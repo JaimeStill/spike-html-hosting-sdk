@@ -14,7 +14,9 @@
 // cache in the scratch directory, so pnpm fetches nothing. The site is made a git repository, as
 // its owner's is, for actionlint, which finds the workflows from the repository's root; then its
 // `mise run check` runs, the copy's lint, types, build, unit tier, and browser tier, with mise
-// trusting its config.
+// trusting its config. Its `mise run currency` runs too, offline, against the currency test's
+// lookup stubs answering each pin with itself and typescript's latest above typescript-eslint's
+// peer range, so a fresh scaffold, which declares no typescript-eslint, prints nothing and exits 0.
 
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -33,6 +35,8 @@ import {
 import { tmpdir } from "node:os";
 import { join, sep } from "node:path";
 import { after, before, describe, test } from "node:test";
+
+import { lsRemote, tags, writeStubs } from "../stubs.ts";
 
 const root = join(import.meta.dirname, "../..");
 const bin = join(root, "bin", "new.js");
@@ -64,6 +68,20 @@ let scratch: string;
 let stubs: string;
 let site: string;
 let made: { status: number | null; stdout: string; stderr: string };
+
+/** The environment the site's own mise runs in: the variables mise sets for the SDK's own task
+ * dropped, so the site's mise reads the site's config as its own run would, a user's mise settings
+ * kept; and so is the one node's test runner sets for this test, with which the site's node --test
+ * would run no file. mise trusts the site's config. */
+function siteEnv(): NodeJS.ProcessEnv {
+  const task = /^(MISE_(TASK_\w+|PROJECT_ROOT|CONFIG_ROOT|ORIGINAL_CWD)|NODE_TEST_CONTEXT)$/;
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !task.test(key)));
+  return { ...env, MISE_TRUSTED_CONFIG_PATHS: site };
+}
+
+/** The absolute path of the command PATH finds, before any stub goes first on it. */
+const which = (command: string): string =>
+  execFileSync("sh", ["-c", `command -v ${command}`], { encoding: "utf8" }).trim();
 
 /** Runs the bin with args in the scratch directory, the stub pnpm first on PATH. */
 function scaffold(...args: string[]): { status: number | null; stdout: string; stderr: string } {
@@ -201,14 +219,9 @@ describe("the scaffold", () => {
       stdio: "ignore",
     });
     execFileSync("git", ["init", "--quiet"], { cwd: site });
-    // The variables mise sets for the SDK's own task are dropped, so the site's mise reads the
-    // site's config as its own run would, a user's mise settings kept; and so is the one node's
-    // test runner sets for this test, with which the site's node --test would run no file.
-    const task = /^(MISE_(TASK_\w+|PROJECT_ROOT|CONFIG_ROOT|ORIGINAL_CWD)|NODE_TEST_CONTEXT)$/;
-    const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !task.test(key)));
     const { status, stdout, stderr } = spawnSync("mise", ["run", "check"], {
       cwd: site,
-      env: { ...env, MISE_TRUSTED_CONFIG_PATHS: site },
+      env: siteEnv(),
       encoding: "utf8",
     });
     assert.equal(status, 0, `${stdout}\n${stderr}`);
@@ -232,5 +245,56 @@ describe("the scaffold", () => {
       assert.match(stdout, new RegExp(`^\\[${tier}\\] ℹ pass [1-9]\\d*$`, "m"), `${tier} ran`);
       assert.match(stdout, new RegExp(`^\\[${tier}\\] ℹ fail 0$`, "m"), `${tier} passed`);
     }
+  });
+
+  // After the check, which installed the site.
+  test("makes a site whose own mise run currency prints nothing, its lookups stubbed", () => {
+    const manifest = JSON.parse(readFileSync(join(site, "package.json"), "utf8")) as {
+      devDependencies: Record<string, string>;
+    };
+    // Each pin answered with itself: a registry pin as its latest, a github: tag and a workflow's
+    // pin as its repository's highest tag; typescript's latest above typescript-eslint's peer
+    // range, whose newest is the site's pin, so only a hold to the SDK's range keeps it silent.
+    const pnpm: Record<string, string> = {};
+    const git: Record<string, string> = {};
+    for (const [pkg, pin] of Object.entries(manifest.devDependencies)) {
+      const github = /^github:([^#]+)#(v[\d.]+)$/.exec(pin);
+      if (github) git[lsRemote(github[1]!)] = tags(github[2]!);
+      else pnpm[`view ${pkg} version`] = `${pin}\n`;
+    }
+    const { dependencies } = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
+      dependencies: Record<string, string>;
+    };
+    const range = ">=4.8.4 <6.1.0";
+    pnpm["view typescript version"] = "99.0.0\n";
+    pnpm[
+      `view typescript-eslint@${dependencies["typescript-eslint"]} peerDependencies.typescript`
+    ] = `${range}\n`;
+    pnpm[`view typescript@${range} version --json`] = JSON.stringify([
+      "5.9.3",
+      manifest.devDependencies.typescript,
+    ]);
+    for (const file of readdirSync(join(site, ".github/workflows"))) {
+      const workflow = readFileSync(join(site, ".github/workflows", file), "utf8");
+      for (const [, repo, tag] of workflow.matchAll(
+        /^\s*(?:-\s+)?uses:\s*([^/@\s]+\/[^/@\s]+)\S*@(\S+)$/gm,
+      ))
+        git[lsRemote(repo!)] = tags(tag!);
+    }
+    const stubs = join(scratch, "currency-stubs");
+    writeStubs(
+      stubs,
+      { mise: { "outdated --bump --local --json": "{}" }, pnpm, git },
+      { pnpm: { first: "exec", to: which("pnpm") } },
+    );
+    const env = siteEnv();
+    const { status, stdout, stderr } = spawnSync(which("mise"), ["run", "currency"], {
+      cwd: site,
+      env: { ...env, PATH: `${stubs}:${env.PATH}` },
+      encoding: "utf8",
+    });
+    assert.equal(stderr, "");
+    assert.equal(stdout, "");
+    assert.equal(status, 0);
   });
 });

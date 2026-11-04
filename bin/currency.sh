@@ -9,7 +9,8 @@
 # A package.json pin is a version, compared against the registry's latest, or a github: tag,
 # github:<owner>/<repo>#vX.Y.Z (the foundation and the tooling), compared against the repository's
 # highest vX.Y.Z tag in `git ls-remote --tags`, which neither the registry nor `pnpm outdated`
-# knows; typescript is compared against the newest version typescript-eslint's peer range accepts.
+# knows; typescript is compared against the newest version typescript-eslint's peer range accepts,
+# typescript-eslint's pin the site's own or, as a site declares none, the installed SDK's.
 # A workflow's pin, an action's <owner>/<repo>[/path]@vX.Y.Z or a reusable workflow call's
 # <owner>/<repo>/.github/workflows/<file>.yml@vX.Y.Z, as a site calls the SDK's site-pages.yml, is
 # compared the same way, against the repository's highest plain tag. A tag trails only when that
@@ -80,11 +81,22 @@ pins=$(node -p '
     .map(([name, pin]) => name + " " + pin)
     .join("\n")
 ')
-# typescript-eslint's pin, from either: the SDK holds it as a dependency, and a site as a
-# devDependency; "undefined" when the site pins none.
+# typescript-eslint's pin, from either: the SDK holds it as a dependency, and a site that pins it
+# as a devDependency. A site that pins none takes the installed SDK's, whose dependency it is and
+# whose lint runs it, read from its package.json by path, as the SDK's exports leave that file out;
+# "undefined" when neither pins it.
 typescript_eslint=$(node -p '
-  const { dependencies, devDependencies } = require("./package.json");
-  ({ ...dependencies, ...devDependencies })["typescript-eslint"]
+  const pin = ({ dependencies, devDependencies }) =>
+    ({ ...dependencies, ...devDependencies })["typescript-eslint"];
+  let own = pin(require("./package.json"));
+  if (own === undefined) {
+    try {
+      own = pin(require("./node_modules/@jaimestill/spike-html-hosting-sdk/package.json"));
+    } catch (error) {
+      if (error.code !== "MODULE_NOT_FOUND") throw error;
+    }
+  }
+  own
 ')
 while read -r package pin; do
   [[ -n "$package" ]] || continue

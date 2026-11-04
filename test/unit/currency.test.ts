@@ -6,14 +6,19 @@
 // github: tag, an action, and a reusable workflow call, the SDK's site-pages.yml, against its
 // repository's highest plain vX.Y.Z tag, a prerelease tag above it ignored; a pin in a form the
 // bin can't compare is reported as one, and a uses: line a comment shows isn't scanned. A current
-// site prints nothing and exits 0.
+// site prints nothing and exits 0. A site-shaped manifest, which declares no typescript-eslint as
+// the SDK depends on it, holds typescript to the range of the installed SDK's typescript-eslint,
+// here a stub SDK's package.json in node_modules: at the range's newest it prints nothing, and
+// behind it it's reported.
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, before, describe, test } from "node:test";
+
+import { type Answers, lsRemote, tags, writeStubs } from "../stubs.ts";
 
 const root = join(import.meta.dirname, "../..");
 const bin = join(root, "bin", "currency.sh");
@@ -23,16 +28,6 @@ before(() => {
   scratch = mkdtempSync(join(tmpdir(), "currency-"));
 });
 after(() => rmSync(scratch, { recursive: true, force: true }));
-
-/** Each stubbed command's answers: its arguments, joined by spaces, to its output. */
-type Answers = Record<"mise" | "pnpm" | "git", Record<string, string>>;
-
-/** git ls-remote --tags --refs's output for the repository's tags. */
-const tags = (...names: string[]): string =>
-  names.map((name, i) => `${String(i).padStart(40, "0")}\trefs/tags/${name}\n`).join("");
-
-/** The ls-remote lookup of the GitHub repository's tags. */
-const lsRemote = (repo: string): string => `ls-remote --tags --refs https://github.com/${repo}.git`;
 
 /** Writes the site's files and the stubs into a fresh directory of the scratch one, runs the bin
  * there with the stubs first on PATH, and returns its status and output. */
@@ -46,21 +41,7 @@ function run(
     writeFileSync(join(dir, path), text);
   }
   const stubs = join(dir, ".stubs");
-  mkdirSync(stubs);
-  for (const [command, table] of Object.entries(answers)) {
-    writeFileSync(join(stubs, `${command}.json`), JSON.stringify(table));
-    const stub = join(stubs, command);
-    writeFileSync(
-      stub,
-      "#!/usr/bin/env bash\n" +
-        `exec node -e '
-const answers = require(process.argv[1]);
-const key = process.argv.slice(2).join(" ");
-if (!(key in answers)) { console.error("stub: unexpected ${command} " + key); process.exit(1); }
-process.stdout.write(answers[key]);' "${join(stubs, `${command}.json`)}" "$@"\n`,
-    );
-    chmodSync(stub, 0o755);
-  }
+  writeStubs(stubs, answers);
   const { status, stdout, stderr } = spawnSync(bin, [], {
     cwd: dir,
     env: { ...process.env, PATH: `${stubs}:${process.env.PATH}` },
@@ -173,5 +154,40 @@ describe("spike-html-hosting-currency", () => {
     assert.equal(stderr, "");
     assert.equal(stdout, "");
     assert.equal(status, 0);
+  });
+
+  describe("on a site that declares no typescript-eslint", () => {
+    /** The site's files: typescript pinned, and the installed SDK's package.json, its
+     * typescript-eslint a dependency. */
+    const site = (pin: string): Record<string, string> => ({
+      "mise.toml": "",
+      "package.json": manifest(
+        {},
+        { typescript: pin, "@jaimestill/spike-html-hosting-sdk": `github:${sdk}#v0.2.0` },
+      ),
+      "node_modules/@jaimestill/spike-html-hosting-sdk/package.json": JSON.stringify({
+        name: "@jaimestill/spike-html-hosting-sdk",
+        dependencies: { "typescript-eslint": "8.72.1" },
+      }),
+    });
+    const answers = (): Answers => ({
+      mise: { "outdated --bump --local --json": "{}" },
+      pnpm: typescript,
+      git: { [lsRemote(sdk)]: tags("v0.1.0", "v0.2.0") },
+    });
+
+    test("prints nothing and exits 0 with typescript at the SDK's range's newest", () => {
+      const { status, stdout, stderr } = run(site("6.0.4"), answers());
+      assert.equal(stderr, "");
+      assert.equal(stdout, "");
+      assert.equal(status, 0);
+    });
+
+    test("reports typescript behind the SDK's range's newest, not its latest", () => {
+      const { status, stdout, stderr } = run(site("6.0.3"), answers());
+      assert.equal(stderr, "");
+      assert.equal(stdout, "package.json: typescript 6.0.3 -> 6.0.4\n");
+      assert.equal(status, 1);
+    });
   });
 });
