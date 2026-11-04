@@ -47,6 +47,8 @@ jobs:
         if: steps.version.outputs.released == 'false'
         run: mise run install
 
+      # The check's build writes dist/, the gitignored build the pack below holds, so it runs
+      # first, as spike-html-apps-sdk's release does.
       - name: mise run check
         if: steps.version.outputs.released == 'false'
         run: mise run check

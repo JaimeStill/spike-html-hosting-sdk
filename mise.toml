@@ -1,5 +1,6 @@
 # Adapted from spike-html-apps-foundation (d5037b4): mise.toml, renamed, lint only.
-# From spike-html-hosting-components (0f64672): mise.toml.
+# Adapted from spike-html-hosting-components (0f64672): mise.toml, with spike-html-apps-tooling's
+# (c598810) typescript-go, ESLint, type check, build, and unit tier, and a pack check.
 # Tasks never install a missing tool; mise run install is the one task that reads the network.
 [settings]
 task.run_auto_install = false
@@ -10,6 +11,7 @@ actionlint = "1.7.12"
 node = "26.13.0"
 pnpm = "12.16.1"
 shellcheck = "0.11.0"
+"github:microsoft/typescript-go" = { version = "7.0.2", version_prefix = "typescript/v", bin_path = "package/lib" }
 
 [tasks.preflight]
 description = "Fail naming mise run install when a tool the tasks need is missing"
@@ -17,8 +19,15 @@ hide = true
 run = "scripts/preflight.sh"
 
 [tasks.lint]
-description = "Run the linters: Prettier, shellcheck, and actionlint"
-depends = ["lint:format", "lint:shell", "lint:workflows"]
+description = "Run the linters: ESLint, Prettier, shellcheck, and actionlint"
+depends = ["lint:eslint", "lint:format", "lint:shell", "lint:workflows"]
+
+# The SDK's own lint is its export, src/eslint.ts's config, which eslint.config.js imports from the
+# source, so it needs no build.
+[tasks."lint:eslint"]
+description = "Lint with ESLint: the SDK's exported config over the sources, the tests, and dist/"
+depends = ["preflight"]
+run = "pnpm exec eslint ."
 
 [tasks."lint:format"]
 description = "Check the format with Prettier"
@@ -34,9 +43,48 @@ run = "shellcheck scripts/*.sh"
 description = "Lint the GitHub Actions workflows with actionlint"
 run = "actionlint"
 
+[tasks.types]
+description = "Type-check the sources and the suite with typescript-go's tsc"
+depends = ["types:src", "types:test"]
+
+[tasks."types:src"]
+description = "Type-check the sources with tsc"
+depends = ["preflight"]
+run = "tsc --noEmit -p ."
+
+# The unit tier imports src/, and the pack check names the package only in the scratch site's
+# files, so neither needs the build.
+[tasks."types:test"]
+description = "Type-check the suite and the lint config with tsc, under tsconfig.test.json"
+depends = ["preflight"]
+run = "tsc -p tsconfig.test.json"
+
+[tasks.build]
+description = "Build src/ into dist/: tsc's emit, and the stylesheet, tsconfig base, and Prettier configuration copied beside it"
+depends = ["preflight"]
+run = "scripts/build.sh"
+
+[tasks."test:unit"]
+description = "Run the unit tier on src/, the leftover check's ESLint runs and the content check's scratch sites in TMPDIR"
+depends = ["preflight"]
+run = "node --test 'test/unit/*.test.ts'"
+
+[tasks."test:pack"]
+description = "Pack the build, install the tarball into a scratch site in TMPDIR, and resolve each export from it"
+depends = ["preflight", "build"]
+run = "node --test 'test/pack/*.test.ts'"
+
+# The check's steps one after another, each a task: the lint, the type check, the build, the unit
+# tier, and the pack check, which packs the build before it.
 [tasks.check]
-description = "Run every check; reads no network"
-depends = ["lint"]
+description = "Run every check, in order; reads no network; writes dist/"
+run = [
+  { task = "lint" },
+  { task = "types" },
+  { task = "build" },
+  { task = "test:unit" },
+  { task = "test:pack" },
+]
 
 [tasks.install]
 description = "Install the pins and node_modules; reads the network"

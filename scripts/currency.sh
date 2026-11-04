@@ -14,7 +14,8 @@
 # Adapted from spike-html-apps (529ec52): scripts/currency.sh, without its go.mod scans and its
 # consumer template, with the action pins scanned by its github: tag scan; and from
 # spike-html-apps-foundation (d5037b4): scripts/currency.sh, its action scan.
-# From spike-html-hosting (6f1155d): scripts/currency.sh.
+# Adapted from spike-html-hosting (6f1155d): scripts/currency.sh, typescript-eslint's pin read from
+# dependencies or devDependencies.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -73,7 +74,11 @@ pins=$(node -p '
     .map(([name, pin]) => name + " " + pin)
     .join("\n")
 ')
-typescript_eslint=$(node -p 'require("./package.json").devDependencies["typescript-eslint"]')
+# typescript-eslint is a dependency here, where the sites hold it as a devDependency.
+typescript_eslint=$(node -p '
+  const { dependencies, devDependencies } = require("./package.json");
+  ({ ...dependencies, ...devDependencies })["typescript-eslint"]
+')
 while read -r package pin; do
   [[ -n "$package" ]] || continue
   if [[ $pin =~ ^github:([^#]+)#(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
