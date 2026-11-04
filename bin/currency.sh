@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
-# The currency command, outside the check: reports every mise.toml pin, package.json pin, and
-# workflow action pin that trails its latest release, as `<file>: ITEM PIN -> LATEST`, one line
-# each, and exits nonzero when it reports any; with everything current it prints nothing and exits
-# 0. It reads the network and writes nothing. Run it through `mise run currency`.
+# spike-html-hosting-currency, the SDK's currency bin, outside the check: reports every pin of the
+# site in the current directory that trails its latest release, its mise.toml tools, its
+# package.json pins, and its .github/workflows/ action and reusable workflow pins, as
+# `<file>: ITEM PIN -> LATEST`, one line each, and exits nonzero when it reports any; with
+# everything current it prints nothing and exits 0. It reads the network and writes nothing. A site
+# runs it from its mise run currency task, which runs in the site's root.
 #
 # A package.json pin is a version, compared against the registry's latest, or a github: tag,
 # github:<owner>/<repo>#vX.Y.Z (the foundation and the tooling), compared against the repository's
 # highest vX.Y.Z tag in `git ls-remote --tags`, which neither the registry nor `pnpm outdated`
-# knows; an action pin, <owner>/<repo>[/path]@vX.Y.Z, is compared the same way. A tag trails only
-# when that tag is strictly higher: a repository with no such tag, or whose highest is below the
-# pin, has an unreleased pin rather than a trailing one. A pin in any other form is reported as one
-# this script can't compare, so none is skipped silently.
+# knows; typescript is compared against the newest version typescript-eslint's peer range accepts.
+# A workflow's pin, an action's <owner>/<repo>[/path]@vX.Y.Z or a reusable workflow call's
+# <owner>/<repo>/.github/workflows/<file>.yml@vX.Y.Z, as a site calls the SDK's site-pages.yml, is
+# compared the same way, against the repository's highest plain tag. A tag trails only when that
+# tag is strictly higher: a repository with no such tag, or whose highest is below the pin, has an
+# unreleased pin rather than a trailing one. A pin in any other form is reported as one this
+# script can't compare, so none is skipped silently.
+#
+# mise, pnpm, and git are each found on PATH, so test/unit/currency.test.ts stands stubs in for
+# their lookups.
 # Adapted from spike-html-apps (529ec52): scripts/currency.sh, without its go.mod scans and its
 # consumer template, with the action pins scanned by its github: tag scan; and from
 # spike-html-apps-foundation (d5037b4): scripts/currency.sh, its action scan.
-# Adapted from spike-html-hosting (6f1155d): scripts/currency.sh, typescript-eslint's pin read from
-# dependencies or devDependencies.
+# Adapted from spike-html-hosting (6f1155d): scripts/currency.sh, a bin over the current directory,
+# typescript-eslint's pin read from dependencies or devDependencies.
 set -euo pipefail
-
-cd "$(dirname "$0")/.."
 
 stale=0
 report() {
@@ -74,7 +80,8 @@ pins=$(node -p '
     .map(([name, pin]) => name + " " + pin)
     .join("\n")
 ')
-# typescript-eslint is a dependency here, where the sites hold it as a devDependency.
+# typescript-eslint's pin, from either: the SDK holds it as a dependency, and a site as a
+# devDependency; "undefined" when the site pins none.
 typescript_eslint=$(node -p '
   const { dependencies, devDependencies } = require("./package.json");
   ({ ...dependencies, ...devDependencies })["typescript-eslint"]
@@ -91,7 +98,7 @@ while read -r package pin; do
   fi
   latest=$(pnpm view "$package" version)
   # typescript is held to the newest version typescript-eslint's peer range accepts.
-  if [[ $package == typescript ]]; then
+  if [[ $package == typescript && $typescript_eslint != undefined ]]; then
     range=$(pnpm view "typescript-eslint@$typescript_eslint" peerDependencies.typescript)
     accepted=$(pnpm view "typescript@$range" version --json)
     latest=$(node -p '[].concat(JSON.parse(process.argv[1])).join("\n")' "$accepted" |
@@ -100,9 +107,18 @@ while read -r package pin; do
   [[ $pin == "$latest" ]] || report "package.json: $package $pin -> $latest"
 done <<<"$pins"
 
-# Each action a workflow uses, once, against its repository's tags: the repository is the
-# action's first two path segments.
-uses=$(grep -ho 'uses: *[^ ]*' .github/workflows/*.yml | sed 's/uses: *//' | sort -u)
+# Each action or reusable workflow a workflow uses, once, against its repository's tags: the
+# repository is the pin's first two path segments.
+# A site with no workflow has no pin to scan.
+shopt -s nullglob
+workflows=(.github/workflows/*.yml .github/workflows/*.yaml)
+shopt -u nullglob
+uses=""
+if ((${#workflows[@]} > 0)); then
+  # A uses: key alone, a step's or a job's, never one a comment shows.
+  uses=$(grep -hoE '^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*[^[:space:]]+' "${workflows[@]}" |
+    sed -E 's/^.*uses:[[:space:]]*//' | sort -u || true)
+fi
 while read -r action; do
   [[ -n "$action" ]] || continue
   if [[ $action =~ ^([^/@]+/[^/@]+)[^@]*@(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then

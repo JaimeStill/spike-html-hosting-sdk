@@ -3,7 +3,9 @@
 // each JS module imported in node, its declarations typing a site's code under the tsconfig base,
 // the Prettier configuration resolved by Prettier, and the stylesheet linked by a site's page and
 // bundled by Vite, in a build that runs both plugins, lints clean under the exported config, and
-// whose copied tree the content check holds to its record.
+// whose copied tree the content check holds to its record. The tarball carries the currency bin and
+// the reusable workflows beside the build, and a pnpm install of it links the bin, which runs in
+// the installing site.
 //
 // The install reads no network: the tarball is extracted to the site's node_modules, and each
 // package its manifest declares, its dependencies and its peers, is linked there from the
@@ -11,10 +13,14 @@
 // tools, prettier and @types/node, beside them. pnpm's offline install can't stand in for it: after
 // mise run install's frozen install it holds no registry metadata to resolve the site's manifest.
 // A module the package imports and its manifest doesn't declare isn't linked, so it fails to load.
+// The bin's site is a pnpm install of the tarball, offline, its store and cache in the scratch
+// directory, each package the manifest declares overridden by a link: to the repository's install,
+// so pnpm fetches nothing and links the bin as it does for a site.
 
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
+  chmodSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -47,7 +53,33 @@ const modules: Record<string, string[]> = {
   "./markdown-pages.js": ["frontMatterTable", "markdownPages", "pageFile", "pageUrl", "render"],
   "./eslint.js": ["build", "config"],
   "./content.js": ["blob", "checkContent"],
+  "./served.js": ["base", "command", "served"],
+  "./browser.js": [
+    "blocksRender",
+    "crawl",
+    "holdsReadingWidth",
+    "opensThemeMenu",
+    "requestsUnderBase",
+    "shell",
+    "staysUnsaved",
+    "stepsEachFacet",
+  ],
+  "./screenshots.js": [
+    "capture",
+    "contentPages",
+    "description",
+    "keepsCaptures",
+    "leavesNoCapture",
+  ],
 };
+
+/** The files the tarball carries beside the build: the bin, and the reusable workflows a site
+ * calls from a release tag's tree. */
+const carried = [
+  "bin/currency.sh",
+  ".github/workflows/site-ci.yml",
+  ".github/workflows/site-pages.yml",
+];
 
 /** The files a site reads as they are, by their subpath. */
 const files = ["./tsconfig.json", "./prettier.json", "./site.css"];
@@ -95,6 +127,14 @@ const site: Record<string, string> = {
     `import { markdownPages, render } from "${name}/markdown-pages.js";\n` +
     `import type { Source } from "${name}/markdown-pages.js";\n` +
     `import { renderBlocking } from "${name}/render-blocking.js";\n` +
+    `import { base, served } from "${name}/served.js";\n` +
+    `import { crawl, shell } from "${name}/browser.js";\n` +
+    `import type { Check, Crawled } from "${name}/browser.js";\n` +
+    `import { contentPages, description } from "${name}/screenshots.js";\n` +
+    `import type { Captured } from "${name}/screenshots.js";\n` +
+    'import type { Description } from "@jaimestill/spike-html-apps-tooling/screenshots.js";\n' +
+    'import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";\n' +
+    'import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";\n' +
     "const source: Source = { pages: new Set(), external: new Set(), repository: '', ref: '' };\n" +
     "export const plugins: Plugin[] = [\n" +
     "  renderBlocking(),\n" +
@@ -104,7 +144,13 @@ const site: Record<string, string> = {
     "export const globs: string[] = build;\n" +
     "export const problems: string[] = checkContent('.');\n" +
     "export const hash: string = blob(new Uint8Array());\n" +
-    "export const title: string = render('a.md', '# A', source).title;\n",
+    "export const title: string = render('a.md', '# A', source).title;\n" +
+    "export const under: string = base('.');\n" +
+    "export const serving: () => Promise<Server> = () => served('.');\n" +
+    "export const checks: Check[] = Object.values(shell);\n" +
+    "export const crawling: (page: Page) => Promise<Crawled> = (page) => crawl(page, '', '.');\n" +
+    "export const described: Description = description({ root: '.', pages: contentPages('.') });\n" +
+    "export type Run = Captured;\n",
 };
 
 let scratch: string;
@@ -114,6 +160,7 @@ let manifest: {
   exports: Record<string, unknown>;
   dependencies: Record<string, string>;
   peerDependencies: Record<string, string>;
+  bin: Record<string, string>;
 };
 
 /** Runs node with args in the site, returning its output. */
@@ -163,10 +210,79 @@ before(() => {
 after(() => rmSync(scratch, { recursive: true, force: true }));
 
 describe("the pack", () => {
-  test("is the build, package.json, README.md, and LICENSE", () => {
+  test("is the build, the bin, the reusable workflows, package.json, README.md, and LICENSE", () => {
     const built = listFiles(join(root, "dist")).map((path) => `dist/${path}`);
     assert.ok(built.length > 0, "mise run build wrote no dist/");
-    assert.deepEqual(tarballFiles, [...built, "LICENSE", "README.md", "package.json"].sort());
+    assert.deepEqual(
+      tarballFiles,
+      [...built, ...carried, "LICENSE", "README.md", "package.json"].sort(),
+    );
+  });
+
+  test("carries each reusable workflow as the repository holds it, on workflow_call", () => {
+    for (const path of carried.filter((path) => path.startsWith(".github/"))) {
+      const packed = readFileSync(join(dir, "node_modules", name, path), "utf8");
+      assert.equal(packed, readFileSync(join(root, path), "utf8"), `${path} is packed as it is`);
+      assert.match(packed, /^on:\n {2}workflow_call:$/m, `${path} is a reusable workflow`);
+    }
+  });
+
+  test("names the currency bin, which a pnpm install of the tarball links and runs", () => {
+    assert.deepEqual(manifest.bin, { "spike-html-hosting-currency": "./bin/currency.sh" });
+    const site = join(scratch, "bin-site");
+    mkdirSync(site);
+    const tarball = readdirSync(scratch).find((file) => file.endsWith(".tgz")) as string;
+    // The site's one pin, the tarball's file: path, is one the bin can't compare, which it reports
+    // with no lookup, so the run needs no network past mise outdated, stubbed: it reads the
+    // installing site's package.json, from its own directory.
+    writeFileSync(
+      join(site, "package.json"),
+      JSON.stringify({
+        name: "bin-site",
+        private: true,
+        devDependencies: { [name]: `file:${join(scratch, tarball)}` },
+      }),
+    );
+    const linked = [
+      ...Object.keys(manifest.dependencies),
+      ...Object.keys(manifest.peerDependencies),
+    ];
+    const overrides = [...new Set(linked)].map(
+      (pkg) =>
+        `  ${JSON.stringify(pkg)}: ${JSON.stringify(`link:${realpathSync(join(root, "node_modules", pkg))}`)}`,
+    );
+    writeFileSync(join(site, "pnpm-workspace.yaml"), `overrides:\n${overrides.join("\n")}\n`);
+    execFileSync(
+      "pnpm",
+      [
+        "install",
+        "--offline",
+        "--ignore-scripts",
+        "--config.auto-install-peers=false",
+        `--store-dir=${join(scratch, "store")}`,
+        `--config.cache-dir=${join(scratch, "cache")}`,
+      ],
+      { cwd: site, stdio: "ignore" },
+    );
+    const stubs = join(scratch, "stubs");
+    mkdirSync(stubs);
+    writeFileSync(join(stubs, "mise"), "#!/usr/bin/env bash\necho '{}'\n");
+    chmodSync(join(stubs, "mise"), 0o755);
+    const { status, stdout, stderr } = spawnSync(
+      join(site, "node_modules", ".bin", "spike-html-hosting-currency"),
+      [],
+      {
+        cwd: site,
+        env: { ...process.env, PATH: `${stubs}:${process.env.PATH}` },
+        encoding: "utf8",
+      },
+    );
+    assert.equal(stderr, "");
+    assert.equal(
+      stdout,
+      `package.json: ${name} file:${join(scratch, tarball)} -> can't compare this form of pin\n`,
+    );
+    assert.equal(status, 1);
   });
 
   test("exports each JS module and each file a site reads, and nothing else", () => {
