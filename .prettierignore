@@ -13,3 +13,6 @@
 .claude/plans/
 .claude/briefs/
 node_modules
+# The template's files hold the scaffold's tokens; the scaffold test checks a scaffolded copy's
+# format with the copy's own check.
+template/

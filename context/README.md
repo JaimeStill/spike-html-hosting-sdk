@@ -2,9 +2,9 @@
 
 spike-html-hosting-sdk is the site SDK and template of spike-html-hosting, released by tag and
 consumed by the spike's three sites: the org stand-in's site (spike-html-hosting) and
-spike-html-hosting-architecture's and spike-html-hosting-sqlate's. package.json stays at `0.0.0`,
-which `release.yml` never tags, until the first release. This context records only working
-knowledge the code and the README do not express.
+spike-html-hosting-architecture's and spike-html-hosting-sqlate's. package.json's version is the
+next release, which `release.yml` tags when it lands on main; the first is v0.1.0. This context
+records only working knowledge the code and the README do not express.
 
 ## Capability map
 
@@ -14,7 +14,9 @@ knowledge the code and the README do not express.
   `markdownPages` Vite plugins, the ESLint configuration with the leftover check, the content
   check, the tsconfig base, the Prettier configuration, the site stylesheet, and the browser tier
   a site runs: `served()`, the shell checks and the crawl, and the capture description and run;
-  the README's table maps each export. The SDK lints itself with its own export (`eslint.config.js` imports
+  the README's table maps each export. vite-plugin-standard-css-modules is a peer, not a
+  dependency: a site's `vite.config.ts` imports it, which pnpm resolves only from the site's own
+  dependencies. The SDK lints itself with its own export (`eslint.config.js` imports
   `src/eslint.ts`) and formats itself with its own Prettier configuration (`.prettierrc.json`
   names `src/prettier.json`). The sites still hold their copies until they move to the package.
 - **The pack check:** `test/pack/pack.test.ts`, the check's last step: a pack of the build,
@@ -32,10 +34,26 @@ knowledge the code and the README do not express.
   stylesheet's package name aliased to `src/site.css`, so it needs no build of the SDK; its
   `dist/` is gitignored and outside the SDK's lint. Its package.json name is its base,
   `/fixture-site/`.
-- **The template:** the files a site starts from and keeps in step with. Planned; nothing yet.
-- **The bins:** the commands a site runs from the package: `spike-html-hosting-currency`,
-  `bin/currency.sh`, a shell script pnpm links, which reads the current directory. Its unit test
-  puts stubs for mise, pnpm, and git first on PATH, so it reads no network.
+- **The template:** `template/`, the Markdown-copy site the scaffold copies, consuming the SDK by
+  its exports alone; it replaces spike-html-hosting-architecture's layout. Its files hold two
+  tokens, `{{name}}` and `{{version}}`, which keep each file valid as it is, and it stores its
+  .gitignore as `gitignore`, since a pack never carries one. The SDK's lint, format, and type
+  check skip it; the scaffold test checks a copy. Its sample copied tree is this repository's
+  README.md at a pushed commit, which content.json records; it never follows README.md, so a
+  README change leaves it as it is until it is copied again. It has no leftover unit test: the
+  SDK's tests the rule, and a site's lint runs it over its own dist/.
+- **The bins:** `spike-html-hosting-sdk`, `bin/new.js`, the scaffold, plain JavaScript a node
+  runs from the package, named after the package so `pnpm dlx` and `npm exec`, which run the bin
+  a package's unscoped name names when it has several, run it; and `spike-html-hosting-currency`,
+  `bin/currency.sh`, a shell script pnpm links, which reads the current directory. The currency
+  test puts stubs for mise, pnpm, and git first on PATH, so it reads no network.
+- **The scaffold test:** `test/scaffold/scaffold.test.ts`, the check's last step: the scaffold
+  run from the working tree into TMPDIR, its `pnpm install --lockfile-only` a stub on PATH; the
+  site installed offline, its pnpm-workspace.yaml overriding each package with a link:, the SDK
+  to the working tree, every other to the repository's install, its store and cache settings
+  there too so the site's `pnpm exec` finds the install current; made a git repository for
+  actionlint; and its own `mise run check` run, with mise trusting its config and the SDK task's
+  mise variables dropped.
 - **The reusable workflows:** `.github/workflows/site-ci.yml` and `site-pages.yml`, on
   `workflow_call`, named apart from the SDK's own `ci.yml` and `release.yml`. GitHub reads a
   called workflow from the tag's tree, which is the pack's, so package.json's `files` lists them.

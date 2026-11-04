@@ -4,10 +4,12 @@
 // stripping, so the lint needs no build before it.
 // test/unit/leftover.test.ts runs the same config over fixtures of built output. The fixture site's
 // build, which the browser tier checks, is ignored: its leftover check is the browser tier's
-// adopted sheet, and its minified code is no source of the SDK's.
+// adopted sheet, and its minified code is no source of the SDK's. template/ is ignored too: its
+// files hold the scaffold's tokens and import the package by its name, so the scaffold test lints
+// a scaffolded copy with the copy's own check (test/scaffold/scaffold.test.ts).
 
 import { defineConfig, globalIgnores } from "eslint/config";
 
 import { config } from "./src/eslint.ts";
 
-export default defineConfig([globalIgnores(["test/fixtures/site/dist/"]), ...config]);
+export default defineConfig([globalIgnores(["test/fixtures/site/dist/", "template/"]), ...config]);

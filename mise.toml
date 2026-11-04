@@ -47,7 +47,7 @@ depends = ["preflight"]
 run = "pnpm exec prettier --check ."
 
 [tasks."lint:shell"]
-description = "Shellcheck the scripts and the currency bin"
+description = "Shellcheck the scripts and the currency bin; the template's are the scaffold test's"
 run = "shellcheck scripts/*.sh bin/*.sh"
 
 # actionlint shellchecks each run: block too, with the shellcheck pinned above.
@@ -99,9 +99,15 @@ description = "Run the browser tier on the fixture site's build, served under it
 depends = ["preflight browser", "build:fixture"]
 run = "BROWSER_EXECUTABLE=$(mise which chrome-headless-shell) node --test 'test/browser/*.test.ts'"
 
+[tasks."test:scaffold"]
+description = "Run the scaffold bin into a scratch dir in TMPDIR, its lockfile step a stub, check the site it makes, install that site offline with every package linked from the working tree and its install, and run the site's own mise run check"
+depends = ["preflight browser", "build"]
+run = "node --test 'test/scaffold/*.test.ts'"
+
 # The check's steps one after another, each a task: the lint, the type check, the build, the unit
-# tier, the pack check, which packs the build before it, and the browser tier, which builds the
-# fixture site before it.
+# tier, the pack check, which packs the build before it, the browser tier, which builds the
+# fixture site before it, and the scaffold test, which runs a scaffolded site's own check on the
+# build.
 [tasks.check]
 description = "Run every check, in order; reads no network; writes dist/ and the fixture site's dist/"
 run = [
@@ -111,6 +117,7 @@ run = [
   { task = "test:unit" },
   { task = "test:pack" },
   { task = "test:browser" },
+  { task = "test:scaffold" },
 ]
 
 [tasks.install]
