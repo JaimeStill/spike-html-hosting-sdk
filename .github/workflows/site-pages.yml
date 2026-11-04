@@ -1,0 +1,65 @@
+# A site's deploy, as a reusable workflow: the site's whole check, then the build it tested, dist/,
+# uploaded and deployed to the caller's GitHub Pages. A site's own .github/workflows/pages.yml
+# calls it from the SDK's release tag on each push to main, and the calling workflow's event is
+# the site's, so its checkout is the caller's repository at the pushed commit. The caller grants
+# the job its permissions, which a called workflow can only narrow, and the repository's Pages
+# source is GitHub Actions, whose github-pages environment the deploy job names:
+#
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+#   permissions:
+#     contents: read
+#     pages: write
+#     id-token: write
+#   concurrency:
+#     group: pages
+#     cancel-in-progress: false
+#   jobs:
+#     pages:
+#       uses: JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z
+#
+# contents: read checks the repository out, pages: write deploys, and id-token: write gives
+# deploy-pages the OIDC token it proves the deploy with. The concurrency group, one deploy at a
+# time with a queued one waiting rather than cancelling the one in flight, is the caller's too, so
+# it holds across the site's runs. The SDK's pack carries this file, so each release tag's tree
+# holds it, where GitHub reads a reusable workflow from.
+# Adapted from spike-html-design (0be53be): .github/workflows/pages.yml, its root upload replaced
+# by mise run install, mise run check, and the build in dist/.
+# Adapted from spike-html-hosting (fc5cf2c): .github/workflows/pages.yml, called by a site, its
+# trigger, permissions, and concurrency the caller's.
+name: site pages
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # The caller's repository: a called workflow's github context is the caller's.
+      - uses: actions/checkout@v7.0.1
+
+      - uses: jdx/mise-action@v5.2.6
+
+      - name: mise run install
+        run: mise run install
+
+      # The check builds dist/ and tests that build, which is the one uploaded.
+      - name: mise run check
+        run: mise run check
+
+      - uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v5.0.1

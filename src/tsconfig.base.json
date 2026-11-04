@@ -1,0 +1,25 @@
+// A site's tsconfig base, @jaimestill/spike-html-hosting-sdk/tsconfig.json, which a site's
+// tsconfig.json and tsconfig.test.json extend: the options both hold, so each sets only its module
+// resolution (bundler for the configs, nodenext for the suite node runs), whether it checks
+// JavaScript, and its own include, which resolves against the file that names it. tsc type-checks
+// and never emits. skipLibCheck: the declarations the ESLint packages ship name types they don't
+// install.
+// Adapted from spike-html-hosting-architecture (59b01b2): tsconfig.json, the options it shares with
+// its tsconfig.test.json.
+// Adapted from spike-html-hosting-architecture (af083a1): tsconfig.test.json, the options it shares
+// with its tsconfig.json.
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024"],
+    "types": ["node"],
+    "strict": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  }
+}
