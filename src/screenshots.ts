@@ -7,13 +7,14 @@
 // menu's dialog is open. A page's name is its built path without .html, a directory's index its
 // directory: index.html is --page index, a/index.html --page a, and a/b.html --page a/b; a state's
 // name, which names its files, turns the name's slashes to dashes. A page's path is its absolute
-// URL path under the base, /<repository>/ for the index, /<repository>/a/ and /<repository>/a/b.html
-// for the others, which is its caption too, and which the bin's messages name. The profile's
-// facets, palette, space, and type, at flexoki, regular, and mono; --all's profiles, every palette
-// at the defaults, then compact and sans at flexoki; the profiles each page registers, from the
-// foundation's registry, every built-in one, as the shell loads the full entry. The site is served
-// as its browser tier serves it, by served(), so a capture makes the requests the deployed site
-// makes. contentPages lists a Markdown site's pages from its content.json, in the build's order.
+// URL path under the base, /<repository>/ for the index, /<repository>/a/ and
+// /<repository>/a/b.html for the others, which is its caption too, and which the bin's messages
+// name. The profile's facets, palette, space, and type, at flexoki, regular, and mono; --all's
+// profiles, every palette at the defaults, then compact and sans at flexoki; the profiles each
+// page registers, from the foundation's registry, every built-in one, as the shell loads the full
+// entry. The site is served as its browser tier serves it, by served(), so a capture makes the
+// requests the deployed site makes. contentPages lists a Markdown site's pages from its
+// content.json, in the build's order.
 //
 // capture runs the bin on a capture file as mise run screenshots does: the index alone, light
 // alone, to the terminal, with TMPDIR a scratch directory of its own and node's compile cache,
@@ -23,8 +24,9 @@
 // capture it printed, so the first run's empty TMPDIR is the output's cleanup, not a capture that
 // never wrote.
 // Adapted from spike-html-hosting-architecture (a09e7db): scripts/screenshots.config.ts, its
-// description a function of the site's root and page list, each page's path its absolute URL path;
-// and from spike-html-hosting (be1422c): scripts/screenshots.config.ts, its one index a list of one.
+// description a function of the site's root and page list, each page's path its absolute URL path.
+// Adapted from spike-html-hosting (be1422c): scripts/screenshots.config.ts, its one index a list of
+// one.
 // Adapted from spike-html-hosting-architecture (a09e7db): test/browser/screenshots.test.ts, its run
 // a function of the site's root and capture file, and its assertions functions.
 

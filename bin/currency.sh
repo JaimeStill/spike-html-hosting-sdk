@@ -20,8 +20,8 @@
 # mise, pnpm, and git are each found on PATH, so test/unit/currency.test.ts stands stubs in for
 # their lookups.
 # Adapted from spike-html-apps (529ec52): scripts/currency.sh, without its go.mod scans and its
-# consumer template, with the action pins scanned by its github: tag scan; and from
-# spike-html-apps-foundation (d5037b4): scripts/currency.sh, its action scan.
+# consumer template, with the action pins scanned by its github: tag scan.
+# Adapted from spike-html-apps-foundation (d5037b4): scripts/currency.sh, its action scan.
 # Adapted from spike-html-hosting (6f1155d): scripts/currency.sh, a bin over the current directory,
 # typescript-eslint's pin read from dependencies or devDependencies.
 set -euo pipefail

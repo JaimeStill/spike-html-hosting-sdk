@@ -2,7 +2,7 @@
 # rewrite the Markdown, the YAML, and pnpm-lock.yaml. Every file is ignored, then every directory
 # and the code, JSON, and CSS files are let back in. Prettier also skips what .gitignore lists.
 # Adapted from spike-html-apps-foundation (d5037b4): .prettierignore, without its test fixtures.
-# From spike-html-hosting-components (396e6d9): .prettierignore.
+# Adapted from spike-html-hosting-components (396e6d9): .prettierignore, with template/ ignored.
 *
 !*/
 !*.js

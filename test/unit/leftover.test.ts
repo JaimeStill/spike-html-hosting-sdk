@@ -1,7 +1,8 @@
 // The leftover check: src/eslint.ts's config, as a site's eslint.config.js spreads it, over dist/,
-// run on small fixtures of built output in a scratch directory of TMPDIR, removed after. It fails on a build that still holds a CSS module
-// script, in each form one takes (a static import, an export-from, an export-all, and an
-// import()), and passes on one whose sheets the build rewrote, look-alikes included.
+// run on small fixtures of built output in a scratch directory of TMPDIR, removed after. It fails
+// on a build that still holds a CSS module script, in each form one takes (a static import, an
+// export-from, an export-all, and an import()), and passes on one whose sheets the build rewrote,
+// look-alikes included.
 // Adapted from spike-html-apps-foundation (d5037b4): test/unit/layers.test.ts, its ESLint run in a
 // scratch directory.
 // Adapted from spike-html-hosting (cb0511c): test/unit/leftover.test.ts, its config the SDK's

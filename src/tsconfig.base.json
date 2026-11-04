@@ -5,7 +5,9 @@
 // and never emits. skipLibCheck: the declarations the ESLint packages ship name types they don't
 // install.
 // Adapted from spike-html-hosting-architecture (59b01b2): tsconfig.json, the options it shares with
-// its tsconfig.test.json (af083a1).
+// its tsconfig.test.json.
+// Adapted from spike-html-hosting-architecture (af083a1): tsconfig.test.json, the options it shares
+// with its tsconfig.json.
 {
   "compilerOptions": {
     "target": "es2024",

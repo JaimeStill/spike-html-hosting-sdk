@@ -1,6 +1,7 @@
 # Adapted from spike-html-apps-foundation (d5037b4): mise.toml, renamed, lint only.
-# Adapted from spike-html-hosting-components (0f64672): mise.toml, with spike-html-apps-tooling's
-# (c598810) typescript-go, ESLint, type check, build, and unit tier, and a pack check.
+# Adapted from spike-html-hosting-components (0f64672): mise.toml, with a pack check.
+# Adapted from spike-html-apps-tooling (c598810): mise.toml, its typescript-go, ESLint, type check,
+# build, and unit tier.
 # Adapted from spike-html-hosting-architecture (a20a1e0): mise.toml, its chrome-headless-shell and
 # browser tier, over the fixture site.
 # Tasks never install a missing tool; mise run install is the one task that reads the network.

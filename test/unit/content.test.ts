@@ -1,6 +1,6 @@
-// The content check, src/content.ts's checkContent, on scratch sites in TMPDIR, removed after: each
-// a content/ tree beside a content.json whose blob hashes `git hash-object` computed, so the check's
-// hash is held to git's own. It finds nothing in a faithful copy, and finds an edited copy, a
+// The content check, src/content.ts's checkContent, on scratch sites in TMPDIR, removed after:
+// each a content/ tree beside a content.json whose blob hashes `git hash-object` computed, so the
+// check's hash is held to git's own. It finds nothing in a faithful copy, and finds an edited copy, a
 // recorded file missing, a file no record names, and a source named by anything but a GitHub
 // repository URL and a full commit.
 
