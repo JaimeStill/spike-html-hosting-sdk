@@ -6,14 +6,15 @@
 // copied tree the template's byte for byte. It refuses a dir that holds anything, and a usage
 // error exits 2 with the usage.
 //
-// It reads no network. The bin's one network step, `pnpm install --lockfile-only`, runs a stub
-// pnpm first on PATH, which records its arguments and directory. The site is then installed
-// offline as the pack check's bin site is: its pnpm-workspace.yaml overrides each package its
-// manifest declares with a link:, the SDK to the working tree, whose dist/ the check's build
-// wrote, and every other to the repository's own install, with its store and cache in the scratch
-// directory, so pnpm fetches nothing. The site is made a git repository, as its owner's is, for
-// actionlint, which finds the workflows from the repository's root; then its `mise run check`
-// runs, the copy's lint, types, build, unit tier, and browser tier, with mise trusting its config.
+// It reads no network. The bin's one network step, `pnpm install --lockfile-only`, runs a stub pnpm
+// first on PATH, which records its arguments and directory. The site is then installed offline as
+// the pack check's bin site is: its pnpm-workspace.yaml overrides each package its manifest
+// declares with a link:, the SDK to the working tree, whose dist/ the check's build wrote, and
+// every other to the repository's own install, which the site's pin must match, with its store and
+// cache in the scratch directory, so pnpm fetches nothing. The site is made a git repository, as
+// its owner's is, for actionlint, which finds the workflows from the repository's root; then its
+// `mise run check` runs, the copy's lint, types, build, unit tier, and browser tier, with mise
+// trusting its config.
 
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -171,6 +172,17 @@ describe("the scaffold", () => {
     const manifest = JSON.parse(readFileSync(join(site, "package.json"), "utf8")) as {
       devDependencies: Record<string, string>;
     };
+    // Each package but the SDK is linked from the repository's install, so the site's pin must be
+    // the one the repository installs, or the check would pass on a version the site never gets.
+    const own = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
+      dependencies: Record<string, string>;
+      devDependencies: Record<string, string>;
+    };
+    for (const [pkg, pin] of Object.entries(manifest.devDependencies)) {
+      if (pkg === name) continue;
+      const installed = own.devDependencies[pkg] ?? own.dependencies[pkg];
+      assert.equal(pin, installed, `the site pins ${pkg} at the repository's own pin`);
+    }
     const overrides = Object.keys(manifest.devDependencies).map((pkg) => {
       const target = pkg === name ? root : realpathSync(join(root, "node_modules", pkg));
       return `  ${JSON.stringify(pkg)}: ${JSON.stringify(`link:${target}`)}`;
@@ -200,6 +212,21 @@ describe("the scaffold", () => {
       encoding: "utf8",
     });
     assert.equal(status, 0, `${stdout}\n${stderr}`);
+    // Every step ran, as mise echoes each task's command to stderr, so a step dropped from the
+    // site's check fails here rather than passing unrun.
+    for (const step of [
+      "lint:eslint",
+      "lint:format",
+      "lint:shell",
+      "lint:workflows",
+      "types:src",
+      "types:test",
+      "build",
+      "test:unit",
+      "test:browser",
+    ]) {
+      assert.match(stderr, new RegExp(`^\\[${step}\\] \\$ `, "m"), `${step} ran`);
+    }
     // Each tier ran its tests, and none failed.
     for (const tier of ["test:unit", "test:browser"]) {
       assert.match(stdout, new RegExp(`^\\[${tier}\\] ℹ pass [1-9]\\d*$`, "m"), `${tier} ran`);

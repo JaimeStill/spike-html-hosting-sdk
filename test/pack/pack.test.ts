@@ -1,5 +1,5 @@
-// The pack check: pnpm pack's tarball of the build, installed into a scratch site in TMPDIR, removed
-// after, and each export resolved from it as a site resolves it, through the manifest's exports:
+// The pack check: pnpm pack's tarball of the build, installed into a scratch site in TMPDIR,
+// removed after, and each export resolved from it as a site resolves it, through the manifest's exports:
 // each JS module imported in node, its declarations typing a site's code under the tsconfig base,
 // the Prettier configuration resolved by Prettier, and the stylesheet linked by a site's page and
 // bundled by Vite, in a build that runs both plugins, lints clean under the exported config, and
@@ -232,12 +232,13 @@ describe("the pack", () => {
     }
   });
 
-  test("names the scaffold bin after the package, which dlx runs, and the currency bin", () => {
+  test("names the scaffold bin after the package, which dlx runs, each bin a packed file", () => {
     // pnpm dlx and npm exec run, of a package's several bins, the one its unscoped name names.
-    assert.deepEqual(manifest.bin, {
-      "spike-html-hosting-sdk": "./bin/new.js",
-      "spike-html-hosting-currency": "./bin/currency.sh",
-    });
+    const unscoped = name.slice(name.indexOf("/") + 1);
+    assert.equal(manifest.bin[unscoped], "./bin/new.js");
+    for (const path of Object.values(manifest.bin)) {
+      assert.ok(tarballFiles.includes(path.replace(/^\.\//, "")), `${path} is packed`);
+    }
   });
 
   test("links the currency bin in a pnpm install of the tarball, and runs it", () => {

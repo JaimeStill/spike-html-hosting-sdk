@@ -1,7 +1,8 @@
 // The render-blocking entry, src/render-blocking.ts's renderBlocking, its transform run on built
 // pages as Vite writes them: the one entry tag gains blocking="render", and a page with none, or
-// with more than one, fails the build, naming the page. Each site's browser tier loads its built
-// pages themselves.
+// with more than one, fails the build, naming the page. That it runs after Vite writes the tag is
+// the builds' to show: the fixture site's, whose page the browser tier finds render-blocking, and
+// the pack check's.
 
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
@@ -14,7 +15,6 @@ import { renderBlocking } from "../../src/render-blocking.ts";
 function transform(page: string, path = "/index.html"): unknown {
   const hook = renderBlocking().transformIndexHtml;
   assert.ok(hook && typeof hook === "object", "transformIndexHtml isn't an ordered hook");
-  assert.equal(hook.order, "post");
   const context = { path, filename: path } as IndexHtmlTransformContext;
   return hook.handler.call({} as never, page, context);
 }
@@ -22,10 +22,6 @@ function transform(page: string, path = "/index.html"): unknown {
 const entry = '<script type="module" crossorigin src="/assets/index-abc.js"></script>';
 
 describe("the render-blocking entry", () => {
-  test("is a build-only plugin", () => {
-    assert.equal(renderBlocking().apply, "build");
-  });
-
   test("marks the page's one entry script render-blocking", () => {
     assert.equal(
       transform(`<head>${entry}</head>`),

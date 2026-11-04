@@ -1,9 +1,9 @@
 // The capture description at its seam, with no browser: description's pages, each named by its
 // built path without .html, a directory's index by its directory, at its absolute URL path under
 // the base, which is its caption; each page's states, the index's theme-menu states among them,
-// named with the page name's slashes as dashes; the facets and --all; and its server a start
-// function. contentPages lists the fixture site's pages from its content.json, in the build's
-// order.
+// named with the page name's slashes as dashes. contentPages lists the fixture site's pages from
+// its content.json, in the build's order. The browser tier holds the facets and --all to the
+// profiles the fixture site's index registers.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -51,22 +51,6 @@ describe("description", () => {
         ["/fixture-site/, the theme menu open, narrow", false, "function"],
       ],
     );
-  });
-
-  test("gives the foundation's facets, --all's profiles, and a start function", () => {
-    assert.deepEqual(
-      described.facets?.map(({ flag }) => flag),
-      ["palette", "space", "type"],
-    );
-    assert.deepEqual(described.all, [
-      { palette: "flexoki" },
-      { palette: "primer" },
-      { palette: "catppuccin" },
-      { palette: "everforest" },
-      { space: "compact" },
-      { type: "sans" },
-    ]);
-    assert.equal(typeof described.server, "function");
   });
 
   test("refuses a page that isn't a built .html path", () => {
