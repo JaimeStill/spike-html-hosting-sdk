@@ -23,6 +23,10 @@
 // captures under that TMPDIR, and leaves it empty; keepsCaptures that with --keep it leaves every
 // capture it printed, so the first run's empty TMPDIR is the output's cleanup, not a capture that
 // never wrote.
+// Adapted from spike-html-apps-foundation (d5037b4): scripts/screenshots.config.ts, its theme
+// menu's open step, viewports, facets, --all, and registry read.
+// Adapted from spike-html-apps-components (19d4f59): scripts/screenshots.config.ts, its pages
+// mapped from a list and its server the browser tier's.
 // Adapted from spike-html-hosting-architecture (a09e7db): scripts/screenshots.config.ts, its
 // description a function of the site's root and page list, each page's path its absolute URL path.
 // Adapted from spike-html-hosting (be1422c): scripts/screenshots.config.ts, its one index a list of

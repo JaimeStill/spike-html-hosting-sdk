@@ -1,9 +1,8 @@
 # spike-html-hosting-sdk
 
 The site SDK and template of spike-html-hosting, published as `@jaimestill/spike-html-hosting-sdk`.
-It holds what the spike's three GitHub Pages sites consume by tag: the template a site starts
-from, the package it builds and tests with, the currency bin it runs, and the reusable workflows
-it calls.
+It holds what a GitHub Pages site consumes by tag: the template a site starts from, the package it
+builds and tests with, the currency bin it runs, and the reusable workflows it calls.
 
 Each release is a `vX.Y.Z` tag, cut by the release workflow when a version lands on main, whose
 tree is the package as `pnpm pack` makes it, its build included. The first is v0.1.0.
@@ -36,10 +35,10 @@ any file the pages link that the site doesn't copy.
 
 ## Install
 
-A site made by hand installs the package from its tag, beside its peers:
+A site made by hand installs the package from its tag, beside its peers, each pinned exactly:
 
 ```sh
-pnpm add -D github:JaimeStill/spike-html-hosting-sdk#v0.1.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.1.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   vite eslint vite-plugin-standard-css-modules rolldown

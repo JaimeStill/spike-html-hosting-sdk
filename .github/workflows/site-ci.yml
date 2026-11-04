@@ -12,6 +12,7 @@
 # It needs no permission beyond contents: read, the default. The SDK's pack carries this file, so
 # each release tag's tree holds it, where GitHub reads a reusable workflow from; the SDK's own CI
 # is ci.yml.
+# Adapted from spike-html-apps-foundation (d5037b4): .github/workflows/ci.yml, its pins current.
 # Adapted from spike-html-hosting (fc5cf2c): .github/workflows/ci.yml, called by a site.
 name: site CI
 

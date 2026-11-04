@@ -25,6 +25,8 @@
 # time with a queued one waiting rather than cancelling the one in flight, is the caller's too, so
 # it holds across the site's runs. The SDK's pack carries this file, so each release tag's tree
 # holds it, where GitHub reads a reusable workflow from.
+# Adapted from spike-html-design (0be53be): .github/workflows/pages.yml, its root upload replaced
+# by mise run install, mise run check, and the build in dist/.
 # Adapted from spike-html-hosting (fc5cf2c): .github/workflows/pages.yml, called by a site, its
 # trigger, permissions, and concurrency the caller's.
 name: site pages

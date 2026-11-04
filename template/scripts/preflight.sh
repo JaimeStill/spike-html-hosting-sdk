@@ -3,6 +3,9 @@
 # typescript-go's tsc, the pinned mise tool; and with `browser`, the pinned chrome-headless-shell.
 # Adapted from spike-html-apps-foundation (d5037b4): scripts/preflight.sh, without the browser
 # check.
+# Adapted from spike-html-apps-foundation (d5037b4): scripts/preflight.sh, with vite among the
+# node_modules tooling.
+# From spike-html-hosting (cb0511c): scripts/preflight.sh.
 # Adapted from spike-html-hosting-components (0f64672): scripts/preflight.sh, with eslint and tsc.
 # Adapted from spike-html-hosting-architecture (8b97a7c): scripts/preflight.sh, its vite and its
 # browser check.

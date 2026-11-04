@@ -22,6 +22,8 @@
 // in-site link reaches a built page, and an element with its fragment's id when it has one. The
 // crawl checks a page for every file content.json records, and no other: a page no link from the
 // index reaches is crawled from once the links run out, and returned, for the test's diagnostics.
+// Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
+// the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
 // a page, and the stored choice checked unsaved.
 // Adapted from spike-html-hosting-architecture (a20a1e0): test/browser/site.test.ts, its crawl a
