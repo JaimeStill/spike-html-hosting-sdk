@@ -1,10 +1,9 @@
 # spike-html-hosting-sdk
 
-spike-html-hosting-sdk is the site SDK and template of spike-html-hosting, released by tag and
-consumed by the spike's three sites: the org stand-in's site (spike-html-hosting) and
-spike-html-hosting-architecture's and spike-html-hosting-sqlate's. package.json's version is the
-next release, which `release.yml` tags when it lands on main; the first is v0.1.0. This context
-records only working knowledge the code and the README do not express.
+spike-html-hosting-sdk is the site SDK and template of spike-html-hosting, released by tag, which a
+site pins; it names no site that consumes it (principles/downward-dependencies.md). package.json's
+version is the next release, which `release.yml` tags when it lands on main; the first is v0.1.0.
+This context records only working knowledge the code and the README do not express.
 
 ## Capability map
 
@@ -35,13 +34,12 @@ records only working knowledge the code and the README do not express.
   `dist/` is gitignored and outside the SDK's lint. Its package.json name is its base,
   `/fixture-site/`.
 - **The template:** `template/`, the Markdown-copy site the scaffold copies, consuming the SDK by
-  its exports alone; it replaces spike-html-hosting-architecture's layout. Its files hold two
-  tokens, `{{name}}` and `{{version}}`, which keep each file valid as it is, and it stores its
-  .gitignore as `gitignore`, since a pack never carries one. The SDK's lint, format, and type
-  check skip it; the scaffold test checks a copy. Its sample copied tree is this repository's
-  README.md at a pushed commit, which content.json records; it never follows README.md, so a
-  README change leaves it as it is until it is copied again. It has no leftover unit test: the
-  SDK's tests the rule, and a site's lint runs it over its own dist/.
+  its exports alone. Its files hold two tokens, `{{name}}` and `{{version}}`, which keep each file
+  valid as it is, and it stores its .gitignore as `gitignore`, since a pack never carries one. The
+  SDK's lint, format, and type check skip it; the scaffold test checks a copy. Its sample copied
+  tree is this repository's README.md at a pushed commit, which content.json records; it never
+  follows README.md, so a README change leaves it as it is until it is copied again. It has no
+  leftover unit test: the SDK's tests the rule, and a site's lint runs it over its own dist/.
 - **The bins:** `spike-html-hosting-sdk`, `bin/new.js`, the scaffold, plain JavaScript a node
   runs from the package, named after the package so `pnpm dlx` and `npm exec`, which run the bin
   a package's unscoped name names when it has several, run it; and `spike-html-hosting-currency`,

@@ -4,7 +4,7 @@ The judgement calls the check can't enforce, one line each, for the standards-re
 `mise run check` enforces is never restated here.
 
 This repository is the site SDK and template of spike-html-hosting: the package, the site
-template, and the bins that the three sites consume by tag.
+template, and the bins that a site consumes by tag.
 
 The architecture pages that apply, in the architecture repository:
 
