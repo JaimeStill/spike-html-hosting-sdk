@@ -41,7 +41,7 @@ A site made by hand installs the package from its tag, beside its peers, each pi
 pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.1.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
-  vite eslint vite-plugin-standard-css-modules rolldown
+  vite eslint
 ```
 
 ## The package
@@ -51,6 +51,7 @@ site reads as they are, each through package.json's `exports`:
 
 | Export | What it is |
 | --- | --- |
+| `./css-module-scripts.js` | `cssModuleScripts()`, the Vite plugin that rewrites each CSS module script the foundation's modules hold to a constructed `CSSStyleSheet` |
 | `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking |
 | `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, and its renderer |
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
@@ -62,12 +63,13 @@ site reads as they are, each through package.json's `exports`:
 | `./prettier.json` | the Prettier configuration |
 | `./site.css` | the site stylesheet, its `site` layer |
 
-Its peers are vite, eslint, vite-plugin-standard-css-modules, which a site's `vite.config.ts`
-imports itself, and, at their `github:` tags, spike-html-apps-foundation and
-spike-html-apps-tooling, which a site installs; its own dependencies are exact pins. The CSS
-module plugin parses with `rolldown/utils`, which it doesn't declare, so a site declares rolldown
-too, at the version Vite resolves. Beside the build the package carries its template, its bins,
-and its reusable workflows:
+Its peers are vite, eslint, and, at their `github:` tags, spike-html-apps-foundation and
+spike-html-apps-tooling, which a site installs; its own dependencies are exact pins, among them
+vite-plugin-standard-css-modules, which `cssModuleScripts()` configures, and rolldown, whose
+`rolldown/utils` the plugin parses with and doesn't declare. A site declares neither: the plugin
+finds rolldown through pnpm's default hoist, `node_modules/.pnpm/node_modules`, so a site that
+turns the hoist off declares rolldown itself, at the version Vite resolves. Beside the build the
+package carries its template, its bins, and its reusable workflows:
 
 | File | What it is |
 | --- | --- |
@@ -80,9 +82,11 @@ and its reusable workflows:
 ### Use
 
 A site's `vite.config.ts`, as the template's, builds under the base its package name gives, the
-one `served()` serves it under, and runs both plugins after the CSS module script rewrite:
+one `served()` serves it under, and runs the CSS module script rewrite first, then the Markdown
+pages and the render-blocking entry:
 
 ```ts
+import { cssModuleScripts } from "@jaimestill/spike-html-hosting-sdk/css-module-scripts.js";
 import { markdownPages } from "@jaimestill/spike-html-hosting-sdk/markdown-pages.js";
 import { renderBlocking } from "@jaimestill/spike-html-hosting-sdk/render-blocking.js";
 import { base } from "@jaimestill/spike-html-hosting-sdk/served.js";
@@ -93,20 +97,19 @@ export default defineConfig({
   base: base(root),
   appType: "mpa",
   plugins: [
-    standardCssModules({
-      include: ["**/node_modules/@jaimestill/**/*.js"],
-      outputMode: "CSSStyleSheet",
-    }),
+    cssModuleScripts(),
     markdownPages({ dir: "content", repository: content.url, ref: content.commit }),
     renderBlocking(),
   ],
 });
 ```
 
-`markdownPages` fills the site's `index.html` shell, one `<title>` and one empty `<main></main>`,
-with each Markdown file under `dir`, and fails the build on a relative link it can't place;
-`external` lists files the source holds that aren't copied. `renderBlocking` fails the build on a
-page with no entry script, or more than one.
+`cssModuleScripts` parses the foundation's modules under `node_modules/@jaimestill/` and makes
+each sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone
+doesn't support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one
+empty `<main></main>`, with each Markdown file under `dir`, and fails the build on a relative
+link it can't place; `external` lists files the source holds that aren't copied.
+`renderBlocking` fails the build on a page with no entry script, or more than one.
 
 A site's `eslint.config.js` spreads the configuration, which lints the site's code under the
 config's directory and runs the leftover check, no CSS module script left in the build, over
@@ -264,12 +267,12 @@ resolves it through `exports` and bundles it into the page's sheet:
 exports alone:
 
 - `package.json`, its name the repository's, the SDK at its tag and the peers at their pins, with
-  typescript, prettier, `@types/node`, and rolldown; `mise.toml`, the toolchain and the tasks:
+  typescript, prettier, and `@types/node`; `mise.toml`, the toolchain and the tasks:
   install, check and its steps, screenshots, and currency, the SDK's bin;
   `scripts/preflight.sh`, which runs before node_modules exists, so the site holds its copy.
-- `vite.config.ts`, both plugins and the base from the package's name; `index.html`, the shell,
-  with the foundation's full page entry, its preferences and keys modules, the Theme button on T,
-  and the SDK's stylesheet; the sample copied tree, `content/` and `content.json`.
+- `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`,
+  the shell, with the foundation's full page entry, its preferences and keys modules, the Theme
+  button on T, and the SDK's stylesheet; the sample copied tree, `content/` and `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.
