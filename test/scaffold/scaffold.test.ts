@@ -20,6 +20,7 @@
 
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
+import { stripVTControlCharacters } from "node:util";
 import {
   chmodSync,
   existsSync,
@@ -225,6 +226,9 @@ describe("the scaffold", () => {
       encoding: "utf8",
     });
     assert.equal(status, 0, `${stdout}\n${stderr}`);
+    // Read uncolored: mise and node color their lines where CI forces color.
+    const out = stripVTControlCharacters(stdout);
+    const err = stripVTControlCharacters(stderr);
     // Every step ran, as mise echoes each task's command to stderr, so a step dropped from the
     // site's check fails here rather than passing unrun.
     for (const step of [
@@ -238,12 +242,12 @@ describe("the scaffold", () => {
       "test:unit",
       "test:browser",
     ]) {
-      assert.match(stderr, new RegExp(`^\\[${step}\\] \\$ `, "m"), `${step} ran`);
+      assert.match(err, new RegExp(`^\\[${step}\\] \\$ `, "m"), `${step} ran`);
     }
     // Each tier ran its tests, and none failed.
     for (const tier of ["test:unit", "test:browser"]) {
-      assert.match(stdout, new RegExp(`^\\[${tier}\\] ℹ pass [1-9]\\d*$`, "m"), `${tier} ran`);
-      assert.match(stdout, new RegExp(`^\\[${tier}\\] ℹ fail 0$`, "m"), `${tier} passed`);
+      assert.match(out, new RegExp(`^\\[${tier}\\] ℹ pass [1-9]\\d*$`, "m"), `${tier} ran`);
+      assert.match(out, new RegExp(`^\\[${tier}\\] ℹ fail 0$`, "m"), `${tier} passed`);
     }
   });
 
