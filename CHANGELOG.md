@@ -13,6 +13,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 ### Added
 
 - The package's exports, built ES modules with their declarations:
+  - `./css-module-scripts.js`: `cssModuleScripts()`, the Vite plugin that rewrites each CSS module
+    script the foundation's modules hold to a constructed `CSSStyleSheet`, a site's first plugin.
   - `./render-blocking.js`: `renderBlocking()`, the Vite plugin that keeps each page's one entry
     script render-blocking.
   - `./markdown-pages.js`: `markdownPages(options)`, the Vite plugin that renders a copied Markdown
@@ -26,8 +28,11 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
   - `./screenshots.js`: `description`, `contentPages`, `capture`, `leavesNoCapture`, and
     `keepsCaptures`.
   - `./tsconfig.json`, `./prettier.json`, and `./site.css`, the files a site reads as they are.
-- Peers: vite, eslint, vite-plugin-standard-css-modules, and spike-html-apps-foundation and
-  spike-html-apps-tooling at v0.3.0.
+- Peers: vite, eslint, and spike-html-apps-foundation and spike-html-apps-tooling at v0.3.0.
+- Dependencies, pinned exactly, among them vite-plugin-standard-css-modules 0.3.0, which
+  `cssModuleScripts()` configures, and rolldown 1.2.16, whose `rolldown/utils` the plugin parses
+  with and doesn't declare, so a site declares neither. The plugin finds rolldown through pnpm's
+  default hoist; a site that turns the hoist off declares rolldown itself.
 - `template/`, a Markdown-copy site on the package's exports: its package and toolchain, the
   shell and Vite config, a sample copied tree (this README), the configs, the content, browser,
   and capture tests, the capture file, and the Pages and CI workflows calling the reusable ones.

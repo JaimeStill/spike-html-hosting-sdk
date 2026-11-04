@@ -8,8 +8,8 @@
 import { fileURLToPath } from "node:url";
 
 import { defineConfig } from "vite";
-import { standardCssModules } from "vite-plugin-standard-css-modules";
 
+import { cssModuleScripts } from "../../../src/css-module-scripts.ts";
 import { markdownPages } from "../../../src/markdown-pages.ts";
 import { renderBlocking } from "../../../src/render-blocking.ts";
 import { base } from "../../../src/served.ts";
@@ -26,10 +26,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    standardCssModules({
-      include: ["**/node_modules/@jaimestill/**/*.js"],
-      outputMode: "CSSStyleSheet",
-    }),
+    cssModuleScripts(),
     markdownPages({
       dir: "content",
       repository: "https://github.com/JaimeStill/fixture",

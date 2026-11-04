@@ -2,8 +2,8 @@
 // removed after, and each export resolved from it as a site resolves it, through the manifest's exports:
 // each JS module imported in node, its declarations typing a site's code under the tsconfig base,
 // the Prettier configuration resolved by Prettier, and the stylesheet linked by a site's page and
-// bundled by Vite, in a build that runs both plugins, lints clean under the exported config, and
-// whose copied tree the content check holds to its record. The tarball carries the template, the
+// bundled by Vite, in a build that runs the three plugins, its CSS module script rewritten, lints
+// clean under the exported config, and whose copied tree the content check holds to its record. The tarball carries the template, the
 // scaffold and currency bins, and the reusable workflows beside the build, and a pnpm install of it
 // links the currency bin, which runs in the installing site; test/scaffold/ runs the scaffold.
 //
@@ -13,6 +13,9 @@
 // tools, prettier and @types/node, beside them. pnpm's offline install can't stand in for it: after
 // mise run install's frozen install it holds no registry metadata to resolve the site's manifest.
 // A module the package imports and its manifest doesn't declare isn't linked, so it fails to load.
+// The links put the CSS module plugin at its realpath in the repository's install, so its import
+// of rolldown/utils, which it doesn't declare, resolves there, as it does in a site's real install
+// only through pnpm's hoist (src/css-module-scripts.ts); this install can't show that hoist.
 // The bin's site is a pnpm install of the tarball, offline, its store and cache in the scratch
 // directory, each package the manifest declares overridden by a link: to the repository's install,
 // so pnpm fetches nothing and links the bin as it does for a site.
@@ -64,6 +67,7 @@ const modules: Record<string, string[]> = {
     "staysUnsaved",
     "stepsEachFacet",
   ],
+  "./css-module-scripts.js": ["cssModuleScripts"],
   "./screenshots.js": [
     "capture",
     "contentPages",
@@ -85,8 +89,9 @@ const carried = [
 /** The files a site reads as they are, by their subpath. */
 const files = ["./tsconfig.json", "./prettier.json", "./site.css"];
 
-/** The scratch site's files: a copied tree and its record, the shell its pages fill, a Vite config
- * running both plugins, a lint config spreading the SDK's, a tsconfig on the base, and code that
+/** The scratch site's files: a copied tree and its record, the shell its pages fill, its entry
+ * importing the foundation's theme menu, which adopts a CSS module script, a Vite config running
+ * the three plugins, a lint config spreading the SDK's, a tsconfig on the base, and code that
  * types against each JS export's declarations. */
 const site: Record<string, string> = {
   "package.json": JSON.stringify({ name: "site", private: true, type: "module" }),
@@ -97,17 +102,21 @@ const site: Record<string, string> = {
     `<link rel="stylesheet" href="${name}/site.css" />\n` +
     '<script type="module" src="./main.js"></script>\n' +
     "</head><body><main></main></body></html>\n",
-  // The page's entry. A site's own code runs on node, as the exported config's globals have it; the
-  // modules its page loads are the foundation's.
-  "main.js": 'console.log("ready");\n',
+  // The page's entry, which loads the foundation's theme menu and its CSS module script. A site's
+  // own code runs on node, as the exported config's globals have it; the modules its page loads
+  // are the foundation's.
+  "main.js":
+    'import "@jaimestill/spike-html-apps-foundation/theme-menu.js";\nconsole.log("ready");\n',
   "vite.config.js":
     `import { defineConfig } from "vite";\n` +
+    `import { cssModuleScripts } from "${name}/css-module-scripts.js";\n` +
     `import { markdownPages } from "${name}/markdown-pages.js";\n` +
     `import { renderBlocking } from "${name}/render-blocking.js";\n` +
     "export default defineConfig({\n" +
     "  publicDir: false,\n" +
     "  appType: 'mpa',\n" +
     "  plugins: [\n" +
+    "    cssModuleScripts(),\n" +
     "    markdownPages({ dir: 'content', repository: 'https://github.com/owner/source', ref: " +
     "'0123456789abcdef0123456789abcdef01234567' }),\n" +
     "    renderBlocking(),\n" +
@@ -124,6 +133,7 @@ const site: Record<string, string> = {
     'import type { Plugin } from "vite";\n' +
     'import type { Config } from "eslint/config";\n' +
     `import { blob, checkContent } from "${name}/content.js";\n` +
+    `import { cssModuleScripts } from "${name}/css-module-scripts.js";\n` +
     `import { build, config } from "${name}/eslint.js";\n` +
     `import { markdownPages, render } from "${name}/markdown-pages.js";\n` +
     `import type { Source } from "${name}/markdown-pages.js";\n` +
@@ -138,6 +148,7 @@ const site: Record<string, string> = {
     'import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";\n' +
     "const source: Source = { pages: new Set(), external: new Set(), repository: '', ref: '' };\n" +
     "export const plugins: Plugin[] = [\n" +
+    "  cssModuleScripts(),\n" +
     "  renderBlocking(),\n" +
     "  markdownPages({ dir: 'content', repository: '', ref: '' }),\n" +
     "];\n" +
@@ -342,7 +353,7 @@ describe("the pack", () => {
     assert.deepEqual(resolved, exported);
   });
 
-  test("builds a site with both plugins, the stylesheet bundled from its link", () => {
+  test("builds a site with the three plugins, the stylesheet bundled from its link", () => {
     node(bin("vite", "vite"), "build", "--logLevel", "warn");
     const index = readFileSync(join(dir, "dist", "index.html"), "utf8");
     assert.match(index, /<title>The pack's site<\/title>/);
@@ -352,6 +363,14 @@ describe("the pack", () => {
     assert.equal(sheets.length, 1, `want one bundled sheet, found ${sheets.join(", ")}`);
     const sheet = readFileSync(join(dir, "dist", "assets", sheets[0]), "utf8");
     assert.match(sheet, /@layer site\s*\{/);
+    // The theme menu's CSS module script, rewritten to a constructed sheet; the lint below finds
+    // none left.
+    const scripts = listFiles(join(dir, "dist", "assets")).filter((file) => file.endsWith(".js"));
+    const code = scripts.map((file) => readFileSync(join(dir, "dist", "assets", file), "utf8"));
+    assert.ok(
+      code.some((text) => text.includes("new CSSStyleSheet")),
+      "the theme menu's sheet is constructed",
+    );
   });
 
   test("lints the site and its build clean with the exported config", () => {

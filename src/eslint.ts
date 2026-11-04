@@ -1,10 +1,10 @@
 // A site's lint: the recommended rules over the site's code, and the leftover check over its build,
 // dist/, which fails on any CSS module script the build left in it. A site's build rewrites each
-// one the foundation holds (vite-plugin-standard-css-modules); one left in dist/ is an import no
-// browser without CSS module scripts loads, so the page would break where they're unsupported. A
-// site's eslint.config.js spreads config, which covers the files under the config's directory,
-// the site's sources and its dist/. test/unit/leftover.test.ts runs it over a fixture of built
-// output.
+// one the foundation holds (cssModuleScripts, css-module-scripts.ts); one left in dist/ is an
+// import no browser without CSS module scripts loads, so the page would break where they're
+// unsupported. A site's eslint.config.js spreads config, which covers the files under the config's
+// directory, the site's sources and its dist/. test/unit/leftover.test.ts runs it over a fixture
+// of built output.
 // Adapted from spike-html-apps-foundation (d5037b4): eslint.config.js, its CSS module script
 // selectors turned around: the foundation requires the attribute on every .css import, and this
 // refuses it on any import in the build; without its layer rules, which the site has no source
@@ -32,7 +32,7 @@ const key = (name: string): string => `:matches([key.name='${name}'], [key.value
 const cssType = `${key("type")}[value.value='css']`;
 const message =
   "A CSS module script is left in the build: the site's build rewrites each one " +
-  "(vite-plugin-standard-css-modules), and one it missed loads in no browser without them.";
+  "(cssModuleScripts), and one it missed loads in no browser without them.";
 const leftovers = [
   ...["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration"].map((type) => ({
     selector: `${type}:has(> ImportAttribute${cssType})`,
