@@ -191,9 +191,9 @@ element on the page defined, so a module the shell fails to load fails naming it
 every request under the base, and none failed; main's centered reading width at 1600px; nothing
 scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of the
 layout's docks, and at 1400px, with no navigation link's word broken across lines (a hyphenated
-compound may wrap after its hyphen) and every docked side column at least 16rem wide; and the menu left unsaved. A Markdown site also crawls its pages,
-`crawl(page, server.origin, root)`, which resolves to the pages and links it reached and the pages
-no link reaches. Each page it reaches loads with a 2xx, its one module script render-blocking,
+compound may wrap after its hyphen) and every docked side column at least 16rem wide; and the
+menu left unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which
+resolves to the pages and links it reached and the pages no link reaches. Each page it reaches loads with a 2xx, its one module script render-blocking,
 every custom element on it defined, every request under the base and none failed, main at its
 centered reading width at 1600px, nothing scrolling sideways at 390px, its navigation laid out as
 the shell check has it, and its title its source's front matter name or first h1. Its main opens
@@ -201,7 +201,8 @@ with its page header, whose dt and dd pairs are the source's front matter keys a
 order, with no front matter table left; its site index, in its Pages drawer, links every page the
 build writes, each once, and no other; its Pages button is hidden at 1600px and at 390px opens the
 drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and every
-in-site link reaches a built page, and its fragment's element. Since each page's index links every other, the crawl reaches every page from the index.
+in-site link reaches a built page, and its fragment's element. Since each page's index links
+every other, the crawl reaches every page from the index.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its

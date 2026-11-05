@@ -38,9 +38,9 @@ again, and one that imported `frontMatterTable` takes
   against the pages the build writes, and no sideways scroll at 390px.
 - `./browser.js`: `keepsNavigationWords`, in `shell`, and the crawl assert, at 390px, a pixel
   below and at each dock, and at 1400px, that no navigation link's word breaks across lines, but
-  a hyphenated compound after its hyphen, and every docked side column is at least 16rem wide. The crawl asserts each page's Pages button
-  hidden at 1600px, and at 390px opening the drawer by its click and by P, its `aria-expanded`
-  following the drawer.
+  a hyphenated compound after its hyphen, and every docked side column is at least 16rem wide.
+  The crawl asserts each page's Pages button hidden at 1600px, and at 390px opening the drawer by
+  its click and by P, its `aria-expanded` following the drawer.
 - `./browser.js`: `definesEveryElement`, in `shell`, and the crawl assert every element on a
   page whose name holds a hyphen is defined once it loads, failing with the page and the
   undefined tags, so a shell that fails to load one of the components' modules fails the checks
