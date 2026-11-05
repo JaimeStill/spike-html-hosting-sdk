@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.2.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.3.0 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.2.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.3.0 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -36,14 +36,19 @@ any file the pages link that the site doesn't copy.
 
 ## Install
 
-A site made by hand installs the package from its tag, beside its peers, each pinned exactly:
+A site made by hand installs the package from its tag, beside its peers and the components its
+shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.2.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.3.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
+  github:JaimeStill/spike-html-hosting-components#v0.1.0 \
   vite eslint
 ```
+
+spike-html-hosting-components is no peer of the package, whose modules import none of it: the
+pages' markup is written for its elements, and the shell loads them, as the pages below describe.
 
 ## The package
 
@@ -54,12 +59,12 @@ site reads as they are, each through package.json's `exports`:
 | --- | --- |
 | `./css-module-scripts.js` | `cssModuleScripts()`, the Vite plugin that rewrites each CSS module script the foundation's modules hold to a constructed `CSSStyleSheet` |
 | `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking |
-| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, its fenced code highlighted, and its renderer |
+| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, its fenced code highlighted; its renderer, `render()`; and the markup it writes for the components, `pageHeader`, `sectionTree`, and `siteIndex`, with `frontMatterText`, a front matter value's text |
 | `./syntax.js` | `SyntaxTheme`, a palette's syntax theme; `builtinSyntax`, one for each of the foundation's palettes; `checkSyntax(theme)`, the syntax theme check; and `createSyntax(themes, langs)`, the highlighter the plugin makes |
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
 | `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
 | `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
@@ -110,9 +115,13 @@ export default defineConfig({
 each sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone
 doesn't support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one
 empty `<main></main>`, with each Markdown file under `dir`, and fails the build on a relative
-link it can't place; `external` lists files the source holds that aren't copied. It highlights
-each fenced block at build, as the syntax themes below describe.
-`renderBlocking` fails the build on a page with no entry script, or more than one.
+link it can't place; `external` lists files the source holds that aren't copied. It writes each
+page's header, section tree, and site index, as the pages below describe, and highlights each
+fenced block at build, as the syntax themes below describe. `renderBlocking` builds every module
+a page's entry loads statically into one chunk, `index`, so each page keeps one entry tag however
+rolldown would split the modules every page shares, and fails the build on a page with no entry
+script, or more than one; a module loaded only by a dynamic import, as the theme menu is, keeps a
+chunk of its own.
 
 A site's `eslint.config.js` spreads the configuration, which lints the site's code under the
 config's directory and runs the leftover check, no CSS module script left in the build, over
@@ -178,9 +187,16 @@ for (const [name, check] of Object.entries(shell)) {
 
 The shell checks are the theme menu opened by the Theme button and by T, with its sheet adopted;
 each facet stepped and set on the root; the one render-blocking module script; every request
-under the base, and none failed; main's centered reading width at 1600px; and the menu left
-unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves
-to the pages and links it reached and the pages no link reaches.
+under the base, and none failed; main's centered reading width at 1600px; nothing scrolling
+sideways at 390px; and the menu left unsaved. A Markdown site also crawls its pages,
+`crawl(page, server.origin, root)`, which resolves to the pages and links it reached and the pages
+no link reaches. Each page it reaches loads with a 2xx, its one module script render-blocking,
+every request under the base and none failed, main at its centered reading width at 1600px,
+nothing scrolling sideways at 390px, and its title its source's front matter name or first h1.
+Its main opens with its page header, whose dt and dd pairs are the source's front matter keys and
+values, in order, with no front matter table left; its site index links every page the build
+writes, each once, and no other; and every in-site link reaches a built page, and its fragment's
+element. Since each page's index links every other, the crawl reaches every page from the index.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -215,6 +231,88 @@ typescript-eslint's peer range accepts, and exits 1; with everything current it 
 and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
 repository's highest plain `vX.Y.Z` tag.
+
+### The pages
+
+`markdownPages` writes each page's data as the light-DOM markup of spike-html-hosting-components
+v0.1.0's elements, so with no script the page renders it as its own, and each element, once its
+module defines it, styles and marks it. The page header opens main; the section tree and the site
+index follow main, each in a div, so a reader, or a screen reader, reaches the page's text first:
+
+```html
+<main>
+<sl-page-header><dl><dt>name</dt><dd>A page</dd><dt>tags</dt><dd>one, two</dd></dl></sl-page-header>
+<h1 id="a-page">A page</h1>
+…
+</main>
+<div class="section-tree">
+<sl-section-tree><ul><li><a href="#usage">Usage</a><ul><li><a href="#options">Options</a></li></ul></li></ul></sl-section-tree>
+</div>
+<div class="site-index">
+<sl-site-index><ul><li><a href="index.html">The site</a></li><li><a href="guide/index.html">Guide</a><ul>…</ul></li></ul></sl-site-index>
+</div>
+```
+
+- `sl-page-header` slots one dl, a dt for each front matter key and a dd for its value, in
+  source order, escaped; a sequence's dd is its items joined by ", ", a mapping's its
+  `key: value` pairs, as `frontMatterText` gives them. A page with no front matter has an empty
+  `sl-page-header`, which takes no space.
+- `sl-section-tree` slots a list of the page's h2s, each linking the id its heading carries,
+  percent-encoded, with its h3s in a nested list; an h3 before any h2 stands at the top level, and
+  a label is the heading's plain text. A page with neither has no tree and no `div.section-tree`.
+- `sl-site-index` slots a list of every page the build writes, nested by directory: the root's
+  index page first, then each page by its title, and each directory by its index page's link, or a
+  span of its name when it has none, over a nested list of its pages and directories, by name.
+  Each link is relative to the page, as its body's are, so it resolves under any base.
+
+The renderer writes no `aria-current`: the components mark the section in view and the page on
+screen at runtime, and `site.css` paints those marks in a heavier weight. `render()` returns the
+page's `headings`, its h2s and h3s, beside its front matter, title, and HTML.
+
+Each body table is wrapped in a named, focusable region, which scrolls the table sideways in a
+viewport narrower than it, as a highlighted code block's pre does:
+
+```html
+<div class="table-region" role="region" aria-label="Table: Name, Value" tabindex="0">
+<table>…</table>
+</div>
+```
+
+Its name is "Table: " and its header cells' text, joined by ", ", or "Table" when they are empty,
+since a GFM table has no caption.
+
+`site.css` lays a page out by that order. In a viewport 70rem and wider, the body is a grid of
+three columns, `minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr)`: the header across them, the site
+index in the start column, main's reading width in the middle, and the section tree in the end
+column, so main stays centered with or without a tree; the tree and the index each stay in view as
+the page scrolls, and scroll themselves when taller than the viewport. Narrower, the body is one
+column, the tree and the index stacked after main. Every track may shrink to nothing, main breaks
+long words, and each table scrolls in its region, so no page is wider than a 390px viewport. The
+shell's header is a wrapping row of the site nav and the Theme button.
+
+The shell wires the components in: it loads their four modules, `site-nav.js`, `site-index.js`,
+`page-header.js`, and `section-tree.js`, render-blocking like the foundation's, from
+`github:JaimeStill/spike-html-hosting-components#v0.1.0`, and places `sl-site-nav`, which takes
+no content, in its header beside the Theme button:
+
+```html
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
+…
+<header>
+  <sl-site-nav></sl-site-nav>
+  <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
+</header>
+```
+
+`cssModuleScripts` parses every module under `node_modules/@jaimestill/`, the components' among
+them, so their sheets build to constructed `CSSStyleSheet`s as the foundation's do.
+
+The page header replaces v0.2.0's front matter table: `frontMatterTable` and its
+`table.front-matter` are gone, a breaking change at 0.y, so a site that imported it takes
+`pageHeader` instead.
 
 ### Syntax themes
 
@@ -353,13 +451,14 @@ resolves it through `exports` and bundles it into the page's sheet:
 `template/` is a Markdown-copy site, the one the scaffold copies, which consumes the SDK by its
 exports alone:
 
-- `package.json`, its name the repository's, the SDK at its tag and the peers at their pins, with
-  typescript, prettier, and `@types/node`; `mise.toml`, the toolchain and the tasks:
+- `package.json`, its name the repository's, the SDK at its tag, the peers and the components at
+  their pins, with typescript, prettier, and `@types/node`; `mise.toml`, the toolchain and the tasks:
   install, check and its steps, screenshots, and currency, the SDK's bin;
   `scripts/preflight.sh`, which runs before node_modules exists, so the site holds its copy.
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`,
-  the shell, with the foundation's full page entry, its preferences and keys modules, the Theme
-  button on T, and the SDK's stylesheet; the sample copied tree, `content/` and `content.json`.
+  the shell, with the foundation's full page entry, its preferences and keys modules, the
+  components' four modules, `sl-site-nav` and the Theme button on T in the header, and the SDK's
+  stylesheet; the sample copied tree, `content/` and `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.
