@@ -54,6 +54,7 @@ function listFiles(dir: string): string[] {
 const modules: Record<string, string[]> = {
   "./render-blocking.js": ["renderBlocking"],
   "./markdown-pages.js": ["frontMatterTable", "markdownPages", "pageFile", "pageUrl", "render"],
+  "./syntax.js": ["builtinSyntax", "checkSyntax", "createSyntax"],
   "./eslint.js": ["build", "config"],
   "./content.js": ["blob", "checkContent"],
   "./served.js": ["base", "command", "served"],
@@ -95,7 +96,7 @@ const files = ["./tsconfig.json", "./prettier.json", "./site.css"];
  * types against each JS export's declarations. */
 const site: Record<string, string> = {
   "package.json": JSON.stringify({ name: "site", private: true, type: "module" }),
-  "content/README.md": "# The pack's site\n\n[A page](a.md)\n",
+  "content/README.md": "# The pack's site\n\n[A page](a.md)\n\n```sh\necho highlighted\n```\n",
   "content/a.md": "---\nname: A page\n---\n\nBody.\n",
   "index.html":
     "<!doctype html>\n<html><head><title></title>\n" +
@@ -359,10 +360,19 @@ describe("the pack", () => {
     assert.match(index, /<title>The pack's site<\/title>/);
     assert.match(index, /<script type="module" blocking="render" crossorigin src=/);
     assert.match(index, /<a href="a.html">A page<\/a>/);
-    const sheets = listFiles(join(dir, "dist", "assets")).filter((file) => file.endsWith(".css"));
+    // The page's stylesheets bundled into one, and the syntax themes' generated one beside it,
+    // which the page links: its classes from the packed Flexoki copy and Shiki's own themes.
+    const css = listFiles(join(dir, "dist", "assets")).filter((file) => file.endsWith(".css"));
+    const sheets = css.filter((file) => !file.startsWith("syntax-"));
+    const syntax = css.filter((file) => file.startsWith("syntax-"));
     assert.equal(sheets.length, 1, `want one bundled sheet, found ${sheets.join(", ")}`);
+    assert.equal(syntax.length, 1, `want one syntax sheet, found ${syntax.join(", ")}`);
     const sheet = readFileSync(join(dir, "dist", "assets", sheets[0]), "utf8");
     assert.match(sheet, /@layer site\s*\{/);
+    assert.ok(index.includes(`<link rel="stylesheet" href="/assets/${syntax[0]}">`), index);
+    assert.match(index, /<pre class="shiki [^"]*" tabindex="0"><code><span class="line">/);
+    const generated = readFileSync(join(dir, "dist", "assets", syntax[0]), "utf8");
+    assert.match(generated, /\[data-palette="flexoki"\] \.shiki span/);
     // The theme menu's CSS module script, rewritten to a constructed sheet; the lint below finds
     // none left.
     const scripts = listFiles(join(dir, "dist", "assets")).filter((file) => file.endsWith(".js"));

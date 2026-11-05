@@ -1,0 +1,10 @@
+{
+  "repository": "flexoki",
+  "url": "https://github.com/kepano/flexoki",
+  "commit": "24ab91db84035a42175fabe9df725d8294ae8209",
+  "files": {
+    "LICENSE": "69f9d59d314fae830ee7f20307bf2bc27cfa850f",
+    "vscode/Flexoki-Dark-color-theme.json": "53e0144b512a4eb8672fa3b5c2f011db3c10187b",
+    "vscode/Flexoki-Light-color-theme.json": "05e618b3cf7a111834a562f3cd2bfd7827fd670d"
+  }
+}

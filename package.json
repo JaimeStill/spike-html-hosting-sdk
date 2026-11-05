@@ -24,6 +24,10 @@
       "types": "./dist/markdown-pages.d.ts",
       "default": "./dist/markdown-pages.js"
     },
+    "./syntax.js": {
+      "types": "./dist/syntax.d.ts",
+      "default": "./dist/syntax.js"
+    },
     "./eslint.js": {
       "types": "./dist/eslint.d.ts",
       "default": "./dist/eslint.js"
@@ -58,10 +62,12 @@
   },
   "dependencies": {
     "@eslint/js": "10.0.1",
+    "@shikijs/transformers": "4.6.0",
     "globals": "17.14.0",
     "marked": "18.1.3",
     "marked-gfm-heading-id": "4.1.4",
     "rolldown": "1.2.16",
+    "shiki": "4.6.0",
     "typescript-eslint": "8.72.1",
     "vite-plugin-standard-css-modules": "0.3.0",
     "yaml": "2.9.1"
