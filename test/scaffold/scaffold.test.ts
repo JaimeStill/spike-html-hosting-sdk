@@ -3,8 +3,10 @@
 // own check. The site is the template's, its package name and its index's title the repository's
 // name, its .gitignore restored, the SDK pinned and both reusable workflows called at this
 // package's version's tag, each file that takes comments carrying its provenance line, and its
-// copied tree the template's byte for byte. It refuses a dir that holds anything, and a usage
-// error exits 2 with the usage.
+// copied tree the template's byte for byte, its README within 100 columns for a long name, its
+// pnpm-workspace.yaml turning off pnpm's wait before a release installs, and its closing line
+// naming git init before the install and the check. It refuses a dir that holds anything, and a
+// usage error exits 2 with the usage.
 //
 // It reads no network. The bin's one network step, `pnpm install --lockfile-only`, runs a stub pnpm
 // first on PATH, which records its arguments and directory. The site is then installed offline as
@@ -69,6 +71,8 @@ let scratch: string;
 let stubs: string;
 let site: string;
 let made: { status: number | null; stdout: string; stderr: string };
+/** The stub pnpm's log after the one scaffold the before hook makes, read before any other. */
+let log: string;
 
 /** The environment the site's own mise runs in: the variables mise sets for the SDK's own task
  * dropped, so the site's mise reads the site's config as its own run would, a user's mise settings
@@ -104,6 +108,7 @@ before(() => {
   );
   chmodSync(join(stubs, "pnpm"), 0o755);
   made = scaffold(repo);
+  log = readFileSync(join(scratch, "pnpm.log"), "utf8");
   site = join(scratch, repo);
 });
 after(() => rmSync(scratch, { recursive: true, force: true }));
@@ -113,8 +118,30 @@ describe("the scaffold", () => {
     assert.equal(made.status, 0, made.stderr);
     assert.equal(made.stderr, "");
     assert.match(made.stdout, new RegExp(`^spike-html-hosting-sdk v${version}: ${repo} made in`));
-    const log = readFileSync(join(scratch, "pnpm.log"), "utf8");
     assert.equal(log, `${realpathSync(site)} install --lockfile-only\n`);
+  });
+
+  test("closes naming git init, then mise run install and mise run check", () => {
+    assert.ok(
+      made.stdout.endsWith(
+        `Next, in ${realpathSync(site)}: git init, mise run install, then mise run check.\n`,
+      ),
+      made.stdout,
+    );
+  });
+
+  test("keeps its README within 100 columns for a 95-character repository name", () => {
+    // The longest name the README's layout fits: the name stands on a line of its own, as the
+    // heading's and the base's, with at most five columns beside it.
+    const long = `site-${"x".repeat(90)}`;
+    assert.equal(long.length, 95);
+    const { status, stderr } = scaffold(long);
+    assert.equal(status, 0, stderr);
+    const readme = readFileSync(join(scratch, long, "README.md"), "utf8");
+    assert.ok(readme.includes(long), "the README names the repository");
+    for (const [i, line] of readme.split("\n").entries()) {
+      assert.ok(line.length <= 100, `README.md:${i + 1} is ${line.length} columns: ${line}`);
+    }
   });
 
   test("copies the template, its gitignore restored as .gitignore", () => {
@@ -169,6 +196,13 @@ describe("the scaffold", () => {
     assert.match(readFileSync(join(site, "mise.toml"), "utf8"), /\/\{\{ version \}\}\/linux64\//);
   });
 
+  test("turns off pnpm's wait before it installs a release, with no workspace packages", () => {
+    // Read before the check's test adds its offline overrides to the file.
+    const settings = readFileSync(join(site, "pnpm-workspace.yaml"), "utf8");
+    assert.match(settings, /^minimumReleaseAge: 0$/m);
+    assert.doesNotMatch(settings, /^packages:/m);
+  });
+
   test("refuses a dir that holds anything, naming it, and changes nothing there", () => {
     const before = listFiles(site);
     const { status, stdout, stderr } = scaffold("other", repo);
@@ -207,10 +241,12 @@ describe("the scaffold", () => {
       return `  ${JSON.stringify(pkg)}: ${JSON.stringify(`link:${target}`)}`;
     });
     // The store and cache settings are the workspace's, so the check's pnpm exec, which verifies
-    // the install against them before it runs, finds it current and installs nothing.
+    // the install against them before it runs, finds it current and installs nothing. They follow
+    // the site's own settings, its minimumReleaseAge kept.
     writeFileSync(
       join(site, "pnpm-workspace.yaml"),
-      `overrides:\n${overrides.join("\n")}\n` +
+      readFileSync(join(site, "pnpm-workspace.yaml"), "utf8") +
+        `overrides:\n${overrides.join("\n")}\n` +
         `storeDir: ${JSON.stringify(join(scratch, "store"))}\n` +
         `cacheDir: ${JSON.stringify(join(scratch, "cache"))}\n` +
         "autoInstallPeers: false\n",

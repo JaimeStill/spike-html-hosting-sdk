@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- The Noctis fixture's shell, which its one page fills (markdown-pages.ts): the fixture site's
+     shell with spike-html-apps-noctis registered as its README's "Use" describes, its sheet,
+     noctis.css, linked after the foundation's entry, and its registration module, noctis.js,
+     imported beside the foundation's, before preferences.js, so the registry lists noctis when the
+     reader's choice applies and the theme menu offers it after every built-in profile. The entry
+     is the full one, so the menu offers every built-in palette beside noctis.
+     Adapted from spike-html-hosting-sdk (237a769): test/fixtures/site/index.html, its title and
+     Noctis's sheet and module. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Noctis fixture</title>
+    <link rel="stylesheet" href="@jaimestill/spike-html-apps-foundation/page-full.css" />
+    <link rel="stylesheet" href="@jaimestill/spike-html-apps-noctis/noctis.css" />
+    <link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/register-full.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-noctis/noctis.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/preferences.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
+  </head>
+  <body>
+    <header>
+      <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
+    </header>
+    <main></main>
+    <sl-theme-menu id="theme"></sl-theme-menu>
+  </body>
+</html>

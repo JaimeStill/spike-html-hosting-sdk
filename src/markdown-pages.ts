@@ -17,11 +17,19 @@
 // the build, naming the page and the link, so no link is left to break. A fragment alone, or a
 // URL with a scheme, passes through.
 //
+// Each fenced block is highlighted at build, so no script reaches the page: marked's own code
+// renderer, on the page's Marked instance, renders it through the build's Shiki highlighter
+// (syntax.ts), once per build at its start, over the syntax themes the plugin is given, the
+// built-ins by default, and the languages the pages' fences label. A fence whose label Shiki
+// bundles no grammar for, or with none, renders plain, as marked renders it. The build emits one
+// stylesheet of the highlighted tokens' classes, which every page links, after the shell's own.
+//
 // Nothing here names a site or a source: a site imports the plugin and configures it with its
 // content directory, its source repository's URL and pinned commit, and its external files.
 // Adapted from spike-html-hosting-architecture (59b01b2): markdown-pages.ts, imported by a site
 // rather than copied into it.
 
+import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, posix, resolve } from "node:path";
 
@@ -31,6 +39,9 @@ import { gfmHeadingId } from "marked-gfm-heading-id";
 import { normalizePath } from "vite";
 import type { Plugin } from "vite";
 import { parse } from "yaml";
+
+import { builtinSyntax, createSyntax } from "./syntax.ts";
+import type { Syntax, SyntaxTheme } from "./syntax.ts";
 
 /** The copied tree and its source, as the plugin is configured. */
 export interface Options {
@@ -45,7 +56,13 @@ export interface Options {
   external?: string[];
   /** The shell each page fills, under the root: one <title> and one empty <main></main>. */
   shell?: string;
+  /** The syntax themes highlighted code takes, one per palette: builtinSyntax by default, a site's
+   * own appended to it, as [...builtinSyntax, theme]. With none, every fence renders plain. */
+  syntax?: readonly SyntaxTheme[];
 }
+
+/** A fence's code as highlighted HTML, its language label given, or false to render it plain. */
+export type Highlight = (code: string, lang: string) => string | false;
 
 /** What a page's links are placed against: the copied files and the source. */
 export interface Source {
@@ -117,9 +134,19 @@ function frontMatter(
   return { data: data as Record<string, unknown>, body: text.slice(match[0].length) };
 }
 
-/** Renders the copied file at path, its text given, with its links placed against source; throws
- * when the file has neither a front matter name nor an h1 to title it. */
-export function render(path: string, text: string, source: Source): Rendered {
+/** The language label of a fence's info string: its first word, none for an unlabeled fence, as
+ * marked's own code renderer reads it. */
+const fenceLabel = (lang: string | undefined): string => /^\S*/.exec(lang ?? "")?.[0] ?? "";
+
+/** Renders the copied file at path, its text given, with its links placed against source and its
+ * fences through highlight, when given; throws when the file has neither a front matter name nor
+ * an h1 to title it. */
+export function render(
+  path: string,
+  text: string,
+  source: Source,
+  highlight?: Highlight,
+): Rendered {
   const { data, body } = frontMatter(path, text);
   let h1: Tokens.Heading | undefined;
   // gfmHeadingId resets its slugger in its preprocess hook on every parse, so each page's ids
@@ -131,6 +158,20 @@ export function render(path: string, text: string, source: Source): Rendered {
       if (token.type === "heading" && token.depth === 1) h1 ??= token as Tokens.Heading;
     },
   });
+  // A labeled fence renders highlighted; false falls back to marked's own renderer, so an
+  // unlabeled fence, or one highlight leaves plain, renders as marked renders it.
+  if (highlight) {
+    marked.use({
+      renderer: {
+        code(token) {
+          const lang = fenceLabel(token.lang);
+          if (token.codeBlockStyle === "indented" || lang === "") return false;
+          const html = highlight(token.text, lang);
+          return html === false ? false : `${html}\n`;
+        },
+      },
+    });
+  }
   const html = marked.parse(body, { async: false });
   // The h1's inline content as plain text, its emphasis, code, and links reduced to their text,
   // by the parser's own text renderer, which renders nested inline tokens back through it.
@@ -196,6 +237,12 @@ export function markdownPages(options: Options): Plugin {
   const ids = new Map<string, string>();
   let root = "";
   let source: Source;
+  /** Each copied file's page, rendered at the build's start. */
+  const rendered = new Map<string, Rendered>();
+  /** The syntax stylesheet's URL, under the base, when the build highlights. */
+  let stylesheet: string | undefined;
+  let base = "/";
+  let assetsDir = "assets";
 
   return {
     name: "site:markdown-pages",
@@ -216,6 +263,45 @@ export function markdownPages(options: Options): Plugin {
       };
       return { build: { rolldownOptions: { input: [...ids.keys()] } } };
     },
+    configResolved(config) {
+      base = config.base;
+      assetsDir = config.build.assetsDir;
+    },
+    // Every page renders here, before any loads, so the highlighter, which loads its grammars
+    // asynchronously, is made once over every label the pages' fences hold, and the stylesheet,
+    // every class the pages' tokens take, is whole before a page links it.
+    async buildStart() {
+      rendered.clear();
+      stylesheet = undefined;
+      const texts = new Map(
+        [...ids.values()].map((file) => [
+          file,
+          readFileSync(join(root, options.dir, file), "utf8"),
+        ]),
+      );
+      const themes = options.syntax ?? builtinSyntax;
+      let highlight: Highlight | undefined;
+      let syntax: Syntax | undefined;
+      if (themes.length > 0) {
+        const langs = new Set<string>();
+        for (const text of texts.values()) {
+          const marked = new Marked();
+          marked.walkTokens(marked.lexer(text), (token) => {
+            if (token.type === "code") langs.add(fenceLabel((token as Tokens.Code).lang));
+          });
+        }
+        syntax = await createSyntax(themes, langs);
+        highlight = syntax.highlight;
+      }
+      for (const [file, text] of texts) rendered.set(file, render(file, text, source, highlight));
+      if (syntax) {
+        const css = syntax.stylesheet();
+        const hash = createHash("sha256").update(css).digest("base64url").slice(0, 8);
+        const fileName = posix.join(assetsDir, `syntax-${hash}.css`);
+        this.emitFile({ type: "asset", fileName, source: css });
+        stylesheet = base + fileName;
+      }
+    },
     resolveId(id) {
       return ids.has(id) ? id : null;
     },
@@ -231,8 +317,19 @@ export function markdownPages(options: Options): Plugin {
         if (found !== 1)
           throw new Error(`markdown-pages: want ${want} in ${shellName}, found ${found}`);
       }
-      const text = readFileSync(join(root, options.dir, file), "utf8");
-      return fill(shell, render(file, text, source));
+      const page = rendered.get(file);
+      if (page === undefined)
+        throw new Error(`markdown-pages: ${file} loads before the build starts`);
+      return fill(shell, page);
+    },
+    // After Vite's own transform of the page, so the link, to an asset the build emits, is
+    // written as it is and never resolved as a source.
+    transformIndexHtml: {
+      order: "post",
+      handler(_html, ctx) {
+        if (stylesheet === undefined || !ids.has(normalizePath(ctx.filename))) return;
+        return [{ tag: "link", attrs: { rel: "stylesheet", href: stylesheet }, injectTo: "head" }];
+      },
     },
   };
 }

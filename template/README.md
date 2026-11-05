@@ -2,11 +2,14 @@
 
 # {{name}}
 
-The GitHub Pages site of {{name}}, made from the template of
-[spike-html-hosting-sdk](https://github.com/JaimeStill/spike-html-hosting-sdk) v{{version}}. Each
-Markdown file copied into `content/` is a page, in `index.html`'s shell, served under
-`/{{name}}/`. `content.json` records the copied tree's source: its repository, the commit it was
-copied at, and each file's git blob hash.
+The GitHub Pages site of
+{{name}},
+made from the template of
+[spike-html-hosting-sdk](https://github.com/JaimeStill/spike-html-hosting-sdk) v{{version}}.
+Each Markdown file copied into `content/` is a page, in `index.html`'s shell, served under
+`/{{name}}/`.
+`content.json` records the copied tree's source: its repository, the commit it was copied at,
+and each file's git blob hash.
 
 ## Tasks
 
