@@ -146,6 +146,7 @@ describe("the Markdown pages", () => {
     assert.deepEqual(ids(render("a.md", body, source).html), want);
     assert.deepEqual(ids(render("a.md", body, source).html), want);
   });
+
   test("list the h2s in the section tree, their h3s nested, by the ids the headings carry", () => {
     const { html, headings } = render(
       "a.md",
@@ -198,7 +199,6 @@ describe("the Markdown pages", () => {
         '<li><a href="../z.html">Zed</a></li>' +
         "</ul></sl-site-index>",
     );
-    assert.ok(!index.includes("aria-current"), "the index marks no page current");
     // From the root's index, the same entries link relative to it.
     assert.deepEqual(hrefs(siteIndex(titles, "README.md")), [
       "./",

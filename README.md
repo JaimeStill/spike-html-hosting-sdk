@@ -249,7 +249,7 @@ index follow main, each in a div, so a reader, or a screen reader, reaches the p
 <sl-section-tree><ul><li><a href="#usage">Usage</a><ul><li><a href="#options">Options</a></li></ul></li></ul></sl-section-tree>
 </div>
 <div class="site-index">
-<sl-site-index><ul><li><a href="index.html">The site</a></li><li><a href="guide/index.html">Guide</a><ul>…</ul></li></ul></sl-site-index>
+<sl-site-index><ul><li><a href="./">The site</a></li><li><a href="guide/">Guide</a><ul>…</ul></li></ul></sl-site-index>
 </div>
 ```
 

@@ -11,11 +11,11 @@
 // each key and a dd for its value, in source order, escaped. The page's title is the front
 // matter's name, or, with no name, the text of the file's first h1; a file with neither fails the
 // build, naming it. Headings carry GitHub's ids (marked-gfm-heading-id), so a fragment written
-// against the source on GitHub resolves here. A relative link to a copied file is rewritten to that file's page, relative to
-// the linking page, its fragment kept; one to a file listed as external, present in the source
-// but not copied, to the file's blob on GitHub at the pinned commit; any other relative link fails
-// the build, naming the page and the link, so no link is left to break. A fragment alone, or a
-// URL with a scheme, passes through.
+// against the source on GitHub resolves here. A relative link to a copied file is rewritten to
+// that file's page, relative to the linking page, its fragment kept; one to a file listed as
+// external, present in the source but not copied, to the file's blob on GitHub at the pinned
+// commit; any other relative link fails the build, naming the page and the link, so no link is
+// left to break. A fragment alone, or a URL with a scheme, passes through.
 //
 // Each page's data is written as the light-DOM markup the components slot, so with no script it
 // renders as the page's own: the page header, at the top of main, where GitHub shows the front
@@ -306,7 +306,7 @@ interface Directory {
  * resolves under any base. */
 export function siteIndex(titles: ReadonlyMap<string, string>, from: string): string {
   const root: Directory = { pages: [], dirs: new Map() };
-  for (const file of [...titles.keys()].sort()) {
+  for (const file of titles.keys()) {
     const parts = file.split("/");
     let dir = root;
     for (const name of parts.slice(0, -1)) {

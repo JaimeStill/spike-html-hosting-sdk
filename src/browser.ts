@@ -9,8 +9,9 @@
 // profile past its default, which the full entry registers, sets that facet's attribute on the
 // root; the page's one module script, its entry, is render-blocking; every request the page makes
 // resolves under the base, and none fails; in a 1600px viewport the site's layout holds main to a
-// reading width, centered; in a 390px one nothing scrolls sideways; and a choice the menu never saves leaves nothing stored, so a reload
-// shows none of it. shell lists them by name, for a site to make a test of each.
+// reading width, centered; in a 390px one nothing scrolls sideways; and a choice the menu never
+// saves leaves nothing stored, so a reload shows none of it. shell lists them by name, for a site
+// to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the theme menu to each palette the
@@ -174,8 +175,7 @@ async function assertNoSidewaysScroll(page: Page, url: string): Promise<void> {
       const viewport = document.documentElement.clientWidth;
       const wide = [...document.body.querySelectorAll("*")]
         .filter((element) => element.getBoundingClientRect().right > viewport + 0.5)
-        .map((element) => element.tagName.toLowerCase() +
-          (element.className ? "." + String(element.className).split(" ").join(".") : ""));
+        .map((element) => [element.localName, ...element.classList].join("."));
       return { scroll: document.documentElement.scrollWidth, viewport, wide: wide.slice(0, 5) };
     })()`);
   assert.ok(
