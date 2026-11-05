@@ -4,7 +4,10 @@
      entry and its registrations, every built-in profile, so the theme menu offers each, its
      preferences module, and its keys module, render-blocking, as the build makes every module
      script one entry; the SDK's site.css by the package's name, after the entry; and a button
-     that opens the theme menu, which keys.js clicks on T.
+     that opens the theme menu, which keys.js clicks on T. The components' four elements, each
+     module defining its element, render-blocking too: the site nav, beside the Theme button, and
+     the site index, the page header, and the section tree, which the SDK's markdownPages writes
+     into each page with their light-DOM content.
      Adapted from spike-html-hosting (cb0511c): index.html, its title and text this site's, and its
      page a shell.
      Adapted from spike-html-hosting (fba414c): index.html, its full page entry, its keys module,
@@ -22,9 +25,14 @@
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/register-full.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/preferences.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
   </head>
   <body>
     <header>
+      <sl-site-nav></sl-site-nav>
       <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
     </header>
     <main></main>
