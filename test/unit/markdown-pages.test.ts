@@ -7,19 +7,15 @@
 // name nor an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section
 // tree lists the h2s and their h3s by those ids, docked from the layout's tree dock. The site index
 // nests every page by directory, each directory labeled by its index page or its name, and marks
-// none current, in the Pages drawer docked from the layout's index dock; site.css's media queries
-// change the layout at those two docks and no other width. Each body table is in a named region
-// a keyboard focuses. Each site's browser tier crawls its built pages themselves.
+// none current, in the Pages drawer docked from the layout's index dock. Each body table is in a
+// named region a keyboard focuses. Each site's browser tier crawls its built pages themselves.
 // Adapted from spike-html-hosting-architecture (de46c65): test/unit/markdown-pages.test.ts, on
 // src/markdown-pages.ts.
 
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, test } from "node:test";
 
 import {
-  docks,
   pageFile,
   pageHeader,
   pageUrl,
@@ -214,12 +210,6 @@ describe("the Markdown pages", () => {
       "dir/sub/c.html",
       "z.html",
     ]);
-  });
-
-  test("dock the tree and the index at the widths site.css lays out at", () => {
-    const css = readFileSync(join(import.meta.dirname, "../../src/site.css"), "utf8");
-    const widths = new Set([...css.matchAll(/@media \(width [<>]=? ([^)]+)\)/g)].map((m) => m[1]));
-    assert.deepEqual([...widths].sort(), [docks.index, docks.tree].sort());
   });
 
   test("wrap every body table in a region a keyboard focuses, named by its header", () => {

@@ -6,17 +6,22 @@
 // shell that fails to load it leaves it, the site nav's or the Pages drawer's, the shell's
 // definition check and the crawl each fail, naming the page and the tag. With a sheet that breaks
 // the site index's words in a narrow column, or holds the docked drawer's column under 16rem, the
-// navigation check fails, naming the width and the word or the column.
+// navigation check fails, naming the width and the word or the column. A px below and at each of
+// the layout's docks, on the guide's page, which has both side columns, site.css lays each out as
+// its component's dock attribute has it: a docked tree beside main at its end and a bar above it
+// otherwise, a docked drawer beside main at its start with the Pages button hidden, and the button
+// shown otherwise.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 
-import { launch } from "@jaimestill/spike-html-apps-tooling/browser.js";
+import { launch, SETTLED } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Browser, Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";
 
 import { crawl, definesEveryElement, keepsNavigationWords, shell } from "../../src/browser.ts";
+import { docks } from "../../src/markdown-pages.ts";
 import { served } from "../../src/served.ts";
 
 const root = join(import.meta.dirname, "../fixtures/site");
@@ -156,4 +161,69 @@ describe("the fixture site with its navigation cramped", () => {
       await page.close();
     }
   });
+});
+
+describe("the fixture site's layout at its docks", () => {
+  /** A dock's width in px, its rem 16px, as a media query reads it. */
+  const px = (dock: string): number => parseFloat(dock) * 16;
+  const widths = [docks.tree, docks.index].flatMap((dock) => [px(dock) - 1, px(dock)]);
+
+  for (const width of widths) {
+    test(`at ${width}px places each side column as its component docks it`, async () => {
+      const page = await browser.open("about:blank");
+      try {
+        await page.cdp("Emulation.setDeviceMetricsOverride", {
+          width,
+          height: 900,
+          deviceScaleFactor: 1,
+          mobile: false,
+        });
+        await page.goto(`${server.origin}guide/`);
+        await page.evaluate(SETTLED);
+        const layout: {
+          tree: { docked: boolean; beside: boolean; above: boolean };
+          drawer: { docked: boolean; beside: boolean };
+          opener: boolean;
+        } = await page.evaluate(`(() => {
+          const main = document.querySelector("main").getBoundingClientRect();
+          const tree = document.querySelector("sl-section-tree");
+          const drawer = document.querySelector("sl-drawer#pages");
+          const t = tree.getBoundingClientRect();
+          const d = drawer.getBoundingClientRect();
+          return {
+            tree: {
+              docked: tree.matches(":state(docked)"),
+              beside: t.left >= main.right,
+              above: t.bottom <= main.top,
+            },
+            drawer: {
+              docked: drawer.matches(":state(docked)"),
+              beside: d.width > 0 && d.right <= main.left,
+            },
+            opener: getComputedStyle(document.querySelector(".pages-opener")).display !== "none",
+          };
+        })()`);
+        assert.equal(layout.tree.docked, width >= px(docks.tree), "the tree docks from its dock");
+        assert.ok(
+          layout.tree.docked ? layout.tree.beside : layout.tree.above,
+          `the tree is ${layout.tree.docked ? "beside main, at its end" : "a bar above main"}`,
+        );
+        assert.equal(
+          layout.drawer.docked,
+          width >= px(docks.index),
+          "the drawer docks from its dock",
+        );
+        if (layout.drawer.docked) {
+          assert.ok(layout.drawer.beside, "the docked drawer is beside main, at its start");
+        }
+        assert.equal(
+          layout.opener,
+          !layout.drawer.docked,
+          "the Pages button is shown exactly where the drawer is not docked",
+        );
+      } finally {
+        await page.close();
+      }
+    });
+  }
 });
