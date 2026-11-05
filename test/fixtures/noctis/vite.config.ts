@@ -5,7 +5,8 @@
 // With FIXTURE_SYNTAX=plain it builds the same site without the Noctis entry, into plain/dist/,
 // so noctis, which the page still registers, matches no syntax rule and its code renders plain:
 // the build the browser tier's palette check fails on.
-// Adapted from test/fixtures/site/vite.config.ts: the syntax themes, and the plain build.
+// Adapted from spike-html-hosting-sdk (237a769): test/fixtures/site/vite.config.ts, the syntax
+// themes, and the plain build.
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
