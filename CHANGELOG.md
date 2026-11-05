@@ -9,35 +9,46 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 ## [0.3.0] - 2026-11-05
 
 The pages' navigation: each page's front matter, section tree, and site index written as the
-light-DOM markup of spike-html-hosting-components v0.1.0's elements, which the shell loads, and
-tables that scroll in named regions. A site made from v0.2.0 takes the template's `index.html` and
-`package.json`'s components pin again, and one that imported `frontMatterTable` takes
+light-DOM markup of spike-html-hosting-components v0.2.0's elements, which the shell loads, the
+site index in a Pages drawer where its column doesn't fit, and tables that scroll in named regions.
+A site made from v0.2.0 takes the template's `index.html` and `package.json`'s components pin
+again, and one that imported `frontMatterTable` takes
 `pageHeader`: its removal is a breaking change at 0.y.
 
 ### Added
 
 - `markdownPages` writes each page's data as the light-DOM markup of
-  spike-html-hosting-components v0.1.0's elements: an `sl-page-header` at the top of main, a dl
-  of the front matter's keys and values in source order, escaped; an `sl-section-tree` of the
-  page's h2s and their h3s, by the ids the headings carry, in a `div.section-tree` after main; and
-  an `sl-site-index` of every page the site builds, nested by directory, in a `div.site-index`
-  after that. `render()` returns the page's `headings`; `pageHeader`, `sectionTree`, `siteIndex`,
-  and `frontMatterText` are exported.
+  spike-html-hosting-components v0.2.0's elements: an `sl-section-tree` of the page's h2s and
+  their h3s, by the ids the headings carry, in a `div.section-tree` before main; an
+  `sl-page-header` at the top of main, a dl of the front matter's keys and values in source order,
+  escaped; and an `sl-site-index` of every page the site builds, nested by directory, after main
+  in the Pages drawer, `<sl-drawer class="site-index" label="Pages" id="pages">`. Each element's
+  `dock` is the layout's, `docks`: the tree's 70rem, the drawer's 86rem. `render()` returns the
+  page's `headings`; `pageHeader`, `sectionTree`, `siteIndex`, `frontMatterText`, and `docks` are
+  exported.
 - Each body table is wrapped in a `div.table-region`, `role="region"`, named by its header cells,
   with `tabindex="0"`, which scrolls it sideways.
-- `site.css` lays the tree and the index beside main from 70rem, main centered between them, and
-  below main in a narrower viewport; styles the table regions; and paints the components'
-  `aria-current` marks.
+- `site.css` docks each side column only where it fits at 16rem beside main's 80ch: from 86rem
+  three columns, the docked drawer, main centered, and the tree; from 70rem the tree beside main
+  and the index in the drawer; narrower, one column, the tree a bar stuck to the top of the
+  viewport, its wrapper `display: contents`. It shows the Pages button only below 86rem, once the
+  drawer is defined; styles the table regions; and paints the components' `aria-current` marks.
 - `./browser.js`: `fitsNarrowWidth`, in `shell`, nothing scrolling sideways at 390px; the crawl
-  asserts each page's header against its front matter, its site index against the pages the
-  build writes, and no sideways scroll at 390px.
+  asserts each page's header against its front matter, its site index, in its Pages drawer,
+  against the pages the build writes, and no sideways scroll at 390px.
+- `./browser.js`: `keepsNavigationWords`, in `shell`, and the crawl assert, at 390px, a pixel
+  below and at each dock, and at 1400px, that no navigation link's word breaks across lines and
+  every docked side column is at least 16rem wide. The crawl asserts each page's Pages button
+  hidden at 1600px, and at 390px opening the drawer by its click and by P, its `aria-expanded`
+  following the drawer.
 - `./browser.js`: `definesEveryElement`, in `shell`, and the crawl assert every element on a
   page whose name holds a hyphen is defined once it loads, failing with the page and the
   undefined tags, so a shell that fails to load one of the components' modules fails the checks
   rather than hanging the capture run.
-- The template's shell loads the components' four modules, render-blocking, with `sl-site-nav`
-  beside the Theme button; the template pins
-  `github:JaimeStill/spike-html-hosting-components#v0.1.0`.
+- The template's shell loads the components' five modules, render-blocking, with `sl-site-nav` at
+  the header's start, then the Pages button, bound to P, which opens the Pages drawer below its
+  dock, and the Theme button; the template pins
+  `github:JaimeStill/spike-html-hosting-components#v0.2.0`, as the SDK's dev dependency does.
 
 ### Changed
 

@@ -54,6 +54,7 @@ function listFiles(dir: string): string[] {
 const modules: Record<string, string[]> = {
   "./render-blocking.js": ["renderBlocking"],
   "./markdown-pages.js": [
+    "docks",
     "frontMatterText",
     "markdownPages",
     "pageFile",
@@ -74,6 +75,7 @@ const modules: Record<string, string[]> = {
     "fitsNarrowWidth",
     "highlightsEachPalette",
     "holdsReadingWidth",
+    "keepsNavigationWords",
     "opensThemeMenu",
     "requestsUnderBase",
     "shell",

@@ -49,8 +49,8 @@ importers:
         specifier: github:JaimeStill/spike-html-apps-tooling#v0.3.0
         version: https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072
       '@jaimestill/spike-html-hosting-components':
-        specifier: github:JaimeStill/spike-html-hosting-components#v0.1.0
-        version: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/7f23b8bd5cbb5f0a48a2411be7dc8d9bff9b8e9d(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)
+        specifier: github:JaimeStill/spike-html-hosting-components#v0.2.0
+        version: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/211c64aa7e5eacede073cb84e7eb555784c03234(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
@@ -149,9 +149,9 @@ packages:
     version: 0.3.0
     hasBin: true
 
-  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/7f23b8bd5cbb5f0a48a2411be7dc8d9bff9b8e9d':
-    resolution: {gitHosted: true, integrity: sha512-QP7h5rJHbSpI3xswUSsjeMwGDSIZNFjhRvg17yP5VfHI1/2GAojUJrLd0r9/ipsWxDYJcO+ZOf59c2J+5hKTvA==, tarball: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/7f23b8bd5cbb5f0a48a2411be7dc8d9bff9b8e9d}
-    version: 0.1.0
+  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/211c64aa7e5eacede073cb84e7eb555784c03234':
+    resolution: {gitHosted: true, integrity: sha512-Oxjr8Kt4hyDap9+t4lDp5ULM0RRgqCDVkXXF3rmU7YGT3aijMHZDTDSwp/GfY2OT7TGNK7D+iJ6BZnEGelCV8Q==, tarball: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/211c64aa7e5eacede073cb84e7eb555784c03234}
+    version: 0.2.0
     peerDependencies:
       '@jaimestill/spike-html-apps-foundation': ^0.3.0
 
@@ -1043,7 +1043,7 @@ snapshots:
 
   '@jaimestill/spike-html-apps-tooling@https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072': {}
 
-  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/7f23b8bd5cbb5f0a48a2411be7dc8d9bff9b8e9d(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)':
+  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/211c64aa7e5eacede073cb84e7eb555784c03234(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)':
     dependencies:
       '@jaimestill/spike-html-apps-foundation': https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55
       lit: 3.3.3

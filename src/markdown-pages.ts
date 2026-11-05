@@ -20,16 +20,19 @@
 // Each page's data is written as the light-DOM markup the components slot, so with no script it
 // renders as the page's own: the page header, at the top of main, where GitHub shows the front
 // matter; the section tree, an sl-section-tree of the page's h2s, each with its h3s in a nested
-// list, linked by the ids the headings carry, in a div.section-tree after main, or none for a page
-// with neither; and the site index, an sl-site-index of every page the site builds, nested by
-// directory, each linked relative to the page, as its body's links are, in a div.site-index after
-// that. main comes first, so a reader, or a screen reader, reaches the page's text before its
-// navigation; site.css places the tree and the index beside main in a wide viewport and below it
-// in a narrow one. The renderer writes no aria-current: the components mark the current section
-// and page at runtime, and the site nav, which takes no content, is the shell's to place. Each
-// body table is wrapped in a div.table-region, a region named by its header cells that a keyboard
-// focuses, as Shiki's tabindex makes each code block, which scrolls the table sideways in a
-// viewport narrower than it.
+// list, linked by the ids the headings carry, in a div.section-tree before main, or none for a
+// page with neither; and the site index, an sl-site-index of every page the site builds, nested by
+// directory, each linked relative to the page, as its body's links are, in the Pages drawer, an
+// sl-drawer labeled "Pages" with the id the shell's Pages button controls, after main. The tree
+// comes before main so that, as the bar it is in a narrow viewport, it sticks to the top of the
+// viewport from the page's own flow, and so the reading order, and a keyboard's, is the order the
+// page shows; the index, after main, is a column beside it or a closed drawer. Each element's dock,
+// the width from which it is a column, is the layout's (docks), which site.css's media queries
+// write too. The renderer writes no aria-current: the components mark the current section and page
+// at runtime, and the site nav, which takes no content, is the shell's to place, with the Pages
+// button. Each body table is wrapped in a div.table-region, a region named by its header cells
+// that a keyboard focuses, as Shiki's tabindex makes each code block, which scrolls the table
+// sideways in a viewport narrower than it.
 //
 // Each fenced block is highlighted at build, so no script reaches the page: marked's own code
 // renderer, on the page's Marked instance, renders it through the build's Shiki highlighter
@@ -56,6 +59,18 @@ import { parse } from "yaml";
 
 import { builtinSyntax, createSyntax } from "./syntax.ts";
 import type { Syntax, SyntaxTheme } from "./syntax.ts";
+
+/**
+ * The widths from which the layout docks each side column, as the components' dock attribute
+ * takes them, read in the media query (width < dock), so a viewport of exactly dock docks; site.css
+ * writes the same lengths in its media queries, and the shell's Pages button's. Each is the width
+ * where its columns fit at their 16rem minimum beside main's 80ch, measured in the foundation's
+ * default type and regular space, with a scrollbar: the section tree alone in the end column, the
+ * start one left empty so main stays as near centered as fits, from 70rem (about 69.3rem needed),
+ * and the site index too, in the start column, from 86rem (about 85.3rem needed). Below index, the
+ * index is the Pages drawer; below tree, the tree is the sticky bar.
+ */
+export const docks = { tree: "70rem", index: "86rem" } as const;
 
 /** The copied tree and its source, as the plugin is configured. */
 export interface Options {
@@ -270,9 +285,9 @@ export function pageHeader(data: Rendered["data"]): string {
   return `<sl-page-header><dl>${fields.join("")}</dl></sl-page-header>\n`;
 }
 
-/** The page's section tree, an sl-section-tree slotting a list of its h2s, each linking its
- * heading's id, percent-encoded, with the h3s under it in a nested list; an h3 before any h2
- * stands at the top level. Nothing for a page with neither. */
+/** The page's section tree, an sl-section-tree docked from docks.tree, slotting a list of its h2s,
+ * each linking its heading's id, percent-encoded, with the h3s under it in a nested list; an h3
+ * before any h2 stands at the top level. Nothing for a page with neither. */
 export function sectionTree(headings: readonly Heading[]): string {
   if (headings.length === 0) return "";
   const link = ({ id, text }: Heading): string =>
@@ -287,7 +302,7 @@ export function sectionTree(headings: readonly Heading[]): string {
     const list = nested.length > 0 ? `<ul>${nested.join("")}</ul>` : "";
     items.push(`<li>${link(heading)}${list}</li>`);
   }
-  return `<sl-section-tree><ul>${items.join("")}</ul></sl-section-tree>`;
+  return `<sl-section-tree dock="${docks.tree}"><ul>${items.join("")}</ul></sl-section-tree>`;
 }
 
 /** A directory of the copied tree, as the site index nests it: its index page's file, its pages'
@@ -298,12 +313,13 @@ interface Directory {
   dirs: Map<string, Directory>;
 }
 
-/** The page of the copied file from's site index, an sl-site-index slotting a list of every page,
- * titles giving each copied file's title, nested by directory: a page an li of its link, its text
- * the page's title; a directory an li of its index page's link, or a span of its name when it has
- * none, then a nested list of its pages and directories, by name. The root's index page is the
- * top-level list's first entry. Each link is relative to from's page, as its body's are, so it
- * resolves under any base. */
+/** The page of the copied file from's site index in the Pages drawer: an sl-drawer docked from
+ * docks.index, labeled "Pages", its id pages, which the shell's Pages button controls, holding an
+ * sl-site-index slotting a list of every page, titles giving each copied file's title, nested by
+ * directory: a page an li of its link, its text the page's title; a directory an li of its index
+ * page's link, or a span of its name when it has none, then a nested list of its pages and
+ * directories, by name. The root's index page is the top-level list's first entry. Each link is
+ * relative to from's page, as its body's are, so it resolves under any base. */
 export function siteIndex(titles: ReadonlyMap<string, string>, from: string): string {
   const root: Directory = { pages: [], dirs: new Map() };
   for (const file of titles.keys()) {
@@ -335,19 +351,20 @@ export function siteIndex(titles: ReadonlyMap<string, string>, from: string): st
     ...(root.index === undefined ? [] : [`<li>${link(root.index)}</li>`]),
     ...entries(root),
   ];
-  return `<sl-site-index><ul>${top.join("")}</ul></sl-site-index>`;
+  return (
+    `<sl-drawer class="site-index" label="Pages" id="pages" dock="${docks.index}">` +
+    `<sl-site-index><ul>${top.join("")}</ul></sl-site-index></sl-drawer>`
+  );
 }
 
-/** Fills the shell with a rendered page: its title; its header and its body in <main>; then its
- * section tree, when it has one, and the site index, index, each in its div. */
+/** Fills the shell with a rendered page: its title; its section tree, when it has one, in its div;
+ * its header and its body in <main>; then the site index, index, in its drawer. */
 function fill(shell: string, { data, title, html, headings }: Rendered, index: string): string {
   const tree = sectionTree(headings);
-  const after =
-    (tree === "" ? "" : `\n<div class="section-tree">\n${tree}\n</div>`) +
-    `\n<div class="site-index">\n${index}\n</div>`;
+  const before = tree === "" ? "" : `<div class="section-tree">\n${tree}\n</div>\n`;
   return shell
     .replace(/<title>[^<]*<\/title>/, () => `<title>${escape(title)}</title>`)
-    .replace("<main></main>", () => `<main>\n${pageHeader(data)}${html}</main>${after}`);
+    .replace("<main></main>", () => `${before}<main>\n${pageHeader(data)}${html}</main>\n${index}`);
 }
 
 /** The plugin: every copied file under options.dir a page of the build, loaded from its id, the

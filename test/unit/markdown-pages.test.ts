@@ -5,17 +5,21 @@
 // and shown in the page header as a dl of its keys and values in source order, escaped; a file
 // with none shows an empty header and takes its title from its first h1, and one with neither a
 // name nor an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section
-// tree lists the h2s and their h3s by those ids. The site index nests every page by directory,
-// each directory labeled by its index page or its name, and marks none current. Each body table
-// is in a named region a keyboard focuses. Each site's browser tier crawls its built pages
-// themselves.
+// tree lists the h2s and their h3s by those ids, docked from the layout's tree dock. The site index
+// nests every page by directory, each directory labeled by its index page or its name, and marks
+// none current, in the Pages drawer docked from the layout's index dock; site.css's media queries
+// change the layout at those two docks and no other width. Each body table is in a named region
+// a keyboard focuses. Each site's browser tier crawls its built pages themselves.
 // Adapted from spike-html-hosting-architecture (de46c65): test/unit/markdown-pages.test.ts, on
 // src/markdown-pages.ts.
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, test } from "node:test";
 
 import {
+  docks,
   pageFile,
   pageHeader,
   pageUrl,
@@ -159,7 +163,7 @@ describe("the Markdown pages", () => {
     const tree = sectionTree(headings);
     assert.equal(
       tree,
-      "<sl-section-tree><ul>" +
+      '<sl-section-tree dock="70rem"><ul>' +
         '<li><a href="#before">Before</a></li>' +
         '<li><a href="#caf%C3%A9--cr%C3%A8me">Café &amp; crème</a>' +
         '<ul><li><a href="#a-b">A b</a></li><li><a href="#c">C</a></li></ul></li>' +
@@ -175,7 +179,7 @@ describe("the Markdown pages", () => {
     assert.equal(sectionTree(render("a.md", file("# Only a title\n"), source).headings), "");
   });
 
-  test("nest the site index by directory, each labeled by its index page or its name", () => {
+  test("nest the site index by directory, each labeled by its index page or its name, in the Pages drawer", () => {
     const titles = new Map([
       ["README.md", "The <site>"],
       ["z.md", "Zed"],
@@ -188,7 +192,8 @@ describe("the Markdown pages", () => {
     const index = siteIndex(titles, "dir/b.md");
     assert.equal(
       index,
-      "<sl-site-index><ul>" +
+      '<sl-drawer class="site-index" label="Pages" id="pages" dock="86rem">' +
+        "<sl-site-index><ul>" +
         '<li><a href="../">The &lt;site&gt;</a></li>' +
         '<li><a href="../a.html">A &amp; B</a></li>' +
         '<li><span>bare</span><ul><li><a href="../bare/d.html">D</a></li></ul></li>' +
@@ -197,7 +202,7 @@ describe("the Markdown pages", () => {
         '<li><span>sub</span><ul><li><a href="sub/c.html">C</a></li></ul></li>' +
         "</ul></li>" +
         '<li><a href="../z.html">Zed</a></li>' +
-        "</ul></sl-site-index>",
+        "</ul></sl-site-index></sl-drawer>",
     );
     // From the root's index, the same entries link relative to it.
     assert.deepEqual(hrefs(siteIndex(titles, "README.md")), [
@@ -209,6 +214,12 @@ describe("the Markdown pages", () => {
       "dir/sub/c.html",
       "z.html",
     ]);
+  });
+
+  test("dock the tree and the index at the widths site.css lays out at", () => {
+    const css = readFileSync(join(import.meta.dirname, "../../src/site.css"), "utf8");
+    const widths = new Set([...css.matchAll(/@media \(width [<>]=? ([^)]+)\)/g)].map((m) => m[1]));
+    assert.deepEqual([...widths].sort(), [docks.index, docks.tree].sort());
   });
 
   test("wrap every body table in a region a keyboard focuses, named by its header", () => {

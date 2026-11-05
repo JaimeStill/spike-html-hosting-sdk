@@ -3,18 +3,29 @@
  * held off the viewport's edges, main a centered reading column, and room around the header, the
  * page header, tables, and code blocks. Its own layer, site, declared after the foundation's
  * layers, which the page entry declares first, so it wins over them. Every length is a --space-*
- * token, so the reader's Space profile changes it, but main's reading width, in ch.
+ * token, so the reader's Space profile changes it, but main's reading width, in ch, the side
+ * columns' 16rem minimum, and the two widths the layout changes at.
  *
- * The renderer (markdown-pages.ts) writes main, then the section tree's div, when the page has
- * one, then the site index's. In a viewport wide enough for three columns, the body is a grid of
- * main's reading width between two equal columns, so main stays centered whether or not the page
- * has a tree: the site index in the start column and the section tree in the end one, each held in
- * view as the page scrolls and scrolling itself when taller than the viewport. In a narrower one
- * the body is a single column and both follow main. Every grid track and the reading column may
- * shrink to nothing, and each table scrolls sideways in its region, so no page is wider than a
- * 390px viewport. The marks the components set on the light-DOM links, below a shadow sheet's
- * reach, are painted here: the section in view and the page on screen in a heavier weight. The
- * shell's header holds the site nav and the Theme button in a row.
+ * The renderer (markdown-pages.ts) writes the section tree's div, when the page has one, then
+ * main, then the site index in the Pages drawer, an sl-drawer. Each side column docks only where it
+ * fits at 16rem beside main's 80ch, so no column is cramped and no link's words break; the two
+ * widths are the renderer's docks, which it writes as each element's dock attribute, and the
+ * media queries here write the same lengths, as the Pages button's does:
+ * - 86rem and wider: three columns, main's reading width between two equal columns of at least
+ *   16rem, so main stays centered whether or not the page has a tree: the site index's drawer,
+ *   docked, in the start column and the section tree in the end one, each held in view as the page
+ *   scrolls and scrolling itself when taller than the viewport.
+ * - 70rem to 86rem: the same grid with only the end column held to 16rem: the section tree docked
+ *   there, the start column empty, so main is as near centered as fits; the site index is the
+ *   Pages drawer, a modal the Pages button opens, taking no space in the page.
+ * - Narrower than 70rem: one column. The section tree is a bar stuck to the top of the viewport,
+ *   its wrapper display: contents so the bar's containing block is the body, and the page's flow
+ *   places it before main; the site index is still the drawer.
+ * Main's track and its reading width may shrink, and each table scrolls sideways in its region,
+ * so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
+ * below a shadow sheet's reach, are painted here: the section in view and the page on screen in a
+ * heavier weight. The shell's header holds the site nav, then the Pages button and the Theme
+ * button, in a row.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -27,15 +38,32 @@
     padding-block: var(--space-s);
   }
 
-  /* The shell's header: the site nav and the Theme button in one row, wrapping when narrow. */
+  /* The shell's header: the site nav at the start, the Pages and Theme buttons at the end, in one
+     row, wrapping when narrow. */
   body > header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: var(--space-s);
   }
 
+  body > header > sl-site-nav {
+    margin-inline-end: auto;
+  }
+
+  /* The Pages button, shown only where the site index is the drawer and once the drawer is
+     defined, so with no script, or on a page with no drawer, it is never shown. */
+  .pages-opener {
+    display: none;
+  }
+
+  @media (width < 86rem) {
+    body:has(sl-drawer:defined) .pages-opener {
+      display: inline-block;
+    }
+  }
+
+  /* Body text breaks a word too long for the column; the components' navigation never does. */
   main {
     max-inline-size: 80ch;
     margin-inline: auto;
@@ -43,16 +71,19 @@
     overflow-wrap: break-word;
   }
 
-  .section-tree,
-  .site-index {
-    padding-block-end: var(--space-l);
+  /* The section tree as the bar: its wrapper leaves the flow to it, so it sticks within the body,
+     the whole page's height, not within a wrapper only as tall as the bar. */
+  @media (width < 70rem) {
+    .section-tree {
+      display: contents;
+    }
   }
 
-  /* Wide enough for main's 80ch and the two columns beside it. */
+  /* Wide enough for main's 80ch and the section tree's 16rem column beside it. */
   @media (width >= 70rem) {
     body {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr);
       column-gap: var(--space-l);
       align-items: start;
     }
@@ -66,20 +97,35 @@
       inline-size: 100%;
     }
 
-    .section-tree,
-    .site-index {
+    .section-tree {
+      grid-area: 2 / 3;
       position: sticky;
       inset-block-start: var(--space-m);
       max-block-size: calc(100svh - 2 * var(--space-m));
       overflow-y: auto;
+      padding-block-end: var(--space-l);
     }
 
+    /* The drawer, closed, takes no space here; docked, its column is the start one. */
     .site-index {
       grid-area: 2 / 1;
     }
+  }
 
-    .section-tree {
-      grid-area: 2 / 3;
+  /* Wide enough for main's 80ch and both 16rem columns, so main is centered. */
+  @media (width >= 86rem) {
+    body {
+      grid-template-columns: minmax(16rem, 1fr) minmax(0, 80ch) minmax(16rem, 1fr);
+    }
+
+    /* The docked drawer, a column of its header over its body, held to the viewport's height:
+       its body scrolls, the Pages heading staying in view. */
+    .site-index {
+      position: sticky;
+      inset-block-start: var(--space-m);
+      display: flex;
+      flex-direction: column;
+      max-block-size: calc(100svh - 2 * var(--space-m));
     }
   }
 
