@@ -133,18 +133,32 @@ function checkPair(palette: string, light: ThemeRegistrationAny, dark: ThemeRegi
   return failures;
 }
 
-/** What keeps the syntax theme from merging into one light-dark() theme, one line each, naming
- * its palette: none when it merges. */
-export async function checkSyntax(theme: SyntaxTheme): Promise<string[]> {
+/** The syntax theme's pair, resolved and checked: its failures, and the pair when there are
+ * none. */
+async function resolvePair(
+  theme: SyntaxTheme,
+): Promise<{ failures: string[]; light?: ThemeRegistrationAny; dark?: ThemeRegistrationAny }> {
   const { palette } = theme;
   if (!/^[a-z][a-z\d-]*$/.test(palette)) {
-    return [`${JSON.stringify(palette)}: a palette's name is lowercase letters, digits, and -`];
+    return {
+      failures: [
+        `${JSON.stringify(palette)}: a palette's name is lowercase letters, digits, and -`,
+      ],
+    };
   }
   const light = await resolveTheme(theme.light, palette, "light");
   const dark = await resolveTheme(theme.dark, palette, "dark");
-  const unresolved = [light, dark].filter((t) => typeof t === "string");
-  if (unresolved.length > 0) return unresolved;
-  return checkPair(palette, light as ThemeRegistrationAny, dark as ThemeRegistrationAny);
+  if (typeof light === "string" || typeof dark === "string") {
+    return { failures: [light, dark].filter((t) => typeof t === "string") };
+  }
+  const failures = checkPair(palette, light, dark);
+  return failures.length > 0 ? { failures } : { failures, light, dark };
+}
+
+/** What keeps the syntax theme from merging into one light-dark() theme, one line each, naming
+ * its palette: none when it merges. */
+export async function checkSyntax(theme: SyntaxTheme): Promise<string[]> {
+  return (await resolvePair(theme)).failures;
 }
 
 /** light-dark() of the pair's colors, either alone when the other has none. */
@@ -213,14 +227,9 @@ export async function createSyntax(
       continue;
     }
     palettes.add(theme.palette);
-    const found = await checkSyntax(theme);
-    if (found.length > 0) {
-      failures.push(...found);
-      continue;
-    }
-    const light = (await resolveTheme(theme.light, theme.palette, "light")) as ThemeRegistrationAny;
-    const dark = (await resolveTheme(theme.dark, theme.palette, "dark")) as ThemeRegistrationAny;
-    merged.push(merge(theme.palette, light, dark));
+    const { failures: found, light, dark } = await resolvePair(theme);
+    if (light && dark) merged.push(merge(theme.palette, light, dark));
+    else failures.push(...found);
   }
   if (failures.length > 0) {
     throw new Error(`syntax: a syntax theme fails its check:\n  ${failures.join("\n  ")}`);

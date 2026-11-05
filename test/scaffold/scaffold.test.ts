@@ -70,6 +70,8 @@ let scratch: string;
 let stubs: string;
 let site: string;
 let made: { status: number | null; stdout: string; stderr: string };
+/** The stub pnpm's log after the one scaffold the before hook makes, read before any other. */
+let log: string;
 
 /** The environment the site's own mise runs in: the variables mise sets for the SDK's own task
  * dropped, so the site's mise reads the site's config as its own run would, a user's mise settings
@@ -105,6 +107,7 @@ before(() => {
   );
   chmodSync(join(stubs, "pnpm"), 0o755);
   made = scaffold(repo);
+  log = readFileSync(join(scratch, "pnpm.log"), "utf8");
   site = join(scratch, repo);
 });
 after(() => rmSync(scratch, { recursive: true, force: true }));
@@ -114,7 +117,6 @@ describe("the scaffold", () => {
     assert.equal(made.status, 0, made.stderr);
     assert.equal(made.stderr, "");
     assert.match(made.stdout, new RegExp(`^spike-html-hosting-sdk v${version}: ${repo} made in`));
-    const log = readFileSync(join(scratch, "pnpm.log"), "utf8");
     assert.equal(log, `${realpathSync(site)} install --lockfile-only\n`);
   });
 
@@ -127,7 +129,6 @@ describe("the scaffold", () => {
     );
   });
 
-  // After the first test, which reads the stub pnpm's log as the one scaffold's.
   test("keeps its README within 100 columns for a 95-character repository name", () => {
     // The longest name the README's layout fits: the name stands on a line of its own, as the
     // heading's and the base's, with at most five columns beside it.

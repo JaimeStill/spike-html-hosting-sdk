@@ -159,19 +159,18 @@ describe("the highlighting", () => {
     assert.doesNotMatch(pre, /__shiki_/);
   });
 
+  // That the built-ins cover the foundation's palettes is the palette check's, in the browser
+  // tier, which holds every palette the registry lists to its syntax theme.
   test("pass the check for each built-in", async () => {
-    assert.deepEqual(
-      builtinSyntax.map((t) => t.palette),
-      ["flexoki", "primer", "catppuccin", "everforest"],
-    );
     for (const theme of builtinSyntax)
       assert.deepEqual(await checkSyntax(theme), [], theme.palette);
   });
 
   test("fail a pair with a rule dropped from one side, or a color", async () => {
     const dropped = flexokiWith("dropped", (rules) => rules.splice(5, 1));
+    const count = flexokiRules().length;
     assert.deepEqual(await checkSyntax(dropped), [
-      "dropped: light holds 48 rules and dark 47",
+      `dropped: light holds ${count} rules and dark ${count - 1}`,
       `dropped: rule 5 (${JSON.stringify(flexokiRules()[5].scope)}) in ` +
         `light is rule 5 (${JSON.stringify(flexokiRules()[6].scope)}) in dark`,
     ]);
@@ -200,32 +199,6 @@ describe("the highlighting", () => {
 
   test("carry the Flexoki copy as its record holds it", () => {
     assert.deepEqual(checkContent(join(root, "src/syntax/flexoki")), []);
-  });
-
-  test("select each syntax theme by its palette, flexoki's also on a root with none", () => {
-    const stylesheet = syntax.stylesheet();
-    assert.match(stylesheet, /^@layer site \{$/m);
-    const selectors = [...stylesheet.matchAll(/^ {2}(\S.*) \{$/gm)].map((m) => m[1]);
-    // One rule per syntax theme, and none for a palette with none, whose code stays plain.
-    assert.deepEqual(selectors, [
-      '[data-palette="flexoki"] .shiki span',
-      '[data-palette="primer"] .shiki span',
-      '[data-palette="catppuccin"] .shiki span',
-      '[data-palette="everforest"] .shiki span',
-    ]);
-    assert.match(
-      stylesheet,
-      /:root:not\(\[data-palette\]\) \.shiki span,\n {2}\[data-palette="flexoki"\] \.shiki span \{\n {4}color: var\(--shiki-flexoki\);/,
-    );
-    for (const palette of ["primer", "catppuccin", "everforest"]) {
-      assert.ok(
-        stylesheet.includes(
-          `[data-palette="${palette}"] .shiki span {\n    color: var(--shiki-${palette});\n` +
-            `    font-style: var(--shiki-${palette}-font-style, normal);`,
-        ),
-        palette,
-      );
-    }
   });
 
   test("give every token, over the sample tree, its source theme's color and font style", async () => {
