@@ -42,6 +42,9 @@ importers:
       '@jaimestill/spike-html-apps-foundation':
         specifier: github:JaimeStill/spike-html-apps-foundation#v0.3.0
         version: https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55
+      '@jaimestill/spike-html-apps-noctis':
+        specifier: github:JaimeStill/spike-html-apps-noctis#v0.1.1
+        version: https://codeload.github.com/JaimeStill/spike-html-apps-noctis/tar.gz/f36a325c4010f9e9e4acff01f44fa904d60a7694(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)
       '@jaimestill/spike-html-apps-tooling':
         specifier: github:JaimeStill/spike-html-apps-tooling#v0.3.0
         version: https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072
@@ -131,6 +134,12 @@ packages:
   '@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55':
     resolution: {gitHosted: true, integrity: sha512-bGAtgg4E8Dqi4takgffAWSoUKiRMa8UTZuPy3yy2ZCWcbd8GlU+rhdXM1FwUNe5dPDTqPsbfTHcKxYdP9UjKZA==, tarball: https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55}
     version: 0.3.0
+
+  '@jaimestill/spike-html-apps-noctis@https://codeload.github.com/JaimeStill/spike-html-apps-noctis/tar.gz/f36a325c4010f9e9e4acff01f44fa904d60a7694':
+    resolution: {gitHosted: true, integrity: sha512-LW9AEY2QUPl7EXutVnzCzTSqjXTgFNg08Ne5ZBUJhOaUB5guemUREhaDqU1izLwk3g1lU895w1RiCTbExO1Pog==, tarball: https://codeload.github.com/JaimeStill/spike-html-apps-noctis/tar.gz/f36a325c4010f9e9e4acff01f44fa904d60a7694}
+    version: 0.1.1
+    peerDependencies:
+      '@jaimestill/spike-html-apps-foundation': ^0.3.0
 
   '@jaimestill/spike-html-apps-tooling@https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072':
     resolution: {gitHosted: true, integrity: sha512-uQYlMLWnhEQ14v3q7XACnDfYKYH4TcXkY3yoXL8jSPG/a6xGpE8Ib9hwcVzyOumXMgCBGFdQh4F/HlzoZZ9zFQ==, tarball: https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072}
@@ -1000,6 +1009,10 @@ snapshots:
   '@humanwhocodes/retry@0.4.3': {}
 
   '@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55': {}
+
+  '@jaimestill/spike-html-apps-noctis@https://codeload.github.com/JaimeStill/spike-html-apps-noctis/tar.gz/f36a325c4010f9e9e4acff01f44fa904d60a7694(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)':
+    dependencies:
+      '@jaimestill/spike-html-apps-foundation': https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55
 
   '@jaimestill/spike-html-apps-tooling@https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072': {}
 

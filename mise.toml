@@ -95,9 +95,20 @@ depends = ["preflight"]
 run = "../../../node_modules/.bin/vite build --logLevel warn"
 dir = "{{config_root}}/test/fixtures/site"
 
+# The Noctis fixture, built twice: with its Noctis syntax theme into dist/, and without it, with
+# FIXTURE_SYNTAX=plain, into plain/dist/, the build the palette check fails on.
+[tasks."build:fixture-noctis"]
+description = "Build the Noctis fixture, test/fixtures/noctis/, with Vite under its base: with its Noctis syntax theme into dist/, and without it into plain/dist/"
+depends = ["preflight"]
+run = [
+  "../../../node_modules/.bin/vite build --logLevel warn",
+  "FIXTURE_SYNTAX=plain ../../../node_modules/.bin/vite build --logLevel warn",
+]
+dir = "{{config_root}}/test/fixtures/noctis"
+
 [tasks."test:browser"]
-description = "Run the browser tier on the fixture site's build, served under its base, in the pinned chrome-headless-shell: the shell checks, the crawl, and the screenshots command, its captures under a scratch TMPDIR"
-depends = ["preflight browser", "build:fixture"]
+description = "Run the browser tier on the fixture sites' builds, served under their base, in the pinned chrome-headless-shell: the shell checks, the crawl, and the screenshots command, its captures under a scratch TMPDIR, on the fixture site; the palette check on the Noctis fixture's two builds"
+depends = ["preflight browser", "build:fixture", "build:fixture-noctis"]
 run = "BROWSER_EXECUTABLE=$(mise which chrome-headless-shell) node --test 'test/browser/*.test.ts'"
 
 [tasks."test:scaffold"]
@@ -107,10 +118,10 @@ run = "node --test 'test/scaffold/*.test.ts'"
 
 # The check's steps one after another, each a task: the lint, the type check, the build, the unit
 # tier, the pack check, which packs the build before it, the browser tier, which builds the
-# fixture site before it, and the scaffold test, which runs a scaffolded site's own check on the
+# fixture sites before it, and the scaffold test, which runs a scaffolded site's own check on the
 # build.
 [tasks.check]
-description = "Run every check, in order; reads no network; writes dist/ and the fixture site's dist/"
+description = "Run every check, in order; reads no network; writes dist/ and the fixture sites' builds"
 run = [
   { task = "lint" },
   { task = "types" },

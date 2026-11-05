@@ -12,6 +12,13 @@
 // reading width, centered; and a choice the menu never saves leaves nothing stored, so a reload
 // shows none of it. shell lists them by name, for a site to make a test of each.
 //
+// The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
+// test names, since not every site's index holds code: stepping the theme menu to each palette the
+// foundation's registry lists, in light and in dark, recolors every highlighted token to the color
+// its palette's syntax theme gives it there, read from the token's own --shiki-<palette> variable,
+// which the build wrote from the theme; a registered palette whose code renders plain, with no
+// syntax theme for it or no rule selecting it, fails, named.
+//
 // The crawl runs on a Markdown site: from the index, every link into the site is followed,
 // breadth first, and each page reached loads with a 2xx, its one module script render-blocking,
 // every request under the base and none failed, its main held to a reading width, centered, in a
@@ -275,6 +282,129 @@ export const staysUnsaved: Check = async (page, site) => {
     chosen,
     `the cancelled ${chosen} doesn't persist past a reload`,
   );
+};
+
+/** The foundation registry's color profiles, in registration order, read from its store at the
+ * well-known global key every copy of registry.js shares, as profiles("color") gives them. */
+const PALETTES = `[...(globalThis[Symbol.for("spike-html-apps-foundation.registry")]?.color ?? [])]`;
+
+/** Each highlighted token on the page, in palette's syntax theme: its text, the color it renders,
+ * and the color its --shiki-<palette> variable resolves to where it stands, read through a probe
+ * in its block whose inline color, which outranks every layered rule, is the variable's value, so
+ * light-dark() resolves against the block's color-scheme as the token's own rule would; and the
+ * blocks' plain color, the page's text color a token takes when no rule colors it. A token
+ * carrying no variable for the palette, from a build with no syntax theme for it, is left out. */
+const tokens = (palette: string): string => `(() => {
+  const name = ${JSON.stringify(`--shiki-${palette}`)};
+  const blocks = [...document.querySelectorAll(".shiki")];
+  const probe = document.createElement("span");
+  const resolved = new Map();
+  const found = [];
+  for (const block of blocks) {
+    block.append(probe);
+    for (const span of block.querySelectorAll("span")) {
+      if (span === probe) continue;
+      const style = getComputedStyle(span);
+      const value = style.getPropertyValue(name).trim();
+      if (value === "") continue;
+      if (!resolved.has(value)) {
+        probe.style.color = value;
+        resolved.set(value, getComputedStyle(probe).color);
+      }
+      found.push({ text: span.textContent, color: style.color, want: resolved.get(value) });
+    }
+    probe.remove();
+    resolved.clear();
+  }
+  return {
+    blocks: blocks.length,
+    plain: blocks.length > 0 ? getComputedStyle(blocks[0]).color : null,
+    found,
+  };
+})()`;
+
+/** A theme menu row's radios' values, and its checked one, by its section. */
+const row = (section: string): string => `(() => {
+  const row = document.querySelector('sl-theme-menu [data-section="${section}"]');
+  return {
+    values: [...row.querySelectorAll("input")].map((radio) => radio.value),
+    checked: row.querySelector(":checked").value,
+  };
+})()`;
+
+/** The root's attribute. */
+const attribute = (name: string): string => `document.documentElement.getAttribute("${name}")`;
+
+/**
+ * The page's highlighted code, its .shiki blocks, takes each registered palette's syntax theme:
+ * for each palette profiles("color") lists, the theme menu's color row, which lists the same, is
+ * stepped to it, and its scheme row to light and then to dark; in each, every token carrying the
+ * palette's --shiki-<palette> variable renders the color the variable resolves to there, and some
+ * token's color differs from the page's text color. It fails naming the palette and the scheme
+ * for a registered palette whose code renders plain: no token carries a color for it, as on a
+ * build with no syntax theme for it, or a token keeps the page's text color, as where no rule
+ * selects the palette's. It runs on url, a page with highlighted code, which a site's test gives:
+ * its index, when the index holds some. The menu is cancelled after, so nothing is stored.
+ */
+export const highlightsEachPalette: Check = async (page, url) => {
+  await page.goto(url);
+  const palettes: string[] = await page.evaluate(PALETTES);
+  assert.ok(palettes.length > 0, `${url}: the registry lists a color profile`);
+  await press(page, "t");
+  await until(page, MODAL);
+  const color: { values: string[]; checked: string } = await page.evaluate(row("color"));
+  assert.deepEqual(color.values, palettes, "the menu's color row lists the registry's palettes");
+
+  /** Steps the focused row with l until value is checked, once around it at most. */
+  const stepTo = async (section: string, value: string): Promise<void> => {
+    const { values }: { values: string[] } = await page.evaluate(row(section));
+    for (let i = 0; i < values.length; i++) {
+      const { checked }: { checked: string } = await page.evaluate(row(section));
+      if (checked === value) return;
+      await press(page, "l");
+    }
+    assert.fail(`the ${section} row never reaches ${value}`);
+  };
+
+  // Focus opens on the color row; j moves down to the scheme row, and k back up.
+  for (const palette of palettes) {
+    await stepTo("color", palette);
+    // The palette checked at open, the default before any step, applies with no attribute, as a
+    // root with none does: flexoki's code is checked there too, under :root:not([data-palette]).
+    const applied: string | null = await page.evaluate(attribute("data-palette"));
+    assert.equal(applied ?? color.checked, palette, `${palette} applies`);
+    await press(page, "j");
+    for (const scheme of ["light", "dark"]) {
+      await stepTo("scheme", scheme);
+      assert.equal(await page.evaluate(attribute("data-scheme")), scheme, `${scheme} applies`);
+      const at = `${palette} in ${scheme}`;
+      const shown: {
+        blocks: number;
+        plain: string | null;
+        found: { text: string; color: string; want: string }[];
+      } = await page.evaluate(tokens(palette));
+      assert.ok(shown.blocks > 0, `${url} holds highlighted code, a .shiki block`);
+      assert.ok(
+        shown.found.length > 0,
+        `${at}: ${url}'s code renders plain; no token carries a color for ${palette}`,
+      );
+      for (const { text, color, want } of shown.found) {
+        assert.equal(
+          color,
+          want,
+          `${at}: the token ${JSON.stringify(text)} is ${color}, not ${palette}'s ${want}` +
+            (color === shown.plain ? ", the page's text color: its code renders plain" : ""),
+        );
+      }
+      assert.ok(
+        shown.found.some(({ color }) => color !== shown.plain),
+        `${at}: ${url}'s code renders plain; every token is the page's text color`,
+      );
+    }
+    await press(page, "k");
+  }
+  await press(page, "Escape");
+  await until(page, `!document.querySelector("sl-theme-menu dialog")`);
 };
 
 /** The shell checks, by the name a site's test gives each. */

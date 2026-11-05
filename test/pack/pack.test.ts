@@ -61,6 +61,7 @@ const modules: Record<string, string[]> = {
   "./browser.js": [
     "blocksRender",
     "crawl",
+    "highlightsEachPalette",
     "holdsReadingWidth",
     "opensThemeMenu",
     "requestsUnderBase",
