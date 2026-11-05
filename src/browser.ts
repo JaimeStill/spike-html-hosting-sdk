@@ -425,11 +425,11 @@ async function turnCharacterKeys(page: Page): Promise<{ action: string; off: boo
 /**
  * Asserts the loaded page's keys help, between the docks: ? opens the help dialog, the shell's
  * dialog#help, which the foundation's keys module fills, listing the page's bindings, each once:
- * P, the Pages button's, as the drawer isn't docked; ?, the Help button's; T, the Theme button's;
- * and, where the page has a section tree, H and L, its previous and next section. Turning its
- * character-key switch off marks each of them off, and L then marks no other section and P opens
- * no drawer; turning it on again, L moves to another section. The reader's keys settings are
- * cleared after, so no other check runs with the keys off.
+ * P, the Pages button's, where the shell has one, shown as the drawer isn't docked; ?, the Help
+ * button's; T, the Theme button's; and, where the page has a section tree, H and L, its previous
+ * and next section. Turning its character-key switch off marks each of them off, and L then marks
+ * no other section and P opens no drawer; turning it on again, L moves to another section. The
+ * reader's keys settings are cleared after, so no other check runs with the keys off.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
   await between(page);
@@ -440,6 +440,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     await until(page, HELP).catch(() => assert.fail(`${url}: ? opens the keys help dialog`));
     await until(page, `${HELP_ROWS}.length > 0`);
     const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
+    const pages: boolean = await page.evaluate(`${PAGES}.shown`);
     const rows: { keys: string; action: string; off: boolean }[] = await page.evaluate(HELP_ROWS);
     const sections = [
       { keys: "H", action: "Previous section", off: false },
@@ -448,7 +449,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     assert.deepEqual(
       rows,
       [
-        { keys: "P", action: "Pages", off: false },
+        ...(pages ? [{ keys: "P", action: "Pages", off: false }] : []),
         { keys: "?", action: "Help", off: false },
         { keys: "T", action: "Theme", off: false },
         ...(tree ? sections : []),
