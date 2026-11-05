@@ -13,20 +13,21 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.1.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.2.0 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.1.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.2.0 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
 Pages base is `/<repo>/`, pins the SDK and calls the reusable workflows at the tag it ran from,
 marks each file with the release it came from, and writes `pnpm-lock.yaml` with
 `pnpm install --lockfile-only`, which reads the network. It never runs `git init`. Then, in the
-site, `mise run install` and `mise run check`.
+site, `git init`, since the check's actionlint finds the workflows from the repository's root,
+then `mise run install` and `mise run check`.
 
 The new site's `content/` holds a sample copied tree, this README at a commit of this
 repository, recorded in `content.json`; replace both with the tree the site publishes, each
@@ -38,7 +39,7 @@ any file the pages link that the site doesn't copy.
 A site made by hand installs the package from its tag, beside its peers, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.1.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.2.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   vite eslint
@@ -53,11 +54,12 @@ site reads as they are, each through package.json's `exports`:
 | --- | --- |
 | `./css-module-scripts.js` | `cssModuleScripts()`, the Vite plugin that rewrites each CSS module script the foundation's modules hold to a constructed `CSSStyleSheet` |
 | `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking |
-| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, and its renderer |
+| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, its fenced code highlighted, and its renderer |
+| `./syntax.js` | `SyntaxTheme`, a palette's syntax theme; `builtinSyntax`, one for each of the foundation's palettes; `checkSyntax(theme)`, the syntax theme check; and `createSyntax(themes, langs)`, the highlighter the plugin makes |
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
 | `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, and `crawl(page, site, root)`, the Markdown crawl |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
 | `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
@@ -108,7 +110,8 @@ export default defineConfig({
 each sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone
 doesn't support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one
 empty `<main></main>`, with each Markdown file under `dir`, and fails the build on a relative
-link it can't place; `external` lists files the source holds that aren't copied.
+link it can't place; `external` lists files the source holds that aren't copied. It highlights
+each fenced block at build, as the syntax themes below describe.
 `renderBlocking` fails the build on a page with no entry script, or more than one.
 
 A site's `eslint.config.js` spreads the configuration, which lints the site's code under the
@@ -213,6 +216,87 @@ and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
 repository's highest plain `vX.Y.Z` tag.
 
+### Syntax themes
+
+`markdownPages` highlights each fenced block at build with Shiki, under every syntax theme at once,
+so a page's code takes the colors of the palette and scheme the reader chooses, true to the editor
+theme the palette comes from. A syntax theme names a palette of the foundation's Color profile and
+the theme its code takes in light and in dark, each the name of a theme Shiki bundles or a theme
+object, as a VS Code color theme writes one:
+
+```ts
+interface SyntaxTheme {
+  palette: string;
+  light: BundledTheme | ThemeRegistrationAny;
+  dark: BundledTheme | ThemeRegistrationAny;
+}
+```
+
+`builtinSyntax`, the plugin's default, maps each of the foundation's palettes to its source:
+
+| Palette | Light | Dark |
+| --- | --- | --- |
+| flexoki | Flexoki Light | Flexoki Dark |
+| primer | `github-light-default` | `github-dark-dimmed` |
+| catppuccin | `catppuccin-latte` | `catppuccin-mocha` |
+| everforest | `everforest-light` | `everforest-dark` |
+
+The last three are Shiki's bundled themes. Shiki doesn't bundle Flexoki, so its pair is Flexoki's
+own VS Code themes, copied byte for byte from kepano/flexoki at 24ab91d with its license, which the
+package carries under `dist/syntax/flexoki/`.
+
+A site that registers a palette of its own, as spike-html-apps-noctis registers noctis (its sheet
+after the foundation's page entry, its module after the foundation's registration and before
+`preferences.js`), appends a syntax theme for it:
+
+```ts
+import { builtinSyntax } from "@jaimestill/spike-html-hosting-sdk/syntax.js";
+import type { SyntaxTheme } from "@jaimestill/spike-html-hosting-sdk/syntax.js";
+
+const noctis: SyntaxTheme = {
+  palette: "noctis",
+  light: theme("themes/hibernus.json"),
+  dark: theme("themes/obscuro.json"),
+};
+
+markdownPages({ dir: "content", repository, ref, syntax: [...builtinSyntax, noctis] });
+```
+
+Light and dark merge into one theme whose every color is `light-dark()` of the two, so the pair
+must agree rule for rule. `checkSyntax(theme)` resolves to what keeps a syntax theme from merging,
+one line each naming its palette, and to none when it merges: a palette name that isn't
+lowercase letters, digits, and `-`; a bundled name Shiki doesn't have; a theme with no editor
+foreground; and rules that differ in number, in order of scope, in font style, or in being colored
+in one scheme only. The build refuses a syntax theme that fails it, or a palette two of them name,
+listing each failure. A site's unit tier can hold its own to it:
+
+```ts
+import { checkSyntax } from "@jaimestill/spike-html-hosting-sdk/syntax.js";
+
+test("the Noctis pair merges", async () => {
+  assert.deepEqual(await checkSyntax(noctis), []);
+});
+```
+
+Code falls back to plain, in the page's text color, where there is nothing to highlight it with:
+a fence with no language label, or one Shiki bundles no grammar for, and an indented block, render
+as marked renders them; and a palette with no syntax theme matches no rule, so its code is plain.
+`syntax: []` highlights nothing and emits no stylesheet.
+
+`highlightsEachPalette`, a `Check` outside `shell`, holds a page's highlighted code to its syntax
+themes: it steps the theme menu to each palette the registry lists, in light and then in dark, and
+in each checks that every token renders its palette's color and some token differs from the page's
+text color, failing on a palette whose code renders plain, naming the palette and the scheme. It
+runs on a page with highlighted code, which the site's test gives, as the template's runs it on
+its index:
+
+```ts
+test("each palette's code takes its syntax theme, in light and in dark", async () => {
+  const page = await browser.open("about:blank");
+  await highlightsEachPalette(page, server.origin).finally(() => page.close());
+});
+```
+
 ### The reusable workflows
 
 A site's workflows call the reusable ones from a release tag. Each checks out the calling
@@ -276,8 +360,8 @@ exports alone:
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.
-- The tests: the content check; the shell checks and the crawl; and the capture run, on
-  `scripts/screenshots.config.ts`'s description of the pages from `content.json`.
+- The tests: the content check; the shell checks, the palette check, and the crawl; and the
+  capture run, on `scripts/screenshots.config.ts`'s description of the pages from `content.json`.
 - `.github/workflows/pages.yml` and `ci.yml`, which call the reusable workflows at the tag.
 - `LICENSE` and a `README.md` stub.
 
@@ -300,7 +384,9 @@ entry names any change a site's own files need, such as a template file to take 
   check; the build to `dist/`; the unit tier; the pack check, which installs a pack of the build
   into a scratch site, resolves each export from it, and runs the bin a pnpm install links; the
   browser tier, which builds the fixture site, `test/fixtures/site/`, and runs the shell checks,
-  the crawl, and the capture on it in the pinned chrome-headless-shell; and the scaffold test,
+  the crawl, and the capture on it in the pinned chrome-headless-shell, and the Noctis fixture,
+  `test/fixtures/noctis/`, on which the palette check passes with its syntax theme and fails
+  without it; and the scaffold test,
   which scaffolds a site into a scratch directory, installs it offline on the working tree, and
   runs the site's own check. It reads no network.
 - `mise run currency`: report every pin behind its latest, with the SDK's own bin.

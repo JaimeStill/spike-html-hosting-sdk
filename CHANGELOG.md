@@ -6,6 +6,40 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-05
+
+Highlighted code: each fenced block of a Markdown page takes its palette's syntax theme, in light
+and in dark.
+
+### Added
+
+- `markdownPages` highlights each fenced block at build with Shiki 4.6.0 (and
+  `@shikijs/transformers` 4.6.0), pinned exactly, under every syntax theme at once: each token one
+  class, and a generated stylesheet, `assets/syntax-<hash>.css`, whose rules select each palette's
+  colors under its `data-palette`. Its new `syntax` option takes the syntax themes, `builtinSyntax`
+  by default; a fence with no label or one Shiki bundles no grammar for, an indented block, and a
+  palette with no syntax theme render plain.
+- `./syntax.js`: `SyntaxTheme`, `{ palette, light, dark }`; `builtinSyntax`, flexoki to the Flexoki
+  VS Code themes copied from kepano/flexoki at 24ab91d, primer to `github-light-default` and
+  `github-dark-dimmed`, catppuccin to `catppuccin-latte` and `catppuccin-mocha`, and everforest to
+  `everforest-light` and `everforest-dark`; `checkSyntax(theme)`, what keeps a pair from merging
+  into one `light-dark()` theme; and `createSyntax(themes, langs)`, the highlighter.
+- `./browser.js`: `highlightsEachPalette`, the palette check, outside `shell`: on a page with
+  highlighted code, each palette the registry lists, in light and in dark, renders its syntax
+  theme's colors, failing on one whose code is plain. The template's browser test runs it on the
+  index.
+
+### Changed
+
+- vite 8.3.6, the dev dependency, the peer range's floor, and the template's pin.
+
+### Fixed
+
+- The scaffold's closing line, and the SDK README's scaffold section, name `git init` before
+  `mise run install` and `mise run check`, since the site's actionlint needs a git repository.
+- The template's `README.md` keeps every line within 100 columns for a repository name up to 95
+  characters, the name on lines of its own. A site made from v0.1.0 takes it again.
+
 ## [0.1.0]
 
 The first release: the site SDK and template the spike's GitHub Pages sites consume by tag.
@@ -42,5 +76,6 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/releases/tag/v0.1.0

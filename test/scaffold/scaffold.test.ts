@@ -3,8 +3,9 @@
 // own check. The site is the template's, its package name and its index's title the repository's
 // name, its .gitignore restored, the SDK pinned and both reusable workflows called at this
 // package's version's tag, each file that takes comments carrying its provenance line, and its
-// copied tree the template's byte for byte. It refuses a dir that holds anything, and a usage
-// error exits 2 with the usage.
+// copied tree the template's byte for byte, its README within 100 columns for a long name, and
+// its closing line naming git init before the install and the check. It refuses a dir that holds
+// anything, and a usage error exits 2 with the usage.
 //
 // It reads no network. The bin's one network step, `pnpm install --lockfile-only`, runs a stub pnpm
 // first on PATH, which records its arguments and directory. The site is then installed offline as
@@ -115,6 +116,30 @@ describe("the scaffold", () => {
     assert.match(made.stdout, new RegExp(`^spike-html-hosting-sdk v${version}: ${repo} made in`));
     const log = readFileSync(join(scratch, "pnpm.log"), "utf8");
     assert.equal(log, `${realpathSync(site)} install --lockfile-only\n`);
+  });
+
+  test("closes naming git init, then mise run install and mise run check", () => {
+    assert.ok(
+      made.stdout.endsWith(
+        `Next, in ${realpathSync(site)}: git init, mise run install, then mise run check.\n`,
+      ),
+      made.stdout,
+    );
+  });
+
+  // After the first test, which reads the stub pnpm's log as the one scaffold's.
+  test("keeps its README within 100 columns for a 95-character repository name", () => {
+    // The longest name the README's layout fits: the name stands on a line of its own, as the
+    // heading's and the base's, with at most five columns beside it.
+    const long = `site-${"x".repeat(90)}`;
+    assert.equal(long.length, 95);
+    const { status, stderr } = scaffold(long);
+    assert.equal(status, 0, stderr);
+    const readme = readFileSync(join(scratch, long, "README.md"), "utf8");
+    assert.ok(readme.includes(long), "the README names the repository");
+    for (const [i, line] of readme.split("\n").entries()) {
+      assert.ok(line.length <= 100, `README.md:${i + 1} is ${line.length} columns: ${line}`);
+    }
   });
 
   test("copies the template, its gitignore restored as .gitignore", () => {

@@ -10,7 +10,8 @@
 // since content.json holds it to its source's blob hashes. Then `pnpm install --lockfile-only`
 // writes the site's pnpm-lock.yaml, which mise run install's frozen install reads; it is the one
 // step that reads the network. It never runs git init: the new site's repository is its owner's
-// to make.
+// to make, and its closing line names git init first, since the site's check runs actionlint,
+// which finds the workflows from the repository's root.
 //
 // It is the bin named after the package, unscoped, so `pnpm dlx github:...#vX.Y.Z <repo>` and
 // `npm exec -- github:...#vX.Y.Z <repo>`, which run that bin when a package has several, run it.
@@ -91,4 +92,4 @@ if (lock.status !== 0) {
   );
   process.exit(1);
 }
-process.stdout.write(`Next, in ${dir}: mise run install, then mise run check.\n`);
+process.stdout.write(`Next, in ${dir}: git init, mise run install, then mise run check.\n`);
