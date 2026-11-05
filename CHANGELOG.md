@@ -31,6 +31,10 @@ tables that scroll in named regions. A site made from v0.2.0 takes the template'
 - `./browser.js`: `fitsNarrowWidth`, in `shell`, nothing scrolling sideways at 390px; the crawl
   asserts each page's header against its front matter, its site index against the pages the
   build writes, and no sideways scroll at 390px.
+- `./browser.js`: `definesEveryElement`, in `shell`, and the crawl assert every element on a
+  page whose name holds a hyphen is defined once it loads, failing with the page and the
+  undefined tags, so a shell that fails to load one of the components' modules fails the checks
+  rather than hanging the capture run.
 - The template's shell loads the components' four modules, render-blocking, with `sl-site-nav`
   beside the Theme button; the template pins
   `github:JaimeStill/spike-html-hosting-components#v0.1.0`.

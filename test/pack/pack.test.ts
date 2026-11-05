@@ -70,6 +70,7 @@ const modules: Record<string, string[]> = {
   "./browser.js": [
     "blocksRender",
     "crawl",
+    "definesEveryElement",
     "fitsNarrowWidth",
     "highlightsEachPalette",
     "holdsReadingWidth",

@@ -64,7 +64,7 @@ site reads as they are, each through package.json's `exports`:
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
 | `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth` and `definesEveryElement`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
 | `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
@@ -186,12 +186,13 @@ for (const [name, check] of Object.entries(shell)) {
 ```
 
 The shell checks are the theme menu opened by the Theme button and by T, with its sheet adopted;
-each facet stepped and set on the root; the one render-blocking module script; every request
-under the base, and none failed; main's centered reading width at 1600px; nothing scrolling
+each facet stepped and set on the root; the one render-blocking module script; every custom
+element on the page defined, so a module the shell fails to load fails naming its element's tag;
+every request under the base, and none failed; main's centered reading width at 1600px; nothing scrolling
 sideways at 390px; and the menu left unsaved. A Markdown site also crawls its pages,
 `crawl(page, server.origin, root)`, which resolves to the pages and links it reached and the pages
 no link reaches. Each page it reaches loads with a 2xx, its one module script render-blocking,
-every request under the base and none failed, main at its centered reading width at 1600px,
+every custom element on it defined, every request under the base and none failed, main at its centered reading width at 1600px,
 nothing scrolling sideways at 390px, and its title its source's front matter name or first h1.
 Its main opens with its page header, whose dt and dd pairs are the source's front matter keys and
 values, in order, with no front matter table left; its site index links every page the build

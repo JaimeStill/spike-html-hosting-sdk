@@ -7,8 +7,10 @@
 // Theme button and T open the theme menu, whose CSS module script the build rewrote, so its sheet
 // is adopted with no stylesheet fetched for it; stepping the color, space, and type rows each to a
 // profile past its default, which the full entry registers, sets that facet's attribute on the
-// root; the page's one module script, its entry, is render-blocking; every request the page makes
-// resolves under the base, and none fails; in a 1600px viewport the site's layout holds main to a
+// root; the page's one module script, its entry, is render-blocking; once it loads, every element
+// on the page whose name holds a hyphen, a custom element's, is defined, so a shell that fails to
+// load a component's module fails naming its tag, where the capture run's wait for each element's
+// definition would hang; every request the page makes resolves under the base, and none fails; in a 1600px viewport the site's layout holds main to a
 // reading width, centered; in a 390px one nothing scrolls sideways; and a choice the menu never
 // saves leaves nothing stored, so a reload shows none of it. shell lists them by name, for a site
 // to make a test of each.
@@ -22,7 +24,7 @@
 //
 // The crawl runs on a Markdown site: from the index, every link into the site is followed,
 // breadth first, and each page reached loads with a 2xx, its one module script render-blocking,
-// every request under the base and none failed, its main held to a reading width, centered, in a
+// every custom element on it defined, every request under the base and none failed, its main held to a reading width, centered, in a
 // 1600px viewport, nothing scrolling sideways in a 390px one, and its title its source's front
 // matter name, or, for a source with no name, its first h1's text. Each page's main opens with its
 // page header, whose dl holds a dt and a dd per front matter key, in source order, each key and
@@ -147,6 +149,17 @@ function assertLoaded(url: string, site: string, { requests, responses, failures
  * render-blocking, is [true]. */
 const BLOCKING = `[...document.querySelectorAll('script[type="module"]')]
   .map((script) => script.blocking.contains("render"))`;
+
+/** The loaded page's custom elements no definition upgraded: each tag whose name holds a hyphen,
+ * once, that customElements doesn't define, as the capture run's RENDERED wait reads the page. */
+const UNDEFINED = `[...new Set([...document.querySelectorAll("*")].map((element) => element.localName))]
+  .filter((name) => name.includes("-") && !customElements.get(name))`;
+
+/** Asserts every custom element on the loaded page is defined, naming the tags that aren't. */
+async function assertDefined(page: Page, url: string): Promise<void> {
+  const tags: string[] = await page.evaluate(UNDEFINED);
+  assert.deepEqual(tags, [], `${url}: every custom element is defined; ${tags.join(", ")} is not`);
+}
 
 /** Sets a viewport wider than any reading width, so main's cap shows. */
 const wide = (page: Page): Promise<unknown> =>
@@ -273,6 +286,13 @@ export const stepsEachFacet: Check = async (page, site) => {
 export const blocksRender: Check = async (page, site) => {
   await page.goto(site);
   assert.deepEqual(await page.evaluate(BLOCKING), [true], `${site}: its entry blocks render`);
+};
+
+/** Once the page loads, every element on it whose name holds a hyphen is defined: a shell that
+ * fails to load a component's module leaves its element undefined, named. */
+export const definesEveryElement: Check = async (page, site) => {
+  await page.goto(site);
+  await assertDefined(page, site);
 };
 
 /** Every request the page makes, the menu's chunk on its first open included, resolves under the
@@ -448,6 +468,7 @@ export const shell: Record<string, Check> = {
   "the Theme button and T open the theme menu, its sheet adopted": opensThemeMenu,
   "stepping each facet sets its attribute on the root": stepsEachFacet,
   "the page's one module script is render-blocking": blocksRender,
+  "every custom element on the page is defined": definesEveryElement,
   "every request resolves under the base, and none fails": requestsUnderBase,
   "main holds its centered reading width at 1600px": holdsReadingWidth,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
@@ -505,6 +526,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await page.goto(url);
     assertLoaded(url, site, take());
     assert.deepEqual(await page.evaluate(BLOCKING), [true], `${url}: its entry blocks render`);
+    await assertDefined(page, url);
     const path = url.slice(site.length);
     assert.ok(pages.has(path), `${url} is a copied file's page`);
     const data = pages.get(path) ?? null;
