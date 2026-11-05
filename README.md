@@ -363,6 +363,8 @@ exports alone:
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.
+- `pnpm-workspace.yaml`, the site's pnpm settings, no workspace packages: `minimumReleaseAge: 0`,
+  pnpm's wait of a day before it installs a release turned off, as the SDK's own is.
 - The tests: the content check; the shell checks, the palette check, and the crawl; and the
   capture run, on `scripts/screenshots.config.ts`'s description of the pages from `content.json`.
 - `.github/workflows/pages.yml` and `ci.yml`, which call the reusable workflows at the tag.

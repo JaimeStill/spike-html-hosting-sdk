@@ -33,6 +33,11 @@ and in dark.
 ### Changed
 
 - vite 8.3.6, the dev dependency, the peer range's floor, and the template's pin.
+- `minimumReleaseAge: 0` in a new `pnpm-workspace.yaml`, the SDK's and the template's, which
+  turns off pnpm's default wait of a day before it installs a release: currency moves each pin to
+  its latest release, whose notes are read before the bump lands, and with the wait on, a frozen
+  install of a lockfile pinning a release under a day old fails, as CI's did on vite 8.3.6. A site
+  made from v0.1.0 takes the template's file.
 
 ### Fixed
 
