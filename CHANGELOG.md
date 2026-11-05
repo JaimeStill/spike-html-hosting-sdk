@@ -37,8 +37,8 @@ again, and one that imported `frontMatterTable` takes
   asserts each page's header against its front matter, its site index, in its Pages drawer,
   against the pages the build writes, and no sideways scroll at 390px.
 - `./browser.js`: `keepsNavigationWords`, in `shell`, and the crawl assert, at 390px, a pixel
-  below and at each dock, and at 1400px, that no navigation link's word breaks across lines and
-  every docked side column is at least 16rem wide. The crawl asserts each page's Pages button
+  below and at each dock, and at 1400px, that no navigation link's word breaks across lines, but
+  a hyphenated compound after its hyphen, and every docked side column is at least 16rem wide. The crawl asserts each page's Pages button
   hidden at 1600px, and at 390px opening the drawer by its click and by P, its `aria-expanded`
   following the drawer.
 - `./browser.js`: `definesEveryElement`, in `shell`, and the crawl assert every element on a

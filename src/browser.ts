@@ -226,7 +226,10 @@ const NAVIGATION = [
  * nav's in its shadow root, the section tree's, and the site index's, that renders on more than
  * one line, broken inside it, by its range's client rects, a word on one line being one line's
  * rects; and each docked side column's width, the section tree's and the drawer's in their
- * docked state. A link not rendered, in the bar or the closed drawer, has no rects. */
+ * docked state. A word is a run of neither space nor hyphen, with the hyphen that ends it: a
+ * hyphenated compound, as "artifact-keyed", may wrap after its hyphen, where the line breaking
+ * the components keep (overflow-wrap and word-break normal) wraps it, but no word breaks
+ * elsewhere. A link not rendered, in the bar or the closed drawer, has no rects. */
 const NAVIGATION_LAYOUT = `(() => {
   const links = [
     ...[...document.querySelectorAll("sl-site-nav")]
@@ -237,7 +240,7 @@ const NAVIGATION_LAYOUT = `(() => {
   for (const link of links) {
     const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
     for (let text = walker.nextNode(); text; text = walker.nextNode()) {
-      for (const word of text.data.matchAll(/\\S+/g)) {
+      for (const word of text.data.matchAll(/[^\\s-]+-?/g)) {
         const range = document.createRange();
         range.setStart(text, word.index);
         range.setEnd(text, word.index + word[0].length);

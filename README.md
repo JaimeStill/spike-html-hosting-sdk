@@ -190,8 +190,8 @@ each facet stepped and set on the root; the one render-blocking module script; e
 element on the page defined, so a module the shell fails to load fails naming its element's tag;
 every request under the base, and none failed; main's centered reading width at 1600px; nothing
 scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of the
-layout's docks, and at 1400px, with no navigation link's word broken across lines and every docked
-side column at least 16rem wide; and the menu left unsaved. A Markdown site also crawls its pages,
+layout's docks, and at 1400px, with no navigation link's word broken across lines (a hyphenated
+compound may wrap after its hyphen) and every docked side column at least 16rem wide; and the menu left unsaved. A Markdown site also crawls its pages,
 `crawl(page, server.origin, root)`, which resolves to the pages and links it reached and the pages
 no link reaches. Each page it reaches loads with a 2xx, its one module script render-blocking,
 every custom element on it defined, every request under the base and none failed, main at its
