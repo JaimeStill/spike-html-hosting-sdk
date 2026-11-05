@@ -2,9 +2,10 @@
 // grammar for, and one with no label, render plain, as marked renders them with no highlighter;
 // the check passes each built-in and fails a pair with a rule dropped from one side, and one with
 // a color dropped, and the highlighter refuses an entry that fails it, naming the palette; the
-// Flexoki copy is held to its record; and, over the template's sample tree, every highlighted
-// character's color and font style, in each palette and scheme, as the generated stylesheet's
-// classes give it, is the one its source theme gives it alone.
+// Flexoki copy is held to its record, and the flexoki built-in carries the foundation's green, not
+// Flexoki's; and, over the template's sample tree, every highlighted character's color and font
+// style, in each palette and scheme, as the generated stylesheet's classes give it, is the one its
+// source theme gives it alone, flexoki's the copy with the foundation's green.
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -33,6 +34,23 @@ const source: Source = {
 
 /** The template's sample tree, its one file. */
 const sample = readFileSync(join(root, "template/content/README.md"), "utf8");
+
+/** Flexoki's green steps the copy uses, and the foundation's hue-142° departure from each. */
+const flexokiGreen = [
+  ["#66800b", "#408739"],
+  ["#879a39", "#61a25a"],
+] as const;
+
+/** A theme of the Flexoki copy, read from disk, with the foundation's green and every other color
+ * Flexoki's own: the reference the flexoki built-in is held to. */
+const flexokiSource = (scheme: "Light" | "Dark"): ThemeRegistrationAny => {
+  let text = readFileSync(
+    join(root, `src/syntax/flexoki/content/vscode/Flexoki-${scheme}-color-theme.json`),
+    "utf8",
+  );
+  for (const [step, green] of flexokiGreen) text = text.replace(new RegExp(step, "gi"), green);
+  return JSON.parse(text) as ThemeRegistrationAny;
+};
 
 /** The built-in syntax theme of the palette. */
 const builtin = (palette: string): SyntaxTheme => {
@@ -201,6 +219,15 @@ describe("the highlighting", () => {
     assert.deepEqual(checkContent(join(root, "src/syntax/flexoki")), []);
   });
 
+  test("give the flexoki built-in the foundation's green, at hue 142°, not Flexoki's", () => {
+    const { light, dark } = builtin("flexoki");
+    const text = JSON.stringify([light, dark]).toLowerCase();
+    for (const [step, green] of flexokiGreen) {
+      assert.ok(!text.includes(step), `carries ${step}`);
+      assert.ok(text.includes(green), `lacks ${green}`);
+    }
+  });
+
   test("give every token, over the sample tree, its source theme's color and font style", async () => {
     const highlighted = fences(sample).filter((f) => f.lang.toLowerCase() in bundledLanguages);
     assert.ok(highlighted.length >= 10, `the sample tree holds ${highlighted.length} fences`);
@@ -212,7 +239,8 @@ describe("the highlighting", () => {
     ];
     assert.equal(blocks.length, highlighted.length);
 
-    // Each source theme alone, by its own highlighter on the same engine.
+    // Each source theme alone, by its own highlighter on the same engine: flexoki's the copy
+    // read from disk with the foundation's green, so the built-in's green is held to it.
     const sources: {
       palette: string;
       scheme: "light" | "dark";
@@ -220,8 +248,8 @@ describe("the highlighting", () => {
     }[] = builtinSyntax.flatMap(({ palette, light, dark }) =>
       (
         [
-          ["light", light],
-          ["dark", dark],
+          ["light", palette === "flexoki" ? flexokiSource("Light") : light],
+          ["dark", palette === "flexoki" ? flexokiSource("Dark") : dark],
         ] as const
       ).map(([scheme, theme]) => ({
         palette,

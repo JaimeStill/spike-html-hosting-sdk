@@ -5,7 +5,8 @@
 // foundation's palettes to its source: primer to GitHub's light default and dark dimmed,
 // catppuccin to Latte and Mocha, and everforest to its light and dark, as Shiki bundles them; and
 // flexoki, which Shiki doesn't bundle, to a byte-for-byte copy of Flexoki's own VS Code themes,
-// syntax/flexoki/content/, held to its record, syntax/flexoki/content.json. A site appends its own
+// syntax/flexoki/content/, held to its record, syntax/flexoki/content.json, its green the
+// foundation's departure from Flexoki's, at hue 142°, applied as it loads. A site appends its own
 // entry to builtinSyntax for a palette it registers.
 //
 // checkSyntax holds a pair to what the merge needs: light and dark hold the same rule list, in
@@ -46,10 +47,28 @@ export interface SyntaxTheme {
   dark: BundledTheme | ThemeRegistrationAny;
 }
 
-/** A theme object of the copied Flexoki themes, by its path from the copy's root. */
+/** The foundation's departure from Flexoki's green, each green step of the copy to its value at
+ * hue 142°, as spike-html-apps-foundation (v0.3.0): src/profiles/color/flexoki.css gives them:
+ * "Green departs from Flexoki's green-600 / green-400, #66800b / #879a39, which sit at OKLCH hues
+ * ~123° and ~119°, close to yellow: each keeps its lightness and chroma (L 0.559, C 0.134 light;
+ * L 0.651, C 0.124 dark), rotated to hue 142°, sRGB green's." The copy uses no other green step.
+ * Literal values, not var(--green), so the code takes the same green the page does and the
+ * fidelity test compares colors exactly. */
+const flexokiGreen: readonly (readonly [RegExp, string])[] = [
+  [/#66800b/gi, "#408739"], // green-600 at hue 142°
+  [/#879a39/gi, "#61a25a"], // green-400 at hue 142°
+];
+
+/** A theme object of the copied Flexoki themes, by its path from the copy's root, with the
+ * foundation's green: every use of a green step, in tokenColors and colors, an alpha suffix kept,
+ * rewritten in the text before it parses, so the copy stays byte for byte and no object Shiki
+ * loads is changed. */
 const flexokiTheme = (path: string): ThemeRegistrationAny =>
   JSON.parse(
-    readFileSync(new URL(`./syntax/flexoki/content/${path}`, import.meta.url), "utf8"),
+    flexokiGreen.reduce(
+      (text, [step, green]) => text.replace(step, green),
+      readFileSync(new URL(`./syntax/flexoki/content/${path}`, import.meta.url), "utf8"),
+    ),
   ) as ThemeRegistrationAny;
 
 /** The SDK's syntax themes, one for each of the foundation's palettes. */

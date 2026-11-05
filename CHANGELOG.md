@@ -20,7 +20,8 @@ and in dark.
   by default; a fence with no label or one Shiki bundles no grammar for, an indented block, and a
   palette with no syntax theme render plain.
 - `./syntax.js`: `SyntaxTheme`, `{ palette, light, dark }`; `builtinSyntax`, flexoki to the Flexoki
-  VS Code themes copied from kepano/flexoki at 24ab91d, primer to `github-light-default` and
+  VS Code themes copied from kepano/flexoki at 24ab91d, their green the foundation's hue-142°
+  departure from Flexoki's (`#408739` light, `#61a25a` dark), primer to `github-light-default` and
   `github-dark-dimmed`, catppuccin to `catppuccin-latte` and `catppuccin-mocha`, and everforest to
   `everforest-light` and `everforest-dark`; `checkSyntax(theme)`, what keeps a pair from merging
   into one `light-dark()` theme; and `createSyntax(themes, langs)`, the highlighter.

@@ -243,7 +243,10 @@ interface SyntaxTheme {
 
 The last three are Shiki's bundled themes. Shiki doesn't bundle Flexoki, so its pair is Flexoki's
 own VS Code themes, copied byte for byte from kepano/flexoki at 24ab91d with its license, which the
-package carries under `dist/syntax/flexoki/`.
+package carries under `dist/syntax/flexoki/`. Its green follows the foundation's departure from
+Flexoki's, rotated to hue 142°: the pair takes green-600, `#66800B`, as `#408739` and green-400,
+`#879A39`, as `#61a25a`, the foundation's `--green`, as it loads the copy; every other color is
+Flexoki's own.
 
 A site that registers a palette of its own, as spike-html-apps-noctis registers noctis (its sheet
 after the foundation's page entry, its module after the foundation's registration and before
