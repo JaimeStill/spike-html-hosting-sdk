@@ -1,3 +1,3 @@
-# A page no link reaches
+# A page no body link reaches
 
-The crawl reaches it from content.json's record once the links run out.
+No page's body links it; the site index on every page does.

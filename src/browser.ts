@@ -9,7 +9,7 @@
 // profile past its default, which the full entry registers, sets that facet's attribute on the
 // root; the page's one module script, its entry, is render-blocking; every request the page makes
 // resolves under the base, and none fails; in a 1600px viewport the site's layout holds main to a
-// reading width, centered; and a choice the menu never saves leaves nothing stored, so a reload
+// reading width, centered; in a 390px one nothing scrolls sideways; and a choice the menu never saves leaves nothing stored, so a reload
 // shows none of it. shell lists them by name, for a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
@@ -22,13 +22,15 @@
 // The crawl runs on a Markdown site: from the index, every link into the site is followed,
 // breadth first, and each page reached loads with a 2xx, its one module script render-blocking,
 // every request under the base and none failed, its main held to a reading width, centered, in a
-// 1600px viewport, and its title its source's front matter name, or, for a source with no name,
-// its first h1's text. A page whose source has front matter opens its main with the front
-// matter's table, one row per key in source order, each key and value as the source holds it,
-// and shows no key's line as body text; a page whose source has none shows no table. Every
-// in-site link reaches a built page, and an element with its fragment's id when it has one. The
-// crawl checks a page for every file content.json records, and no other: a page no link from the
-// index reaches is crawled from once the links run out, and returned, for the test's diagnostics.
+// 1600px viewport, nothing scrolling sideways in a 390px one, and its title its source's front
+// matter name, or, for a source with no name, its first h1's text. Each page's main opens with its
+// page header, whose dl holds a dt and a dd per front matter key, in source order, each key and
+// value as the source holds it, and none for a source with no front matter; no front matter
+// table remains, and no key's line shows as body text. Each page's site index links every page
+// the build writes, each once, and no other. Every in-site link reaches a built page, and an
+// element with its fragment's id when it has one. The crawl checks a page for every file
+// content.json records, and no other: a page no link from the index reaches is crawled from once
+// the links run out, and returned, for the test's diagnostics.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -45,7 +47,7 @@ import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import { parse } from "yaml";
 
 import type { Content } from "./content.ts";
-import { pageUrl } from "./markdown-pages.ts";
+import { frontMatterText, pageUrl } from "./markdown-pages.ts";
 
 /** A check on a fresh page of the site whose URL under the base, as served() gives it, is site. */
 export type Check = (page: Page, site: string) => Promise<void>;
@@ -154,6 +156,34 @@ const wide = (page: Page): Promise<unknown> =>
     mobile: false,
   });
 
+/** Sets a phone's viewport, 390px wide, where no page may scroll sideways. */
+const narrow = (page: Page): Promise<unknown> =>
+  page.cdp("Emulation.setDeviceMetricsOverride", {
+    width: 390,
+    height: 844,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+
+/** Asserts the loaded page, in a 390px viewport, is no wider than it: nothing scrolls sideways,
+ * naming the widest elements that overflow it. */
+async function assertNoSidewaysScroll(page: Page, url: string): Promise<void> {
+  await narrow(page);
+  const { scroll, viewport, wide }: { scroll: number; viewport: number; wide: string[] } =
+    await page.evaluate(`(() => {
+      const viewport = document.documentElement.clientWidth;
+      const wide = [...document.body.querySelectorAll("*")]
+        .filter((element) => element.getBoundingClientRect().right > viewport + 0.5)
+        .map((element) => element.tagName.toLowerCase() +
+          (element.className ? "." + String(element.className).split(" ").join(".") : ""));
+      return { scroll: document.documentElement.scrollWidth, viewport, wide: wide.slice(0, 5) };
+    })()`);
+  assert.ok(
+    scroll <= viewport,
+    `${url}: ${scroll}px wide in a ${viewport}px viewport, past it: ${wide.join(", ")}`,
+  );
+}
+
 /** Asserts the loaded page's main is held to a reading width, centered, well inside the
  * viewport. */
 async function assertReadingWidth(page: Page, url: string): Promise<void> {
@@ -260,6 +290,12 @@ export const holdsReadingWidth: Check = async (page, site) => {
   await wide(page);
   await page.goto(site);
   await assertReadingWidth(page, site);
+};
+
+/** In a 390px viewport, nothing on the page scrolls sideways. */
+export const fitsNarrowWidth: Check = async (page, site) => {
+  await page.goto(site);
+  await assertNoSidewaysScroll(page, site);
 };
 
 /** A choice the menu never saves, stepped and then cancelled, stores nothing, and a reload shows
@@ -414,20 +450,8 @@ export const shell: Record<string, Check> = {
   "the page's one module script is render-blocking": blocksRender,
   "every request resolves under the base, and none fails": requestsUnderBase,
   "main holds its centered reading width at 1600px": holdsReadingWidth,
+  "nothing scrolls sideways at 390px": fitsNarrowWidth,
   "the theme menu stays unsaved: no stored choice persists": staysUnsaved,
-};
-
-/** A front matter value's text, as its cell's textContent: a sequence's or a mapping's nested
- * table its items', or its keys' and values', text run together, and null nothing. */
-const text = (value: unknown): string => {
-  if (value === null || value === undefined) return "";
-  if (Array.isArray(value)) return value.map(text).join("");
-  if (typeof value === "object") {
-    return Object.entries(value)
-      .map(([key, item]) => key + text(item))
-      .join("");
-  }
-  return String(value);
 };
 
 /** Each copied file's page of the site at root, by its path under the base (x.md at x.html,
@@ -487,44 +511,56 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     const shown: {
       title: string;
       h1: string | null;
+      headers: number;
+      fields: string[][] | null;
       tables: number;
-      rows: string[][] | null;
+      index: string[];
       body: string[];
     } = await page.evaluate(`(() => {
-      const table = document.querySelector("main > table.front-matter:first-child");
+      const header = document.querySelector("main > sl-page-header:first-child");
       return {
         title: document.title,
         h1: document.querySelector("main h1")?.textContent.trim() ?? null,
+        headers: document.querySelectorAll("sl-page-header").length,
+        fields: header && [...header.querySelectorAll(":scope > dl > :is(dt, dd)")].map(
+          (field) => [field.localName, field.textContent]),
         tables: document.querySelectorAll("table.front-matter").length,
-        rows: table && [...table.tBodies[0].rows].map((row) =>
-          [...row.cells].map((cell) => cell.textContent)),
+        index: [...document.querySelectorAll("sl-site-index a[href]")].map((a) => a.href),
         body: [...document.querySelectorAll("main p, main :is(h1, h2, h3, h4, h5, h6)")]
-          .filter((element) => !element.closest("table.front-matter"))
+          .filter((element) => !element.closest("sl-page-header"))
           .map((element) => element.textContent),
       };
     })()`);
     await assertReadingWidth(page, url);
+    await assertNoSidewaysScroll(page, url);
+    await wide(page);
     const name = data?.name;
     assert.equal(shown.title, typeof name === "string" ? name : shown.h1, `${url}'s title`);
     assert.ok(shown.title, `${url} has a title`);
-    if (data === null || Object.keys(data).length === 0) {
-      assert.equal(shown.tables, 0, `${url}: no front matter, no table`);
-    } else {
-      assert.equal(shown.tables, 1, `${url}: one front matter table`);
+    assert.equal(shown.headers, 1, `${url}: one page header`);
+    assert.equal(shown.tables, 0, `${url}: no front matter table remains`);
+    const entries = Object.entries(data ?? {});
+    assert.deepEqual(
+      shown.fields,
+      entries.flatMap(([key, value]) => [
+        ["dt", key],
+        ["dd", frontMatterText(value)],
+      ]),
+      `${url}: its main opens with its page header, a dt and a dd per front matter key in order`,
+    );
+    for (const [key, value] of entries) {
+      const line = `${key}: ${frontMatterText(value)}`;
       assert.deepEqual(
-        shown.rows,
-        Object.entries(data).map(([key, value]) => [key, text(value)]),
-        `${url}: its main opens with its front matter's table, a row per key in order`,
+        shown.body.filter((body) => body.includes(line)),
+        [],
+        `${url}: ${line} isn't body text`,
       );
-      for (const [key, value] of Object.entries(data)) {
-        const line = `${key}: ${text(value)}`;
-        assert.deepEqual(
-          shown.body.filter((body) => body.includes(line)),
-          [],
-          `${url}: ${line} isn't body text`,
-        );
-      }
     }
+    assert.deepEqual(
+      shown.index.toSorted(),
+      [...pages.keys()].map((path) => `${site}${path}`).sort(),
+      `${url}: its site index links every page the build writes, each once`,
+    );
 
     const { ids, hrefs }: { ids: string[]; hrefs: string[] } = await page.evaluate(`({
       ids: [...document.querySelectorAll("[id]")].map((element) => element.id),

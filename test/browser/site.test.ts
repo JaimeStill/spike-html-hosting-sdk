@@ -1,7 +1,8 @@
 // The SDK's browser checks at their seam, on the fixture site's build, as a site's browser tier
 // runs them: test/fixtures/site/dist/, served under its base by served(), in the pinned
 // chrome-headless-shell. Each shell check is a test on a fresh page of the index, and the crawl
-// reaches every page content.json records, the one no link reaches among them.
+// reaches every page content.json records, the one no body link reaches among them, through the
+// site index every page carries.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -44,13 +45,13 @@ describe("the fixture site under its base", () => {
     });
   }
 
-  test("the crawl reaches every recorded page, the unlinked one restarted from", async (t) => {
+  test("the crawl reaches every recorded page, the one no body links through the index", async (t) => {
     const page = await browser.open("about:blank");
     try {
       const crawled = await crawl(page, server.origin, root);
       t.diagnostic(`${crawled.pages} pages, ${crawled.links} in-site links`);
       assert.equal(crawled.pages, 4);
-      assert.deepEqual(crawled.unreachable, ["orphan.html"]);
+      assert.deepEqual(crawled.unreachable, []);
     } finally {
       await page.close();
     }

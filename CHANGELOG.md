@@ -6,6 +6,36 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+### Added
+
+- `markdownPages` writes each page's data as the light-DOM markup of
+  spike-html-hosting-components v0.1.0's elements: an `sl-page-header` at the top of main, a dl
+  of the front matter's keys and values in source order, escaped; an `sl-section-tree` of the
+  page's h2s and their h3s, by the ids the headings carry, in a `div.section-tree` after main; and
+  an `sl-site-index` of every page the site builds, nested by directory, in a `div.site-index`
+  after that. `render()` returns the page's `headings`; `pageHeader`, `sectionTree`, `siteIndex`,
+  and `frontMatterText` are exported.
+- Each body table is wrapped in a `div.table-region`, `role="region"`, named by its header cells,
+  with `tabindex="0"`, which scrolls it sideways.
+- `site.css` lays the tree and the index beside main from 70rem, main centered between them, and
+  below main in a narrower viewport; styles the table regions; and paints the components'
+  `aria-current` marks.
+- `./browser.js`: `fitsNarrowWidth`, in `shell`, nothing scrolling sideways at 390px; the crawl
+  asserts each page's header against its front matter, its site index against the pages the
+  build writes, and no sideways scroll at 390px.
+- The template's shell loads the components' four modules, render-blocking, with `sl-site-nav`
+  beside the Theme button; the template pins
+  `github:JaimeStill/spike-html-hosting-components#v0.1.0`.
+
+### Changed
+
+- `renderBlocking` groups every module a page's entry loads statically into one chunk, `index`,
+  so each page keeps one entry tag however rolldown would split the modules every page shares.
+
+### Removed
+
+- `frontMatterTable` and the front matter's `table.front-matter`: the page header shows it.
+
 ## [0.2.0] - 2026-11-05
 
 Highlighted code: each fenced block of a Markdown page takes its palette's syntax theme, in light

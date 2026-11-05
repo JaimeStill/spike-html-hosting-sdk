@@ -1,9 +1,20 @@
 /*
- * The site's page layout, which the foundation leaves to the page: the body held off the
- * viewport's edges, main a centered reading column, and room around the header, the front matter
- * table, and code blocks. Its own layer, site, declared after the foundation's layers, which the
- * page entry declares first, so it wins over them. Every length is a --space-* token, so the
- * reader's Space profile changes it. Minimal: the site's layout until the components restyle it.
+ * The site's page layout, which the foundation and the components leave to the page: the body
+ * held off the viewport's edges, main a centered reading column, and room around the header, the
+ * page header, tables, and code blocks. Its own layer, site, declared after the foundation's
+ * layers, which the page entry declares first, so it wins over them. Every length is a --space-*
+ * token, so the reader's Space profile changes it, but main's reading width, in ch.
+ *
+ * The renderer (markdown-pages.ts) writes main, then the section tree's div, when the page has
+ * one, then the site index's. In a viewport wide enough for three columns, the body is a grid of
+ * main's reading width between two equal columns, so main stays centered whether or not the page
+ * has a tree: the site index in the start column and the section tree in the end one, each held in
+ * view as the page scrolls and scrolling itself when taller than the viewport. In a narrower one
+ * the body is a single column and both follow main. Every grid track and the reading column may
+ * shrink to nothing, and each table scrolls sideways in its region, so no page is wider than a
+ * 390px viewport. The marks the components set on the light-DOM links, below a shadow sheet's
+ * reach, are painted here: the section in view and the page on screen in a heavier weight. The
+ * shell's header holds the site nav and the Theme button in a row.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -16,14 +27,78 @@
     padding-block: var(--space-s);
   }
 
+  /* The shell's header: the site nav and the Theme button in one row, wrapping when narrow. */
+  body > header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+
   main {
     max-inline-size: 80ch;
     margin-inline: auto;
     padding-block-end: var(--space-2xl);
+    overflow-wrap: break-word;
   }
 
-  table.front-matter {
+  .section-tree,
+  .site-index {
+    padding-block-end: var(--space-l);
+  }
+
+  /* Wide enough for main's 80ch and the two columns beside it. */
+  @media (width >= 70rem) {
+    body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr);
+      column-gap: var(--space-l);
+      align-items: start;
+    }
+
+    body > header {
+      grid-column: 1 / -1;
+    }
+
+    main {
+      grid-area: 2 / 2;
+      inline-size: 100%;
+    }
+
+    .section-tree,
+    .site-index {
+      position: sticky;
+      inset-block-start: var(--space-m);
+      max-block-size: calc(100svh - 2 * var(--space-m));
+      overflow-y: auto;
+    }
+
+    .site-index {
+      grid-area: 2 / 1;
+    }
+
+    .section-tree {
+      grid-area: 2 / 3;
+    }
+  }
+
+  sl-page-header:has(dt) {
     margin-block-end: var(--space-l);
+  }
+
+  sl-section-tree a[aria-current],
+  sl-site-index a[aria-current="page"] {
+    font-weight: 600;
+  }
+
+  .table-region {
+    margin-block: var(--space-m);
+    overflow-x: auto;
+  }
+
+  .table-region > table {
+    margin-block: 0;
   }
 
   pre {
