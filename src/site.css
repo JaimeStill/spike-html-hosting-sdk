@@ -15,17 +15,18 @@
  *   16rem, so main stays centered whether or not the page has a tree: the site index's drawer,
  *   docked, in the start column and the section tree in the end one, each held in view as the page
  *   scrolls and scrolling itself when taller than the viewport.
- * - 70rem to 86rem: the same grid with only the end column held to 16rem: the section tree docked
- *   there, the start column empty, so main is as near centered as fits; the site index is the
- *   Pages drawer, a modal the Pages button opens, taking no space in the page.
+ * - 70rem to 86rem: the same grid, its side columns equal, so main is centered, on a page with no
+ *   section tree; on a page with one, only the end column is held to 16rem, the tree docked there,
+ *   the start column empty, so main is as near centered as fits. The site index is the Pages
+ *   drawer, a modal the Pages button opens, taking no space in the page.
  * - Narrower than 70rem: one column. The section tree is a bar stuck to the top of the viewport,
  *   its wrapper display: contents so the bar's containing block is the body, and the page's flow
  *   places it before main; the site index is still the drawer.
  * Main's track and its reading width may shrink, and each table scrolls sideways in its region,
  * so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
  * below a shadow sheet's reach, are painted here: the section in view and the page on screen in a
- * heavier weight. The shell's header holds the site nav, then the Pages button and the Theme
- * button, in a row.
+ * heavier weight. The shell's header holds the site nav, then the Pages, Help, and Theme buttons,
+ * in a row.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -38,8 +39,8 @@
     padding-block: var(--space-s);
   }
 
-  /* The shell's header: the site nav at the start, the Pages and Theme buttons at the end, in one
-     row, wrapping when narrow. */
+  /* The shell's header: the site nav at the start, the Pages, Help, and Theme buttons at the end,
+     in one row, wrapping when narrow. */
   body > header {
     display: flex;
     flex-wrap: wrap;
@@ -79,11 +80,12 @@
     }
   }
 
-  /* Wide enough for main's 80ch and the section tree's 16rem column beside it. */
+  /* Wide enough for main's 80ch and the section tree's 16rem column beside it. Main is centered
+     between equal side columns; only a page with a tree holds the end column to 16rem, below. */
   @media (width >= 70rem) {
     body {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr);
       column-gap: var(--space-l);
       align-items: start;
     }
@@ -109,6 +111,13 @@
     /* The drawer, closed, takes no space here; docked, its column is the start one. */
     .site-index {
       grid-area: 2 / 1;
+    }
+  }
+
+  /* Below the drawer's dock, the tree's column alone is held to 16rem, on a page that has one. */
+  @media (70rem <= width < 86rem) {
+    body:has(> .section-tree) {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr);
     }
   }
 

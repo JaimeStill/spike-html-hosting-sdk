@@ -30,7 +30,7 @@ again, and one that imported `frontMatterTable` takes
   with `tabindex="0"`, which scrolls it sideways.
 - `site.css` docks each side column only where it fits at 16rem beside main's 80ch: from 86rem
   three columns, the docked drawer, main centered, and the tree; from 70rem the tree beside main
-  and the index in the drawer; narrower, one column, the tree a bar stuck to the top of the
+  on a page that has one, main centered on a page that hasn't, and the index in the drawer; narrower, one column, the tree a bar stuck to the top of the
   viewport, its wrapper `display: contents`. It shows the Pages button only below 86rem, once the
   drawer is defined; styles the table regions; and paints the components' `aria-current` marks.
 - `./browser.js`: `fitsNarrowWidth`, in `shell`, nothing scrolling sideways at 390px; the crawl
@@ -41,13 +41,23 @@ again, and one that imported `frontMatterTable` takes
   a hyphenated compound after its hyphen, and every docked side column is at least 16rem wide.
   The crawl asserts each page's Pages button hidden at 1600px, and at 390px opening the drawer by
   its click and by P, its `aria-expanded` following the drawer.
+- `./browser.js`: `holdsBetweenDocks`, in `shell`, and the crawl assert at 1200px, between the
+  docks, main centered on a page with no section tree and the tree docked beside main on a page
+  with one.
+- `./browser.js`: `opensKeysHelp`, in `shell`, and the crawl assert at 1200px that ? opens the
+  shell's keys help dialog, listing the page's bindings, P, ?, T, and the tree's H and L, and that
+  its character-key switch turns them off, L moving to no section and P opening no drawer, and on
+  again.
 - `./browser.js`: `definesEveryElement`, in `shell`, and the crawl assert every element on a
   page whose name holds a hyphen is defined once it loads, failing with the page and the
   undefined tags, so a shell that fails to load one of the components' modules fails the checks
   rather than hanging the capture run.
 - The template's shell loads the components' five modules, render-blocking, with `sl-site-nav` at
   the header's start, then the Pages button, bound to P, which opens the Pages drawer below its
-  dock, and the Theme button; the template pins
+  dock, the Help button, bound to ?, which opens the keys help dialog the foundation's keys module
+  fills with the page's bindings and its character-key switch, and the Theme button; the Pages and
+  Help buttons carry `aria-label`s, so the dialog names them without their key hints' brackets. A
+  site made from v0.2.0 adds the dialog and the Help button to its own shell. The template pins
   `github:JaimeStill/spike-html-hosting-components#v0.2.0`, as the SDK's dev dependency does.
 
 ### Changed

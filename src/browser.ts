@@ -11,8 +11,12 @@
 // on the page whose name holds a hyphen, a custom element's, is defined, so a shell that fails to
 // load a component's module fails naming its tag, where the capture run's wait for each element's
 // definition would hang; every request the page makes resolves under the base, and none fails; in
-// a 1600px viewport the site's layout holds main to a reading width, centered; in a 390px one
-// nothing scrolls sideways; at a phone's width, a px below and at each of the layout's docks
+// a 1600px viewport the site's layout holds main to a reading width, centered; at 1200px, between
+// the layout's docks, main is centered on a page with no section tree, and the tree is docked
+// beside it on a page with one; ? opens the shell's keys help dialog, which the foundation's keys
+// module fills with the page's bindings, P, ?, T, and the tree's H and L, and its character-key
+// switch turns them off, so L moves to no section and P opens no drawer, and on again; in a 390px
+// viewport nothing scrolls sideways; at a phone's width, a px below and at each of the layout's docks
 // (markdown-pages.ts's docks), and at 1400px, no navigation link's word breaks across lines and
 // every docked side column is at least 16rem wide; and a choice the menu never saves leaves
 // nothing stored, so a reload shows none of it. shell lists them by name, for a site to make a
@@ -29,11 +33,12 @@
 // breadth first, and each page reached loads with a 2xx, its one module script render-blocking,
 // every custom element on it defined, every request under the base and none failed, its main
 // held to a reading width, centered, in a 1600px viewport, nothing scrolling sideways in a 390px
-// one, its navigation laid out as the shell check has it at the same widths, and its title its
-// source's front matter name, or, for a source with no name, its first h1's text. Its Pages button
-// is hidden at 1600px, where the site index is docked, and at 390px is shown and opens the Pages
-// drawer as a modal by its click and by P, its aria-expanded true while the drawer is open and
-// false once Escape closes it. Each page's main opens with its page header, whose dl holds a dt
+// one, its navigation laid out as the shell check has it at the same widths, its layout between
+// the docks and its keys help as the shell checks have them, and its title its source's front
+// matter name, or, for a source with no name, its first h1's text. Its Pages button is hidden at
+// 1600px, where the site index is docked, and at 390px is shown and opens the Pages drawer as a
+// modal by its click and by P, its aria-expanded true while the drawer is open and false once
+// Escape closes it. Each page's main opens with its page header, whose dl holds a dt
 // and a dd per front matter key, in source order, each key and value as the source holds it, and
 // none for a source with no front matter; no front matter table remains, and no key's line shows
 // as body text. Each page's site index, in its Pages drawer, links every page the build writes,
@@ -73,7 +78,11 @@ async function click(page: Page, selector: string): Promise<void> {
   }
 }
 
-/** Presses a key as a US keyboard types it: keyDown, with its text for a letter, then keyUp. */
+/** The protocol's Shift modifier bit. */
+const SHIFT = 8;
+
+/** Presses a key as a US keyboard types it: keyDown, with its text for a letter or ?, then keyUp;
+ * ? is Shift and the slash key. */
 async function press(page: Page, key: string): Promise<void> {
   const letter = /^[a-z]$/.test(key);
   const event = letter
@@ -82,11 +91,13 @@ async function press(page: Page, key: string): Promise<void> {
         code: `Key${key.toUpperCase()}`,
         windowsVirtualKeyCode: key.toUpperCase().charCodeAt(0),
       }
-    : { key, code: key, windowsVirtualKeyCode: key === "Escape" ? 27 : 0 };
+    : key === "?"
+      ? { key, code: "Slash", modifiers: SHIFT, windowsVirtualKeyCode: 191 }
+      : { key, code: key, windowsVirtualKeyCode: key === "Escape" ? 27 : 0 };
   await page.cdp("Input.dispatchKeyEvent", {
     type: "keyDown",
     ...event,
-    ...(letter ? { text: key } : {}),
+    ...(letter || key === "?" ? { text: key } : {}),
   });
   await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...event });
 }
@@ -339,6 +350,148 @@ async function assertReadingWidth(page: Page, url: string): Promise<void> {
   assert.ok(Math.abs(left - right) <= 1, `${url}: main is centered, ${left}px and ${right}px`);
 }
 
+/** A width between the layout's docks, 75rem: the section tree docked and the site index the
+ * Pages drawer, so only a page's tree may take a side column. */
+const BETWEEN = 1200;
+
+/** Sets a viewport between the layout's docks, BETWEEN wide. */
+const between = (page: Page): Promise<unknown> =>
+  page.cdp("Emulation.setDeviceMetricsOverride", {
+    width: BETWEEN,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+
+/** Asserts the loaded page between the docks: with no section tree, main centered, as no side
+ * column is docked; with one, the tree docked beside main, at its end. */
+async function assertBetweenDocks(page: Page, url: string): Promise<void> {
+  assert.ok(px(docks.tree) <= BETWEEN && BETWEEN < px(docks.index), "BETWEEN is between the docks");
+  await between(page);
+  await page.evaluate(SETTLED);
+  const shown: { tree: boolean; beside: boolean; left: number; right: number } =
+    await page.evaluate(`(() => {
+      const main = document.querySelector("main").getBoundingClientRect();
+      const tree = document.querySelector("sl-section-tree");
+      return {
+        tree: !!tree,
+        beside: !!tree && tree.getBoundingClientRect().left >= main.right,
+        left: main.left,
+        right: document.documentElement.clientWidth - main.right,
+      };
+    })()`);
+  if (shown.tree) {
+    assert.ok(shown.beside, `${url}: at ${BETWEEN}px the section tree is docked beside main`);
+  } else {
+    assert.ok(
+      Math.abs(shown.left - shown.right) <= 1,
+      `${url}: at ${BETWEEN}px, with no section tree, main is centered, ` +
+        `${shown.left}px and ${shown.right}px`,
+    );
+  }
+}
+
+/** The keys help dialog is open, modal. */
+const HELP = `!!document.querySelector("dialog#help")?.matches(":modal")`;
+
+/** The keys help dialog's bindings table: each row's keys, as its kbd elements read, and its
+ * action, the row's button's label; and which rows are marked off. */
+const HELP_ROWS = `[...document.querySelectorAll("#help [data-keys-table] tbody tr:not([data-keys-fixed])")]
+  .map((tr) => ({
+    keys: [...tr.cells[0].querySelectorAll("kbd")].map((kbd) => kbd.textContent).join(" "),
+    action: tr.cells[1].textContent.trim(),
+    off: tr.hasAttribute("data-keys-off"),
+  }))`;
+
+/** The href of the section tree's link marked as the section in view, or null. */
+const MARKED = `document.querySelector("sl-section-tree a[aria-current]")?.getAttribute("href") ?? null`;
+
+/** The localStorage key the foundation's keys.js stores the reader's keys settings under. */
+const KEYS_SETTINGS = "spike-html-apps-foundation.keys";
+
+/** Turns the keys help dialog's character-key switch, through its checkbox, with the dialog open
+ * by the Help button, then closes it with Escape; resolves to the dialog's rows after the turn. */
+async function turnCharacterKeys(page: Page): Promise<{ action: string; off: boolean }[]> {
+  await click(page, "button[commandfor=help][command=show-modal]");
+  await until(page, HELP);
+  await until(page, `!!document.querySelector("#help [data-keys-settings]")`);
+  await click(page, `#help [data-keys-settings] input[name=enabled]`);
+  const rows: { action: string; off: boolean }[] = await page.evaluate(HELP_ROWS);
+  await press(page, "Escape");
+  await until(page, `!${HELP}`);
+  return rows;
+}
+
+/**
+ * Asserts the loaded page's keys help, between the docks: ? opens the help dialog, the shell's
+ * dialog#help, which the foundation's keys module fills, listing the page's bindings, each once:
+ * P, the Pages button's, as the drawer isn't docked; ?, the Help button's; T, the Theme button's;
+ * and, where the page has a section tree, H and L, its previous and next section. Turning its
+ * character-key switch off marks each of them off, and L then marks no other section and P opens
+ * no drawer; turning it on again, L moves to another section. The reader's keys settings are
+ * cleared after, so no other check runs with the keys off.
+ */
+async function assertKeysHelp(page: Page, url: string): Promise<void> {
+  await between(page);
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  await page.evaluate(SETTLED);
+  try {
+    await press(page, "?");
+    await until(page, HELP).catch(() => assert.fail(`${url}: ? opens the keys help dialog`));
+    await until(page, `${HELP_ROWS}.length > 0`);
+    const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
+    const rows: { keys: string; action: string; off: boolean }[] = await page.evaluate(HELP_ROWS);
+    const sections = [
+      { keys: "H", action: "Previous section", off: false },
+      { keys: "L", action: "Next section", off: false },
+    ];
+    assert.deepEqual(
+      rows,
+      [
+        { keys: "P", action: "Pages", off: false },
+        { keys: "?", action: "Help", off: false },
+        { keys: "T", action: "Theme", off: false },
+        ...(tree ? sections : []),
+      ],
+      `${url}: the keys help lists the page's bindings`,
+    );
+    await press(page, "Escape");
+    await until(page, `!${HELP}`);
+
+    const off = await turnCharacterKeys(page);
+    assert.ok(
+      off.every((row) => row.off),
+      `${url}: the switch turns every character key off; ${off.filter((row) => !row.off).map((row) => row.action)} isn't`,
+    );
+    const marked: string | null = await page.evaluate(MARKED);
+    await press(page, "l");
+    await press(page, "p");
+    await page.evaluate(SETTLED);
+    assert.equal(await page.evaluate(MARKED), marked, `${url}: with the keys off, L doesn't move`);
+    assert.equal(
+      await page.evaluate(`${PAGES}.modal`),
+      false,
+      `${url}: with the keys off, P doesn't open the drawer`,
+    );
+
+    const on = await turnCharacterKeys(page);
+    assert.ok(
+      on.every((row) => !row.off),
+      `${url}: the switch turns the character keys on again`,
+    );
+    if (tree) {
+      await press(page, "l");
+      assert.notEqual(
+        await page.evaluate(MARKED),
+        marked,
+        `${url}: with the keys on again, L moves to another section`,
+      );
+    }
+  } finally {
+    await page.evaluate(`localStorage.removeItem(${JSON.stringify(KEYS_SETTINGS)})`);
+  }
+}
+
 /** The Theme button and T each open the theme menu, which adopts its sheet, the constructed
  * CSSStyleSheet the build made of its CSS module script, onto the document, in its layer; no
  * stylesheet is fetched for it, and its chunk loads on the first open. */
@@ -440,6 +593,20 @@ export const holdsReadingWidth: Check = async (page, site) => {
   await wide(page);
   await page.goto(site);
   await assertReadingWidth(page, site);
+};
+
+/** Between the layout's docks, main is centered on a page with no section tree, and the tree is
+ * docked beside it on a page with one. */
+export const holdsBetweenDocks: Check = async (page, site) => {
+  await page.goto(site);
+  await assertBetweenDocks(page, site);
+};
+
+/** ? opens the keys help dialog, listing the page's bindings, whose character-key switch turns
+ * them off and on again. */
+export const opensKeysHelp: Check = async (page, site) => {
+  await page.goto(site);
+  await assertKeysHelp(page, site);
 };
 
 /** In a 390px viewport, nothing on the page scrolls sideways. */
@@ -608,6 +775,9 @@ export const shell: Record<string, Check> = {
   "every custom element on the page is defined": definesEveryElement,
   "every request resolves under the base, and none fails": requestsUnderBase,
   "main holds its centered reading width at 1600px": holdsReadingWidth,
+  "between the docks main is centered with no section tree, beside a docked one": holdsBetweenDocks,
+  "? opens the keys help, listing the page's bindings, and its switch turns them off":
+    opensKeysHelp,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
   "no navigation link breaks inside a word, and each docked column is 16rem or wider":
     keepsNavigationWords,
@@ -698,6 +868,8 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await assertNoSidewaysScroll(page, url);
     await assertPagesButton(page, url);
     await assertNavigation(page, url);
+    await assertBetweenDocks(page, url);
+    await assertKeysHelp(page, url);
     await wide(page);
     const name = data?.name;
     assert.equal(shown.title, typeof name === "string" ? name : shown.h1, `${url}'s title`);

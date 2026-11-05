@@ -10,7 +10,9 @@
 // the layout's docks, on the guide's page, which has both side columns, site.css lays each out as
 // its component's dock attribute has it: a docked tree beside main at its end and a bar above it
 // otherwise, a docked drawer beside main at its start with the Pages button hidden, and the button
-// shown otherwise.
+// shown otherwise. With a sheet that holds the end column to 16rem on a page with no section tree,
+// the between-docks check fails on the index, naming main's off-center margins; with the shell's
+// keys help dialog removed, the keys help check fails, naming the page.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -20,7 +22,14 @@ import { launch, SETTLED } from "@jaimestill/spike-html-apps-tooling/browser.js"
 import type { Browser, Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";
 
-import { crawl, definesEveryElement, keepsNavigationWords, shell } from "../../src/browser.ts";
+import {
+  crawl,
+  definesEveryElement,
+  holdsBetweenDocks,
+  keepsNavigationWords,
+  opensKeysHelp,
+  shell,
+} from "../../src/browser.ts";
 import { docks } from "../../src/markdown-pages.ts";
 import { served } from "../../src/served.ts";
 
@@ -226,4 +235,42 @@ describe("the fixture site's layout at its docks", () => {
       }
     });
   }
+});
+
+describe("the fixture site with its index off-center between the docks", () => {
+  test("the end column held to 16rem with no section tree fails the between-docks check", async () => {
+    // Slice 6b's grid, the tree's 16rem end column on every page.
+    const page = await withSheet(
+      "@media (width >= 70rem) { body { grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr) !important; } }",
+    );
+    try {
+      await assert.rejects(holdsBetweenDocks(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: at 1200px, with no section tree, main is centered, [\d.]+px and [\d.]+px/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with no keys help dialog", () => {
+  test("the keys help check fails, naming the page", async () => {
+    // The shell's dialog#help removed before any of the page's scripts run.
+    const page = await browser.open("about:blank");
+    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
+      source: `document.addEventListener("DOMContentLoaded", () => document.querySelector("dialog#help")?.remove());`,
+    });
+    try {
+      await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
+        assert.match(error.message, /\/fixture-site\/: \? opens the keys help dialog/);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
 });

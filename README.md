@@ -64,7 +64,7 @@ site reads as they are, each through package.json's `exports`:
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
 | `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, and `keepsNavigationWords`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, `keepsNavigationWords`, `holdsBetweenDocks`, and `opensKeysHelp`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
 | `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
@@ -188,15 +188,18 @@ for (const [name, check] of Object.entries(shell)) {
 The shell checks are the theme menu opened by the Theme button and by T, with its sheet adopted;
 each facet stepped and set on the root; the one render-blocking module script; every custom
 element on the page defined, so a module the shell fails to load fails naming its element's tag;
-every request under the base, and none failed; main's centered reading width at 1600px; nothing
-scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of the
+every request under the base, and none failed; main's centered reading width at 1600px; at
+1200px, between the docks, main centered on a page with no section tree and the tree docked beside
+it on a page with one; ? opening the shell's keys help dialog, which lists the page's bindings, P,
+?, T, and the tree's H and L, and whose character-key switch turns them off, so L and P do nothing,
+and on again; nothing scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of the
 layout's docks, and at 1400px, with no navigation link's word broken across lines (a hyphenated
 compound may wrap after its hyphen) and every docked side column at least 16rem wide; and the
 menu left unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which
 resolves to the pages and links it reached and the pages no link reaches. Each page it reaches loads with a 2xx, its one module script render-blocking,
 every custom element on it defined, every request under the base and none failed, main at its
-centered reading width at 1600px, nothing scrolling sideways at 390px, its navigation laid out as
-the shell check has it, and its title its source's front matter name or first h1. Its main opens
+centered reading width at 1600px, nothing scrolling sideways at 390px, its navigation, its layout
+between the docks, and its keys help as the shell checks have them, and its title its source's front matter name or first h1. Its main opens
 with its page header, whose dt and dd pairs are the source's front matter keys and values, in
 order, with no front matter table left; its site index, in its Pages drawer, links every page the
 build writes, each once, and no other; its Pages button is hidden at 1600px and at 390px opens the
@@ -298,17 +301,18 @@ beside main's 80ch, measured in the foundation's default type and regular space 
   main's reading width in the middle, centered with or without a tree, and the section tree in the
   end column; the tree and the index each stay in view as the page scrolls, and scroll themselves
   when taller than the viewport.
-- 70rem to 86rem, the same grid with only the end column held to 16rem,
-  `minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the section tree docked in the end column,
-  main as near centered as fits, and the site index in the Pages drawer, a modal dialog the Pages
-  button opens.
+- 70rem to 86rem, on a page with no section tree, `minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr)`:
+  main centered between equal columns. On a page with one, `body:has(> .section-tree)`, only the
+  end column is held to 16rem, `minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the section
+  tree docked in the end column and main as near centered as fits. Either way the site index is in
+  the Pages drawer, a modal dialog the Pages button opens.
 - Narrower than 70rem, one column: the section tree is a bar stuck to the top of the viewport,
   holding its reading progress and its Previous and Next buttons, its wrapper
   `display: contents` so the bar sticks within the whole page; the site index stays in the drawer.
 
 Main's track may shrink, main breaks long words while the components' navigation never breaks
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
-shell's header is a wrapping row of the site nav, then the Pages button and the Theme button.
+shell's header is a wrapping row of the site nav, then the Pages, Help, and Theme buttons.
 
 The shell wires the components in: it loads their five modules, `site-nav.js`, `site-index.js`,
 `page-header.js`, `section-tree.js`, and `drawer.js`, render-blocking like the foundation's, from
@@ -319,6 +323,17 @@ shows it only below 86rem, the drawer's dock, and only once the drawer is define
 script it stays hidden and the index renders as the page's own; and the page's script opens the
 drawer on its click and keeps its `aria-expanded` in step with the drawer's `open` and `close`
 events. The drawer, open, is a modal: Escape or its Close button closes it.
+
+A site's shell carries the keys help dialog, as the foundation's keys module gives it: a
+`dialog#help` holding a `[data-keys-list]`, which keys.js fills as it opens with every binding the
+page has, the Pages button's P, the Help button's ?, the Theme button's T, and the section tree's
+H and L, and with the reader's settings, among them the switch that turns the character keys off
+(WCAG 2.1.4). The Help button, between Pages and Theme, opens it by the invoker command
+`show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
+its element's `aria-label`, else by its text less each `kbd`, so the Pages and Help buttons, whose
+bracketed key hints leave a bracket pair in that text, carry `aria-label`s, the names they had
+with their hints `aria-hidden`. The SDK's template and fixture shells carry it; a site made from an
+earlier template, or the root's own shell, adds it.
 
 ```html
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
@@ -337,11 +352,25 @@ events. The drawer, open, is a modal: Escape or its Close button closes it.
 …
 <header>
   <sl-site-nav></sl-site-nav>
-  <button type="button" class="pages-opener" aria-controls="pages" aria-haspopup="dialog" aria-expanded="false" data-keys="p">
+  <button type="button" class="pages-opener" aria-controls="pages" aria-haspopup="dialog" aria-expanded="false" aria-label="Pages" data-keys="p">
     Pages <span aria-hidden="true">[<kbd>P</kbd>]</span>
+  </button>
+  <button type="button" commandfor="help" command="show-modal" aria-label="Help" data-keys="?">
+    Help <span aria-hidden="true">[<kbd>?</kbd>]</span>
   </button>
   <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
 </header>
+<main></main>
+<sl-theme-menu id="theme"></sl-theme-menu>
+<dialog id="help" aria-labelledby="help-title">
+  <h2 id="help-title">Keyboard shortcuts</h2>
+  <div data-keys-list></div>
+  <footer>
+    <button type="button" commandfor="help" command="close" aria-label="Close" data-keys="?">
+      Close <span aria-hidden="true">[<kbd>?</kbd>]</span>
+    </button>
+  </footer>
+</dialog>
 ```
 
 `cssModuleScripts` parses every module under `node_modules/@jaimestill/`, the components' among
@@ -494,8 +523,8 @@ exports alone:
   `scripts/preflight.sh`, which runs before node_modules exists, so the site holds its copy.
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`,
   the shell, with the foundation's full page entry, its preferences and keys modules, the
-  components' five modules, `sl-site-nav`, the Pages button on P, and the Theme button on T in
-  the header, the script that opens the Pages drawer, and the SDK's stylesheet; the sample copied tree, `content/` and `content.json`.
+  components' five modules, `sl-site-nav`, the Pages button on P, the Help button on ?, and the
+  Theme button on T in the header, the keys help dialog, the script that opens the Pages drawer, and the SDK's stylesheet; the sample copied tree, `content/` and `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.
