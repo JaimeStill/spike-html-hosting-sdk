@@ -16,11 +16,11 @@
 // beside it on a page with one; ? opens the shell's keys help dialog, which the foundation's keys
 // module fills with the page's bindings, P, ?, T, and the tree's H and L, and its character-key
 // switch turns them off, so L moves to no section and P opens no drawer, and on again; in a 390px
-// viewport nothing scrolls sideways; at a phone's width, a px below and at each of the layout's docks
-// (markdown-pages.ts's docks), and at 1400px, no navigation link's word breaks across lines and
-// every docked side column is at least 16rem wide; and a choice the menu never saves leaves
-// nothing stored, so a reload shows none of it. shell lists them by name, for a site to make a
-// test of each.
+// viewport nothing scrolls sideways; at a phone's width, a px below and at each of the layout's
+// docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word breaks across lines
+// and every docked side column is at least 16rem wide; and a choice the menu never saves leaves
+// nothing stored, so a reload shows none of it. shell lists them by name, for a site to make a test
+// of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the theme menu to each palette the
@@ -403,6 +403,9 @@ const HELP_ROWS = `[...document.querySelectorAll("#help [data-keys-table] tbody 
     off: tr.hasAttribute("data-keys-off"),
   }))`;
 
+/** A row of the keys help dialog's bindings table, as HELP_ROWS reads it. */
+type HelpRow = { keys: string; action: string; off: boolean };
+
 /** The href of the section tree's link marked as the section in view, or null. */
 const MARKED = `document.querySelector("sl-section-tree a[aria-current]")?.getAttribute("href") ?? null`;
 
@@ -411,12 +414,12 @@ const KEYS_SETTINGS = "spike-html-apps-foundation.keys";
 
 /** Turns the keys help dialog's character-key switch, through its checkbox, with the dialog open
  * by the Help button, then closes it with Escape; resolves to the dialog's rows after the turn. */
-async function turnCharacterKeys(page: Page): Promise<{ action: string; off: boolean }[]> {
+async function turnCharacterKeys(page: Page): Promise<HelpRow[]> {
   await click(page, "button[commandfor=help][command=show-modal]");
   await until(page, HELP);
   await until(page, `!!document.querySelector("#help [data-keys-settings]")`);
   await click(page, `#help [data-keys-settings] input[name=enabled]`);
-  const rows: { action: string; off: boolean }[] = await page.evaluate(HELP_ROWS);
+  const rows: HelpRow[] = await page.evaluate(HELP_ROWS);
   await press(page, "Escape");
   await until(page, `!${HELP}`);
   return rows;
@@ -441,7 +444,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     await until(page, `${HELP_ROWS}.length > 0`);
     const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
     const pages: boolean = await page.evaluate(`${PAGES}.shown`);
-    const rows: { keys: string; action: string; off: boolean }[] = await page.evaluate(HELP_ROWS);
+    const rows: HelpRow[] = await page.evaluate(HELP_ROWS);
     const sections = [
       { keys: "H", action: "Previous section", off: false },
       { keys: "L", action: "Next section", off: false },
@@ -459,10 +462,10 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     await press(page, "Escape");
     await until(page, `!${HELP}`);
 
-    const off = await turnCharacterKeys(page);
-    assert.ok(
-      off.every((row) => row.off),
-      `${url}: the switch turns every character key off; ${off.filter((row) => !row.off).map((row) => row.action)} isn't`,
+    assert.deepEqual(
+      await turnCharacterKeys(page),
+      rows.map((row) => ({ ...row, off: true })),
+      `${url}: the switch turns every character key off`,
     );
     const marked: string | null = await page.evaluate(MARKED);
     await press(page, "l");
@@ -475,13 +478,14 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       `${url}: with the keys off, P doesn't open the drawer`,
     );
 
-    const on = await turnCharacterKeys(page);
-    assert.ok(
-      on.every((row) => !row.off),
+    assert.deepEqual(
+      await turnCharacterKeys(page),
+      rows,
       `${url}: the switch turns the character keys on again`,
     );
     if (tree) {
       await press(page, "l");
+      await page.evaluate(SETTLED);
       assert.notEqual(
         await page.evaluate(MARKED),
         marked,

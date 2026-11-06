@@ -11,8 +11,10 @@
 // its component's dock attribute has it: a docked tree beside main at its end and a bar above it
 // otherwise, a docked drawer beside main at its start with the Pages button hidden, and the button
 // shown otherwise. With a sheet that holds the end column to 16rem on a page with no section tree,
-// the between-docks check fails on the index, naming main's off-center margins; with the shell's
-// keys help dialog removed, the keys help check fails, naming the page.
+// the between-docks check fails on the index, naming main's off-center margins, and with the
+// guide's tree moved to the start column it fails naming the tree. With the shell's keys help
+// dialog removed, the Theme button's binding removed, or a handler that opens the Pages drawer on
+// P whatever the switch says, the keys help check fails, naming the page and the assertion.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -255,6 +257,24 @@ describe("the fixture site with its index off-center between the docks", () => {
       await page.close();
     }
   });
+
+  test("the section tree out of its end column fails the between-docks check", async () => {
+    // The guide's docked tree moved to the start column, before main.
+    const page = await withSheet(
+      "@media (width >= 70rem) { body > .section-tree { grid-column: 1 !important; } }",
+    );
+    try {
+      await assert.rejects(holdsBetweenDocks(page, `${server.origin}guide/`), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/guide\/: at 1200px the section tree is docked beside main/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("the fixture site with no keys help dialog", () => {
@@ -267,6 +287,43 @@ describe("the fixture site with no keys help dialog", () => {
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
         assert.match(error.message, /\/fixture-site\/: \? opens the keys help dialog/);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with its keys help wrong", () => {
+  test("a binding missing from the dialog fails the keys help check", async () => {
+    // The Theme button's T binding removed before keys.js reads the page's bindings.
+    const page = await browser.open("about:blank");
+    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
+      source: `document.addEventListener("DOMContentLoaded", () => document.querySelector("[commandfor=theme][data-keys]")?.removeAttribute("data-keys"));`,
+    });
+    try {
+      await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
+        assert.match(error.message, /\/fixture-site\/: the keys help lists the page's bindings/);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("P opening the drawer with the keys off fails the keys help check", async () => {
+    // A handler that opens the Pages drawer on P whatever the reader's switch says.
+    const page = await browser.open("about:blank");
+    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
+      source: `addEventListener("keydown", (event) => { if (event.key === "p") document.querySelector("sl-drawer#pages")?.show(); });`,
+    });
+    try {
+      await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: with the keys off, P doesn't open the drawer/,
+        );
         return true;
       });
     } finally {
