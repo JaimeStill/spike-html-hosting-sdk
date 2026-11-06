@@ -1,27 +1,39 @@
 // The Markdown pages: a Vite plugin that renders every Markdown file of one directory, copied
-// byte for byte from a source repository at a pinned commit, into an HTML page of the build. Each
+// byte for byte from source repositories at pinned commits, into an HTML page of the build. Each
 // page is a virtual .html input: the plugin loads it, the site's shell filled with the file's
 // title and its rendered body, and Vite's own HTML build transforms it as it does a page on disk,
 // naming its output by its path under the root. Nothing is written to the working tree.
 //
+// The directory holds one copied tree, from one source, at its root, or several, each from its own
+// source at its own commit, in a directory named for its source repository (content.ts's treeDir:
+// the name with a leading dot dropped), so standards-lab/.github's profile/README.md builds to
+// github/profile/ and standards-lab/org's briefs/orientation.md to org/briefs/orientation.html. The
+// trees are one site: one site index lists every page of every tree, and each page's links are
+// placed against its own tree's source.
+//
 // A file's page is its path with .md turned to .html, except a README.md, which is its
-// directory's index.html, so the copied tree's root README.md is the site's index. A file's
+// directory's index.html, so a single tree's root README.md is the site's index. A file's
 // leading YAML front matter, when it has one, is parsed and never rendered as body text: the page
 // shows it in its header, an sl-page-header of spike-html-hosting-components, as a dl of a dt for
 // each key and a dd for its value, in source order, escaped. The page's title is the front
 // matter's name, or, with no name, the text of the file's first h1; a file with neither fails the
 // build, naming it. Headings carry GitHub's ids (marked-gfm-heading-id), so a fragment written
-// against the source on GitHub resolves here. A relative link to a copied file is rewritten to
-// that file's page, relative to the linking page, its fragment kept; one to a file listed as
-// external, present in the source but not copied, to the file's blob on GitHub at the pinned
-// commit; any other relative link fails the build, naming the page and the link, so no link is
-// left to break. A fragment alone, or a URL with a scheme, passes through.
+// against the source on GitHub resolves here. A relative link to a file copied in the linking
+// file's tree is rewritten to that file's page, relative to the linking page, its fragment kept;
+// one to a file listed as external, present in the source but not copied, to the file's blob on
+// GitHub at the tree's pinned commit; any other relative link, one leaving its tree among them,
+// fails the build, naming the page and the link, so no link is left to break. A fragment alone,
+// or a URL with a scheme, passes through. A GitHub alert, a blockquote opening [!NOTE], [!TIP],
+// [!IMPORTANT], [!WARNING], or [!CAUTION], renders as marked-alert renders it, as GitHub does: a
+// div.markdown-alert.markdown-alert-<kind>, its first line a p.markdown-alert-title of the kind's
+// octicon, an svg aria-hidden, and its kind as visible text, "Important", which site.css draws as
+// a callout.
 //
 // Each page's data is written as the light-DOM markup the components slot, so with no script it
 // renders as the page's own: the page header, at the top of main, where GitHub shows the front
 // matter; the section tree, an sl-section-tree of the page's h2s, each with its h3s in a nested
 // list, linked by the ids the headings carry, in a div.section-tree before main, or none for a
-// page with neither; and the site index, an sl-site-index of every page the site builds, nested by
+// page with neither; and the site index, an sl-site-index of every copied page, nested by
 // directory, each linked relative to the page, as its body's links are, in the Pages drawer, an
 // sl-drawer labeled "Pages" with the id the shell's Pages button controls, after main. The tree
 // comes before main so that, as the bar it is in a narrow viewport, it sticks to the top of the
@@ -42,7 +54,15 @@
 // stylesheet of the highlighted tokens' classes, which every page links, after the shell's own.
 //
 // Nothing here names a site or a source: a site imports the plugin and configures it with its
-// content directory, its source repository's URL and pinned commit, and its external files.
+// content directory and, for its one tree, or for each of several, the source repository's URL,
+// its pinned commit, and its external files.
+//
+// The pages are build inputs the plugin adds; a site's own inputs concatenate with them, as Vite
+// merges the arrays, so a site whose index.html is a hand page, with hand pages elsewhere, lists
+// each as an input, as absolute paths in an array, and names another file as the shell its
+// rendered pages fill: Vite builds index.html only when no input is given, and an input names
+// a page whether or not a shell fills it. The build fails on a hand input that is also a copied
+// file's page, which the two would each write.
 // Adapted from spike-html-hosting-architecture (59b01b2): markdown-pages.ts, imported by a site
 // rather than copied into it.
 
@@ -52,11 +72,13 @@ import { join, posix, resolve } from "node:path";
 
 import { Marked, Parser, Renderer } from "marked";
 import type { Tokens } from "marked";
+import markedAlert from "marked-alert";
 import { getHeadingList, gfmHeadingId } from "marked-gfm-heading-id";
 import { normalizePath } from "vite";
 import type { Plugin } from "vite";
 import { parse } from "yaml";
 
+import { treeDir } from "./content.ts";
 import { builtinSyntax, createSyntax } from "./syntax.ts";
 import type { Syntax, SyntaxTheme } from "./syntax.ts";
 
@@ -72,10 +94,8 @@ import type { Syntax, SyntaxTheme } from "./syntax.ts";
  */
 export const docks = { tree: "70rem", index: "86rem" } as const;
 
-/** The copied tree and its source, as the plugin is configured. */
-export interface Options {
-  /** The directory, under the root, holding the copied Markdown files. */
-  dir: string;
+/** A copied tree's source, as the plugin is configured. */
+export interface TreeOptions {
   /** The source repository's URL, as GitHub serves it: https://github.com/<owner>/<repo>. */
   repository: string;
   /** The full commit the files were copied at, which every blob URL pins. */
@@ -83,23 +103,38 @@ export interface Options {
   /** Paths, relative to the copied tree's root, that exist in the source at the commit and aren't
    * copied: a link to one is rewritten to its blob URL. */
   external?: string[];
-  /** The shell each page fills, under the root: one <title> and one empty <main></main>. */
+}
+
+/** The copied trees and their sources, as the plugin is configured: one tree's source, the tree at
+ * dir's root, or several, in trees, each under dir in its directory, content.ts's treeDir of its
+ * repository's name. */
+export type Options = {
+  /** The directory, under the root, holding the copied Markdown files. */
+  dir: string;
+  /** The shell each page fills, under the root: one <title> and one empty <main></main>;
+   * index.html by default. */
   shell?: string;
   /** The syntax themes highlighted code takes, one per palette: builtinSyntax by default, a site's
    * own appended to it, as [...builtinSyntax, theme]. With none, every fence renders plain. */
   syntax?: readonly SyntaxTheme[];
-}
+} & (TreeOptions | { trees: readonly TreeOptions[] });
 
 /** A fence's code as highlighted HTML, its language label given, or false to render it plain. */
 export type Highlight = (code: string, lang: string) => string | false;
 
-/** What a page's links are placed against: the copied files and the source. */
+/** What a page's links are placed against: its tree's copied files and its source; dir, the
+ * tree's directory under the copied root, names the page in a failure, none for a single tree. */
 export interface Source {
   pages: ReadonlySet<string>;
   external: ReadonlySet<string>;
   repository: string;
   ref: string;
+  dir?: string;
 }
+
+/** The copied file at path in source's tree, by its path under the copied root, as a failure
+ * names it. */
+const named = (path: string, source: Source): string => posix.join(source.dir ?? "", path);
 
 /** One of a page's h2 and h3 headings, as the section tree lists it: its depth, the id it
  * carries, and its text. */
@@ -149,7 +184,7 @@ function place(href: string, path: string, source: Source): string {
     }
   }
   throw new Error(
-    `markdown-pages: ${path} links ${href}, which is neither a copied file nor a listed ` +
+    `markdown-pages: ${named(path, source)} links ${href}, which is neither a copied file nor a listed ` +
       `external one; copy it, or list it external if the source holds it at ${source.ref}`,
   );
 }
@@ -177,22 +212,25 @@ function frontMatter(
  * marked's own code renderer reads it. */
 const fenceLabel = (lang: string | undefined): string => /^\S*/.exec(lang ?? "")?.[0] ?? "";
 
-/** Renders the copied file at path, its text given, with its links placed against source and its
- * fences through highlight, when given; throws when the file has neither a front matter name nor
- * an h1 to title it. */
+/** Renders the copied file at path in source's tree, its path in the source, its text given, with
+ * its links placed against source, its fences through highlight, when given, and its alerts as
+ * marked-alert's callouts; throws when the file has neither a front matter name nor an h1 to title
+ * it. */
 export function render(
   path: string,
   text: string,
   source: Source,
   highlight?: Highlight,
 ): Rendered {
-  const { data, body } = frontMatter(path, text);
+  const { data, body } = frontMatter(named(path, source), text);
   /** Every heading token, in document order. */
   const tokens: Tokens.Heading[] = [];
   // gfmHeadingId resets its slugger in its preprocess hook on every parse, so each page's ids
   // count their duplicates from none, as GitHub's do. walkTokens visits in document order, so the
   // first depth-1 heading it meets is the file's first h1.
-  const marked = new Marked(gfmHeadingId(), {
+  // marked-alert's walkTokens turns an alert's blockquote into its alert token before marked
+  // walks the token's children, so a link inside an alert is placed as any other.
+  const marked = new Marked(gfmHeadingId(), markedAlert(), {
     walkTokens(token) {
       if (token.type === "link") token.href = place(token.href, path, source);
       if (token.type === "heading") tokens.push(token as Tokens.Heading);
@@ -246,7 +284,7 @@ export function render(
   const title = (data?.name as string | undefined) ?? (h1 && plain(h1));
   if (!title) {
     throw new Error(
-      `markdown-pages: ${path} has neither a front matter name nor an h1 to title it`,
+      `markdown-pages: ${named(path, source)} has neither a front matter name nor an h1 to title it`,
     );
   }
   return { data, title, html, headings };
@@ -305,7 +343,7 @@ export function sectionTree(headings: readonly Heading[]): string {
   return `<sl-section-tree dock="${docks.tree}"><ul>${items.join("")}</ul></sl-section-tree>`;
 }
 
-/** A directory of the copied tree, as the site index nests it: its index page's file, its pages'
+/** A directory of the copied root, as the site index nests it: its index page's file, its pages'
  * files, and its directories by name. */
 interface Directory {
   index?: string;
@@ -367,14 +405,27 @@ function fill(shell: string, { data, title, html, headings }: Rendered, index: s
     .replace("<main></main>", () => `${before}<main>\n${pageHeader(data)}${html}</main>\n${index}`);
 }
 
+/** A copied file the plugin builds: its path under the copied root, its path in its tree's source,
+ * and the source its links are placed against. */
+interface Copied {
+  file: string;
+  path: string;
+  source: Source;
+}
+
 /** The plugin: every copied file under options.dir a page of the build, loaded from its id, the
  * page's path under the root. */
 export function markdownPages(options: Options): Plugin {
   const shellName = options.shell ?? "index.html";
-  /** Each page's id, its absolute path under the root, to its copied file's path. */
-  const ids = new Map<string, string>();
+  /** Each tree configured, with its directory under options.dir: "" for the one tree of a single
+   * source, and each of several trees' its repository's, as content.ts's treeDir names it. */
+  const trees: { dir: string; tree: TreeOptions }[] =
+    "trees" in options
+      ? options.trees.map((tree) => ({ dir: treeDir(posix.basename(tree.repository)), tree }))
+      : [{ dir: "", tree: options }];
+  /** Each page's id, its absolute path under the root, to its copied file. */
+  const ids = new Map<string, Copied>();
   let root = "";
-  let source: Source;
   /** Each copied file's page, rendered at the build's start, and its title, which every page's
    * site index lists. */
   const rendered = new Map<string, Rendered>();
@@ -389,21 +440,54 @@ export function markdownPages(options: Options): Plugin {
     apply: "build",
     config(config) {
       root = normalizePath(resolve(config.root ?? process.cwd()));
-      const dir = join(root, options.dir);
-      const files = readdirSync(dir, { recursive: true, encoding: "utf8" })
-        .map((file) => normalizePath(file))
-        .filter((file) => file.endsWith(".md"))
-        .sort();
-      for (const file of files) ids.set(`${root}/${pageFile(file)}`, file);
-      source = {
-        pages: new Set(files),
-        external: new Set(options.external),
-        repository: options.repository,
-        ref: options.ref,
-      };
+      ids.clear();
+      const dirs = new Set<string>();
+      for (const { dir, tree } of trees) {
+        if (dirs.has(dir)) {
+          throw new Error(
+            `markdown-pages: two trees share the directory ${dir}, ${tree.repository}'s`,
+          );
+        }
+        dirs.add(dir);
+        const paths = readdirSync(join(root, options.dir, dir), {
+          recursive: true,
+          encoding: "utf8",
+        })
+          .map((path) => normalizePath(path))
+          .filter((path) => path.endsWith(".md"))
+          .sort();
+        const source: Source = {
+          pages: new Set(paths),
+          external: new Set(tree.external),
+          repository: tree.repository,
+          ref: tree.ref,
+          ...(dir === "" ? {} : { dir }),
+        };
+        for (const path of paths) {
+          const file = posix.join(dir, path);
+          ids.set(`${root}/${pageFile(file)}`, { file, path, source });
+        }
+      }
       return { build: { rolldownOptions: { input: [...ids.keys()] } } };
     },
     configResolved(config) {
+      // A site's own inputs, its hand pages, concatenate with the pages' ids, each of which is
+      // an input once; a hand input that names a copied file's page makes it twice, and the two
+      // would build to one file.
+      const input = config.build.rolldownOptions.input ?? [];
+      const inputs = typeof input === "string" ? [input] : Object.values(input);
+      const seen = new Set<string>();
+      for (const name of inputs) {
+        const id = normalizePath(resolve(root, name));
+        const copied = ids.get(id);
+        if (copied !== undefined && seen.has(id)) {
+          throw new Error(
+            `markdown-pages: the input ${name} is also ${copied.file}'s page; a hand page can't ` +
+              `take a copied file's path`,
+          );
+        }
+        seen.add(id);
+      }
       base = config.base;
       assetsDir = config.build.assetsDir;
     },
@@ -415,9 +499,9 @@ export function markdownPages(options: Options): Plugin {
       titles.clear();
       stylesheet = undefined;
       const texts = new Map(
-        [...ids.values()].map((file) => [
-          file,
-          readFileSync(join(root, options.dir, file), "utf8"),
+        [...ids.values()].map((copied) => [
+          copied,
+          readFileSync(join(root, options.dir, copied.file), "utf8"),
         ]),
       );
       const themes = options.syntax ?? builtinSyntax;
@@ -434,8 +518,8 @@ export function markdownPages(options: Options): Plugin {
         syntax = await createSyntax(themes, langs);
         highlight = syntax.highlight;
       }
-      for (const [file, text] of texts) {
-        const page = render(file, text, source, highlight);
+      for (const [{ file, path, source }, text] of texts) {
+        const page = render(path, text, source, highlight);
         rendered.set(file, page);
         titles.set(file, page.title);
       }
@@ -451,7 +535,7 @@ export function markdownPages(options: Options): Plugin {
       return ids.has(id) ? id : null;
     },
     load(id) {
-      const file = ids.get(id);
+      const file = ids.get(id)?.file;
       if (file === undefined) return null;
       const shell = readFileSync(join(root, shellName), "utf8");
       for (const [pattern, want] of [

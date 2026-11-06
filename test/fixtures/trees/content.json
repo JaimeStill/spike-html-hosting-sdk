@@ -1,0 +1,21 @@
+{
+  "trees": [
+    {
+      "repository": ".github",
+      "url": "https://github.com/JaimeStill/.github",
+      "commit": "89abcdef0123456789abcdef0123456789abcdef",
+      "files": {
+        "profile/README.md": "4ab0ef0b76066b95c45fd1f74d37828702477f94"
+      }
+    },
+    {
+      "repository": "org",
+      "url": "https://github.com/JaimeStill/org",
+      "commit": "0123456789abcdef0123456789abcdef01234567",
+      "files": {
+        "briefs/next.md": "f0e1ae899bc9cfd56bf0bcf36841caf6c842ab33",
+        "briefs/orientation.md": "340e18e144eb7073d4447bdf14e24592dfe3b018"
+      }
+    }
+  ]
+}

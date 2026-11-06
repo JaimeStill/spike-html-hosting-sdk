@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.3.1 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.4.0 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.3.1 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.4.0 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,10 +40,10 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.3.1 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.4.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
-  github:JaimeStill/spike-html-hosting-components#v0.2.2 \
+  github:JaimeStill/spike-html-hosting-components#v0.3.0 \
   vite eslint
 ```
 
@@ -58,14 +58,14 @@ site reads as they are, each through package.json's `exports`:
 | Export | What it is |
 | --- | --- |
 | `./css-module-scripts.js` | `cssModuleScripts()`, the Vite plugin that rewrites each CSS module script the foundation's modules hold to a constructed `CSSStyleSheet` |
-| `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking |
-| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, its fenced code highlighted; its renderer, `render()`; the markup it writes for the components, `pageHeader`, `sectionTree`, and `siteIndex`, with `frontMatterText`, a front matter value's text; and `docks`, the widths the layout docks the side columns from |
+| `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking, each page running only its own scripts |
+| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders one copied Markdown tree, or several, into pages, its fenced code highlighted and its GitHub alerts callouts, with `Options` and `TreeOptions`, a tree's source; its renderer, `render()`; the markup it writes for the components, `pageHeader`, `sectionTree`, and `siteIndex`, with `frontMatterText`, a front matter value's text; and `docks`, the widths the layout docks the side columns from |
 | `./syntax.js` | `SyntaxTheme`, a palette's syntax theme; `builtinSyntax`, one for each of the foundation's palettes; `checkSyntax(theme)`, the syntax theme check; and `createSyntax(themes, langs)`, the highlighter the plugin makes |
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
-| `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
+| `./content.js` | `checkContent(root)`, the content check; `Content`, content.json's record, one `Tree` or `{ trees: Tree[] }`; `treeDir(repository)`, a tree's directory; `copiedFiles(root)`, every copied file's path under `content/`; and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, `keepsNavigationWords`, `holdsBetweenDocks`, `startsUnderHeader`, and `opensKeysHelp`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
-| `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site, url?) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, `keepsNavigationWords`, `holdsBetweenDocks`, `startsUnderHeader`, and `opensKeysHelp`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl, resolving to its `Crawled` |
+| `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's copied pages, every tree's, from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
 | `./site.css` | the site stylesheet, its `site` layer |
@@ -121,7 +121,12 @@ fenced block at build, as the syntax themes below describe. `renderBlocking` bui
 a page's entry loads statically into one chunk, `index`, so each page keeps one entry tag however
 rolldown would split the modules every page shares, and fails the build on a page with no entry
 script, or more than one; a module loaded only by a dynamic import, as the theme menu is, keeps a
-chunk of its own.
+chunk of its own. Since one chunk holds every page's modules, it keeps rolldown's
+`output.strictExecutionOrder`: each module's body is wrapped and runs only where a page's entry
+imports it, so each page runs only its own scripts, and a hand page beside the rendered pages never
+runs the shell's Pages drawer wiring. A page loads three JS files, its entry, the shared `index`
+chunk, and rolldown's runtime, the last two statically from the entry, so they block render as its
+one render-blocking tag does.
 
 A site's `eslint.config.js` spreads the configuration, which lints the site's code under the
 config's directory and runs the leftover check, no CSS module script left in the build, over
@@ -185,6 +190,11 @@ for (const [name, check] of Object.entries(shell)) {
 }
 ```
 
+A check runs on the site's index, `site`, unless its third argument, `url`, a URL under `site`,
+names another page:
+`` check(page, server.origin, `${server.origin}briefs/orientation.html`) `` runs it on that page,
+every request still held under the base `site` names.
+
 The shell checks, each named in `shell`, assert these:
 
 - The Theme button and T open the theme menu, and its sheet is adopted.
@@ -208,18 +218,26 @@ The shell checks, each named in `shell`, assert these:
   column is at least 16rem wide.
 - The theme menu stays unsaved: no stored choice persists.
 
-A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves to the
-pages and links it reached and the pages no link reaches. Each page it reaches loads with a 2xx,
+A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves to a
+`Crawled`, `{ pages, links, unreachable, hand }`: the pages it reached and the in-site links it
+counted, the copied pages no link from the index reaches, and the hand pages it reached. Each copied
+file's page it reaches loads with a 2xx,
 its one module script render-blocking, every custom element on it defined, every request under the
 base and none failed, main at its centered reading width at 1600px, nothing scrolling sideways at
 390px, its navigation, its layout between the docks, its main under the header, and its keys help
 as the shell checks have them, and its title its source's front matter name or first h1. Its main
 opens with its page header, whose dt and dd pairs are the source's front matter keys and values,
-in order, with no front matter table left; its site index, in its Pages drawer, links every page
-the build writes, each once, and no other; its Pages button is hidden at 1600px and at 390px opens
+in order, with no front matter table left; its site index, in its Pages drawer, links every copied
+page the build writes, each once, and no hand page; its Pages button is hidden at 1600px and at 390px opens
 the drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and
 every in-site link reaches a built page, and its fragment's element. Since each page's index links
-every other, the crawl reaches every page from the index.
+every other, the crawl reaches every page from the index. It checks a page for every Markdown file
+`content.json` records, every tree's, crawling from one no link reaches once the links run out. A
+page it reaches that no record names is a hand page the site builds, as a root-style site's index
+is: it loads with a 2xx, every request under the base and none failed, its ids the targets of the
+fragments linking it, and its links followed, but the copied pages' checks are left to the shell
+checks, which the site runs on it by its URL; `Crawled.hand` lists each, by its path under the
+base, in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -255,10 +273,108 @@ and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
 repository's highest plain `vX.Y.Z` tag.
 
+### Several copied trees
+
+A site may copy several trees into one, each from its own repository at its own commit.
+`content.json` records them as `{ trees: [...] }`, each tree a record as a single-source
+`content.json` is one, its `files` keyed by their paths in its source:
+
+```json
+{
+  "trees": [
+    {
+      "repository": ".github",
+      "url": "https://github.com/JaimeStill/.github",
+      "commit": "<full commit>",
+      "files": { "profile/README.md": "<blob hash>" }
+    },
+    {
+      "repository": "org",
+      "url": "https://github.com/JaimeStill/org",
+      "commit": "<full commit>",
+      "files": { "briefs/orientation.md": "<blob hash>" }
+    }
+  ]
+}
+```
+
+Each tree's files sit under `content/` in its directory, `treeDir(repository)`: the repository's
+name with a leading dot dropped, so `.github`'s are under `content/github/`, a directory the base
+never hides, and `org`'s under `content/org/`. A file's path under `content/` is its page's path
+under the base, so `content/github/profile/README.md`, recorded as `profile/README.md`, builds to
+`github/profile/`, and `content/org/briefs/orientation.md` to `org/briefs/orientation.html`.
+`checkContent` holds each tree to its record, naming the tree in what it finds, and fails on a file
+under `content/` no tree records and on two trees that share a directory. A single-source record,
+as the template's, is still valid: its one tree sits at `content/`'s root, and its messages are
+what they were.
+
+`markdownPages` takes the trees in `trees`, each a `TreeOptions`, `{ repository, ref, external }`,
+in place of one tree's source, each tree's directory `treeDir` of its repository URL's last
+segment, as `content.json` places it:
+
+```ts
+markdownPages({
+  dir: "content",
+  trees: content.trees.map(({ url, commit }) => ({ repository: url, ref: commit })),
+});
+```
+
+The trees are one site: one site index lists every tree's pages, and each page's links are placed
+against its own tree's source, its `external` that tree's, so a relative link that leaves its tree
+fails the build. `contentPages(root)`, `copiedFiles(root)`, and the crawl read every tree's pages.
+
+### A root-style site
+
+A site whose index is a page written by hand, as an org's root site is, beside the rendered pages
+of its copied trees, names another file as the shell its rendered pages fill, with `shell`, and
+lists its hand pages as build inputs, absolute paths in an array: Vite builds `index.html` only
+when no input is given, and the plugin gives its pages, with which a site's own inputs
+concatenate. The build fails on a hand input at a copied file's page, which the two would each
+write. As the SDK's trees fixture, `test/fixtures/trees/vite.config.ts`, has it:
+
+```ts
+export default defineConfig({
+  base: base(root),
+  appType: "mpa",
+  plugins: [
+    cssModuleScripts(),
+    markdownPages({
+      dir: "content",
+      trees: content.trees.map(({ url, commit, repository }) => ({
+        repository: url,
+        ref: commit,
+        external: repository === "org" ? ["LICENSE"] : [],
+      })),
+      shell: "page.html",
+    }),
+    renderBlocking(),
+  ],
+  build: {
+    rolldownOptions: { input: [`${root}index.html`, `${root}briefs/orientation.html`] },
+  },
+});
+```
+
+A hand page loads what it uses, `renderBlocking` keeping each page to its own scripts; the
+fixture's index carries the shell's header, theme menu, and keys help dialog, but no Pages button
+or drawer, since it has no site index. The site's browser tier runs the shell checks on each hand
+page by its URL, and on a rendered page, and the crawl tolerates the hand pages it reaches:
+
+```ts
+for (const path of ["", "briefs/orientation.html", "org/briefs/orientation.html"]) {
+  for (const [name, check] of Object.entries(shell)) {
+    test(`${name} on ${path || "the index"}`, async () => {
+      const page = await browser.open("about:blank");
+      await check(page, server.origin, `${server.origin}${path}`).finally(() => page.close());
+    });
+  }
+}
+```
+
 ### The pages
 
 `markdownPages` writes each page's data as the light-DOM markup of spike-html-hosting-components
-v0.2.2's elements, so with no script the page renders it as its own, and each element, once its
+v0.3.0's elements, so with no script the page renders it as its own, and each element, once its
 module defines it, styles and marks it. The section tree, in a div, comes before main, then main,
 opened by the page header, then the site index in the Pages drawer:
 
@@ -283,7 +399,7 @@ opened by the page header, then the site index in the Pages drawer:
   a label is the heading's plain text. A page with neither has no tree and no `div.section-tree`.
   It comes before main so that, as the bar in a narrow viewport, it sticks to the top of the
   viewport from the page's own flow, and so a keyboard reaches it in the order the page shows it.
-- `sl-site-index` slots a list of every page the build writes, nested by directory: the root's
+- `sl-site-index` slots a list of every copied page the build writes, nested by directory: the root's
   index page first, then each page by its title, and each directory by its index page's link, or a
   span of its name when it has none, over a nested list of its pages and directories, by name.
   Each link is relative to the page, as its body's are, so it resolves under any base. It sits in
@@ -305,6 +421,23 @@ viewport narrower than it, as a highlighted code block's pre does:
 
 Its name is "Table: " and its header cells' text, joined by ", ", or "Table" when they are empty,
 since a GFM table has no caption.
+
+A GitHub alert, a blockquote opening `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, or
+`[!CAUTION]`, renders as marked-alert 2.1.2 renders it, as GitHub does: a div of its kind, its
+first line a title of the kind's octicon, `aria-hidden`, and its kind as visible text, and a link
+inside it placed as any other:
+
+```html
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg … aria-hidden="true">…</svg>Important</p>
+<p>…</p>
+</div>
+```
+
+`site.css` draws it as a callout from the foundation's tokens: a `--line-m` rule at its start and
+its title, the octicon sized to the text, in its kind's palette color as GitHub maps the kinds,
+note `--blue`, tip `--green`, important `--purple`, warning `--yellow`, and caution `--red`; its
+body keeps the page's text color.
 
 `site.css` lays a page out at the two docks, each where its columns fit at their 16rem minimum
 beside main's 80ch, measured in the foundation's default type and regular space with a scrollbar
@@ -330,13 +463,13 @@ shell's header is a wrapping row of the site nav, then the Pages, Help, and Them
 
 The shell wires the components in: it loads their five modules, `site-nav.js`, `site-index.js`,
 `page-header.js`, `section-tree.js`, and `drawer.js`, render-blocking like the foundation's, from
-`github:JaimeStill/spike-html-hosting-components#v0.2.2`; places `sl-site-nav`, which takes no
-content, at its header's start; and adds the Pages button beside the Theme button, as the
-components' README gives it. keys.js clicks the button on P, as it does Theme on T; `site.css`
-shows it only below 86rem, the drawer's dock, and only once the drawer is defined, so with no
-script it stays hidden and the index renders as the page's own; and the page's script opens the
-drawer on its click and keeps its `aria-expanded` in step with the drawer's `open` and `close`
-events. The drawer, open, is a modal: Escape or its Close button closes it.
+`github:JaimeStill/spike-html-hosting-components#v0.3.0`; places `sl-site-nav`, which takes no
+content, at its header's start, with no `src`, so it lists the components' built `SITES`; and
+adds the Pages button beside the Theme button, as the components' README gives it. keys.js clicks
+the button on P, as it does Theme on T; `site.css` shows it only below 86rem, the drawer's dock,
+and only once the drawer is defined, so with no script it stays hidden and the index renders as
+the page's own; and the page's script opens the drawer on its click and keeps its `aria-expanded`
+in step with the drawer's `open` and `close` events. The drawer, open, is a modal: Escape or its Close button closes it.
 
 A site's shell carries the keys help dialog, as the foundation's keys module gives it: a
 `dialog#help` holding a `[data-keys-list]`, which keys.js fills as it opens with every binding the
@@ -567,9 +700,10 @@ entry names any change a site's own files need, such as a template file to take 
   check; the build to `dist/`; the unit tier; the pack check, which installs a pack of the build
   into a scratch site, resolves each export from it, and runs the bin a pnpm install links; the
   browser tier, which builds the fixture site, `test/fixtures/site/`, and runs the shell checks,
-  the crawl, and the capture on it in the pinned chrome-headless-shell, and the Noctis fixture,
+  the crawl, and the capture on it in the pinned chrome-headless-shell; the Noctis fixture,
   `test/fixtures/noctis/`, on which the palette check passes with its syntax theme and fails
-  without it; and the scaffold test,
-  which scaffolds a site into a scratch directory, installs it offline on the working tree, and
-  runs the site's own check. It reads no network.
+  without it; and the trees fixture, `test/fixtures/trees/`, a root-style site of two trees, on
+  whose hand pages and a rendered page the shell checks run, and which it crawls; and the scaffold
+  test, which scaffolds a site into a scratch directory, installs it offline on the working tree,
+  and runs the site's own check. It reads no network.
 - `mise run currency`: report every pin behind its latest, with the SDK's own bin.

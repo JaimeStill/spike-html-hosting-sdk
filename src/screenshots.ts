@@ -13,8 +13,8 @@
 // profiles, every palette at the defaults, then compact and sans at flexoki; the profiles each
 // page registers, from the foundation's registry, every built-in one, as the shell loads the full
 // entry. The site is served as its browser tier serves it, by served(), so a capture makes the
-// requests the deployed site makes. contentPages lists a Markdown site's pages from its
-// content.json, in the build's order.
+// requests the deployed site makes. contentPages lists a Markdown site's copied pages, every
+// tree's, from its content.json; a site with hand pages lists those beside them.
 //
 // capture runs the bin on a capture file as mise run screenshots does: the index alone, light
 // alone, to the terminal, with TMPDIR a scratch directory of its own and node's compile cache,
@@ -36,7 +36,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -49,7 +49,7 @@ import type {
   Viewport,
 } from "@jaimestill/spike-html-apps-tooling/screenshots.js";
 
-import type { Content } from "./content.ts";
+import { copiedFiles } from "./content.ts";
 import { pageFile } from "./markdown-pages.ts";
 import { base, command, served } from "./served.ts";
 
@@ -105,13 +105,12 @@ function described(built: string, base: string): DescribedPage {
   return { name, caption: path, path, states: states(name, path, name === "index") };
 }
 
-/** The pages of the Markdown site at root, each its built path, in the build's order: the plugin
- * sorts the files it reads, and content.json records them. */
+/** The copied pages of the Markdown site at root, each its built path, every tree's, each under
+ * its tree's directory, sorted by its copied file's path: content.json records them. A site with
+ * hand pages lists them beside these. */
 export function contentPages(root: string): string[] {
-  const content: Content = JSON.parse(readFileSync(join(root, "content.json"), "utf8"));
-  return Object.keys(content.files)
+  return copiedFiles(root)
     .filter((file) => file.endsWith(".md"))
-    .sort()
     .map(pageFile);
 }
 

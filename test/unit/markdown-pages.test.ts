@@ -1,21 +1,33 @@
 // The Markdown pages' rendering, on small files: each copied file's page path, the links it
 // rewrites (to a copied file's page, relative to the linking page, its fragment kept; to an
-// external file's blob at the pinned commit), the links it passes through, and the build failing
-// on a relative link it can't place. The front matter is parsed, never rendered as body text,
-// and shown in the page header as a dl of its keys and values in source order, escaped; a file
-// with none shows an empty header and takes its title from its first h1, and one with neither a
-// name nor an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section
-// tree lists the h2s and their h3s by those ids, docked from the layout's tree dock. The site index
-// nests every page by directory, each directory labeled by its index page or its name, and marks
-// none current, in the Pages drawer docked from the layout's index dock. Each body table is in a
-// named region a keyboard focuses. Each site's browser tier crawls its built pages themselves.
+// external file's blob at the pinned commit), the links it passes through, and the build failing on
+// a relative link it can't place. The front matter is parsed, never rendered as body text, and
+// shown in the page header as a dl of its keys and values in source order, escaped; a file with
+// none shows an empty header and takes its title from its first h1, and one with neither a name nor
+// an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section tree lists
+// the h2s and their h3s by those ids, docked from the layout's tree dock. The site index nests
+// every page by directory, each directory labeled by its index page or its name, and marks none
+// current, in the Pages drawer docked from the layout's index dock. Each body table is in a named
+// region a keyboard focuses. Each GitHub alert is marked-alert's callout, its kind's name visible
+// text and its octicon aria-hidden, a link in it placed as any other; a plain blockquote stays one.
+// Several trees, configured to the plugin in a scratch root in TMPDIR, build each file to its page
+// under its tree's directory, the repository's name with a leading dot dropped, and the site index
+// lists them all, nested by those directories; a failure names a page by its tree's directory, and
+// a site's own input at a copied page's path fails the build. Each site's browser tier crawls its
+// built pages themselves.
 // Adapted from spike-html-hosting-architecture (de46c65): test/unit/markdown-pages.test.ts, on
 // src/markdown-pages.ts.
 
 import assert from "node:assert/strict";
-import { describe, test } from "node:test";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { after, describe, test } from "node:test";
+
+import type { ResolvedConfig, UserConfig } from "vite";
 
 import {
+  markdownPages,
   pageFile,
   pageHeader,
   pageUrl,
@@ -225,5 +237,145 @@ describe("the Markdown pages", () => {
     ]);
     assert.equal(html.match(/<table>/g)?.length, 2);
     assert.equal(html.match(/<\/table>\n<\/div>/g)?.length, 2, "each region closes on its table");
+  });
+
+  test("draw each GitHub alert as a callout, its kind visible text and its icon aria-hidden", () => {
+    const { html } = render(
+      "a.md",
+      "# T\n\n> [!IMPORTANT]\n> Read [a](a.md#x) *first*.\n>\n> Second.\n\n" +
+        "> [!TIP]\n> One.\n\n> Plain quote.\n",
+      source,
+    );
+    // Each octicon, an svg of one path, aria-hidden, its path left out of the pinned markup.
+    const icons = [...html.matchAll(/<svg [^>]*><path d="[^"]*"><\/path><\/svg>/g)].map((m) =>
+      m[0].replace(/<path d="[^"]*">/, "<path>"),
+    );
+    assert.deepEqual(icons, [
+      '<svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path></path></svg>',
+      '<svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path></path></svg>',
+    ]);
+    assert.equal(
+      html.replace(/<svg [^>]*><path d="[^"]*"><\/path><\/svg>/g, "<svg/>"),
+      '<h1 id="t">T</h1>\n' +
+        '<div class="markdown-alert markdown-alert-important">\n' +
+        '<p class="markdown-alert-title"><svg/>Important</p>\n' +
+        '<p>Read <a href="a.html#x">a</a> <em>first</em>.</p>\n' +
+        "<p>Second.</p>\n" +
+        "</div>\n" +
+        '<div class="markdown-alert markdown-alert-tip">\n' +
+        '<p class="markdown-alert-title"><svg/>Tip</p>\n' +
+        "<p>One.</p>\n" +
+        "</div>\n" +
+        "<blockquote>\n<p>Plain quote.</p>\n</blockquote>\n",
+    );
+  });
+
+  test("name a page of one of several trees by its tree's directory in a failure", () => {
+    const tree: Source = { ...source, dir: "org" };
+    assert.throws(
+      () => render("dir/b.md", file("[x](../../a.md)"), tree),
+      /markdown-pages: org\/dir\/b\.md links \.\.\/\.\.\/a\.md, which is neither/,
+    );
+    assert.throws(() => render("dir/b.md", "Body.\n", tree), /org\/dir\/b\.md has neither/);
+    // A link within the tree is placed as a single tree's is, relative to the linking page.
+    assert.deepEqual(hrefs(render("dir/b.md", file("[a](../a.md)"), tree).html), ["../a.html"]);
+  });
+
+  test("list several trees' pages in one site index, each tree under its directory", () => {
+    const titles = new Map([
+      ["github/profile/README.md", "The charter"],
+      ["org/briefs/orientation.md", "Orientation"],
+      ["org/README.md", "The org"],
+    ]);
+    assert.equal(
+      siteIndex(titles, "org/briefs/orientation.md"),
+      '<sl-drawer class="site-index" label="Pages" id="pages" dock="86rem">' +
+        "<sl-site-index><ul>" +
+        '<li><span>github</span><ul><li><a href="../../github/profile/">The charter</a></li></ul></li>' +
+        '<li><a href="../">The org</a><ul>' +
+        '<li><span>briefs</span><ul><li><a href="orientation.html">Orientation</a></li></ul></li>' +
+        "</ul></li>" +
+        "</ul></sl-site-index></sl-drawer>",
+    );
+  });
+});
+
+const scratches: string[] = [];
+after(() => {
+  for (const scratch of scratches) rmSync(scratch, { recursive: true, force: true });
+});
+
+/** A scratch site root in TMPDIR holding files, by their paths from it. */
+function scratch(files: Record<string, string>): string {
+  const root = mkdtempSync(join(tmpdir(), "markdown-pages-"));
+  scratches.push(root);
+  for (const [path, text] of Object.entries(files)) {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), text);
+  }
+  return root;
+}
+
+/** The plugin's config hook, as Vite calls it with the site's config, and its configResolved,
+ * called with the inputs the merged config holds. */
+function hooks(plugin: ReturnType<typeof markdownPages>): {
+  config: (config: UserConfig) => UserConfig;
+  configResolved: (input: string[]) => void;
+} {
+  const config = plugin.config as unknown as (config: UserConfig) => UserConfig;
+  const resolved = plugin.configResolved as unknown as (config: ResolvedConfig) => void;
+  return {
+    config: (user) => config.call({}, user),
+    configResolved: (input) =>
+      resolved.call({}, {
+        base: "/site/",
+        build: { assetsDir: "assets", rolldownOptions: { input } },
+      } as unknown as ResolvedConfig),
+  };
+}
+
+describe("the Markdown pages of several trees", () => {
+  const ref = "0123456789abcdef0123456789abcdef01234567";
+  const files = {
+    "content/github/profile/README.md": "# The charter\n",
+    "content/org/README.md": "# The org\n",
+    "content/org/briefs/orientation.md": "# Orientation\n",
+    "index.html": "<!doctype html><title>Hand</title>",
+  };
+  const trees = [
+    { repository: "https://github.com/standards-lab/.github", ref },
+    { repository: "https://github.com/standards-lab/org", ref },
+  ];
+
+  test("build each tree's files to pages under its directory, the name's leading dot dropped", () => {
+    const root = scratch(files);
+    const { config } = hooks(markdownPages({ dir: "content", trees, shell: "page.html" }));
+    const input = config({ root }).build?.rolldownOptions?.input as string[];
+    assert.deepEqual(
+      input.map((id) => id.slice(root.length + 1)),
+      ["github/profile/index.html", "org/index.html", "org/briefs/orientation.html"],
+    );
+  });
+
+  test("fail on a site's own input at a copied page's path, and pass a hand page beside them", () => {
+    const root = scratch(files);
+    const { config, configResolved } = hooks(markdownPages({ dir: "content", trees }));
+    const pages = config({ root }).build?.rolldownOptions?.input as string[];
+    configResolved([...pages, join(root, "index.html")]);
+    assert.throws(
+      () => configResolved([...pages, join(root, "org/index.html")]),
+      /markdown-pages: the input \S+\/org\/index\.html is also org\/README\.md's page/,
+    );
+  });
+
+  test("fail on two trees whose directories are one", () => {
+    const root = scratch(files);
+    const { config } = hooks(
+      markdownPages({
+        dir: "content",
+        trees: [...trees, { repository: "https://github.com/other/org", ref }],
+      }),
+    );
+    assert.throws(() => config({ root }), /two trees share the directory org/);
   });
 });

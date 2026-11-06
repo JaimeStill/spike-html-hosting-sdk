@@ -6,6 +6,53 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-06
+
+Several copied trees as one site, a root-style site with a hand index beside its rendered pages,
+and GitHub alerts as callouts. A site of one tree keeps its `content.json` and `vite.config.ts` as
+they are; one that types a check by its two arguments takes `Check`'s third, optional.
+
+### Added
+
+- `markdownPages` takes several trees, `trees: [{ repository, ref, external }]`, each a
+  `TreeOptions`, in place of one tree's source: each tree's files under `dir` in its directory, the
+  repository's name with a leading dot dropped (`.github` is `github`), built to pages at their
+  source paths under it. One site index lists every tree's pages, each page's links are placed
+  against its own tree's source, and a failure names the page by its tree's directory.
+- `content.json` may record `{ trees: [...] }`, each tree's files under `content/<dir>/`, keyed by
+  their paths in its source. `checkContent` holds every tree to its record and fails on a file
+  under `content/` no tree records and on two trees sharing a directory; a single-source record is
+  one tree at `content/`'s root, still valid, its messages unchanged. `./content.js` exports
+  `Tree`, `Content`, `treeDir(repository)`, a tree's directory, and `copiedFiles(root)`, every
+  copied file's path under `content/`; `contentPages` lists every tree's pages.
+- A root-style site: a site's own build inputs concatenate with the plugin's pages, so a site whose
+  index is a hand page lists its hand pages as inputs, absolute paths in an array, and names its
+  rendered pages' shell with `shell`; the build fails on a hand input at a copied file's page.
+  `test/fixtures/trees/` is one, which the browser tier checks.
+- `./browser.js`: `Check` is `(page, site, url?) => Promise<void>`, each check run on the page at
+  `url`, under `site`, `site` itself by default, so a site runs the shell checks on each hand page.
+  The crawl tolerates the hand pages it reaches, loading each, its requests under the base and its
+  links followed, and returns them in `Crawled.hand`; it still checks every copied page of every
+  tree.
+- `markdownPages` renders GitHub alerts, `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, and
+  `[!CAUTION]`, with marked-alert 2.1.2, pinned exactly, as GitHub does: a
+  `div.markdown-alert.markdown-alert-<kind>`, its title the kind's octicon, `aria-hidden`, and its
+  kind as visible text. `site.css` draws each as a callout, a `--line-m` rule and its title in the
+  kind's palette color: note `--blue`, tip `--green`, important `--purple`, warning `--yellow`, and
+  caution `--red`.
+
+### Changed
+
+- `renderBlocking` keeps rolldown's `output.strictExecutionOrder`: its one `index` chunk holds
+  every page's modules, each now run only where a page's entry imports it, so each page runs only
+  its own scripts, where before every page ran every page's, the shell's Pages drawer wiring
+  throwing on a hand page with no drawer. A page loads three JS files, its entry, the shared
+  `index` chunk, and rolldown's runtime, still through its one render-blocking tag.
+- The SDK's dev dependency and the template pin
+  `github:JaimeStill/spike-html-hosting-components#v0.3.0`, from v0.2.2, whose `sl-site-nav`
+  takes an optional `src`; the template's keeps none, listing the built `SITES`. A site made from
+  an earlier release moves its pin.
+
 ## [0.3.1] - 2026-11-05
 
 Main directly under the header on a page shorter than the viewport.
@@ -170,7 +217,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.1.0...v0.2.0
