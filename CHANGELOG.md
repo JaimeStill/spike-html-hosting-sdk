@@ -66,6 +66,7 @@ again, and one that imported `frontMatterTable` takes
 
 - `renderBlocking` groups every module a page's entry loads statically into one chunk, `index`,
   so each page keeps one entry tag however rolldown would split the modules every page shares.
+- The SDK and the template pin pnpm 12.18.0, from 12.16.1.
 
 ### Removed
 
