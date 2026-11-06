@@ -227,8 +227,8 @@ base and none failed, main at its centered reading width at 1600px, nothing scro
 390px, its navigation, its layout between the docks, its main under the header, and its keys help
 as the shell checks have them, and its title its source's front matter name or first h1. Its main
 opens with its page header, whose dt and dd pairs are the source's front matter keys and values,
-in order, with no front matter table left; its site index, in its Pages drawer, links every page
-the build writes, each once, and no other; its Pages button is hidden at 1600px and at 390px opens
+in order, with no front matter table left; its site index, in its Pages drawer, links every copied
+page the build writes, each once, and no hand page; its Pages button is hidden at 1600px and at 390px opens
 the drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and
 every in-site link reaches a built page, and its fragment's element. Since each page's index links
 every other, the crawl reaches every page from the index. It checks a page for every Markdown file
@@ -399,7 +399,7 @@ opened by the page header, then the site index in the Pages drawer:
   a label is the heading's plain text. A page with neither has no tree and no `div.section-tree`.
   It comes before main so that, as the bar in a narrow viewport, it sticks to the top of the
   viewport from the page's own flow, and so a keyboard reaches it in the order the page shows it.
-- `sl-site-index` slots a list of every page the build writes, nested by directory: the root's
+- `sl-site-index` slots a list of every copied page the build writes, nested by directory: the root's
   index page first, then each page by its title, and each directory by its index page's link, or a
   span of its name when it has none, over a nested list of its pages and directories, by name.
   Each link is relative to the page, as its body's are, so it resolves under any base. It sits in
