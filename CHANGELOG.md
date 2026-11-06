@@ -23,8 +23,9 @@ dialog again, each button's word replaced by its glyph marker, or the shell chec
   every page the build writes, the rendered pages' shell and a site's hand pages alike, with that
   icon's `svg` from the icons layer, resolved from the site's root, and adds no script. A `class`
   on the marker carries onto the `svg`; a name that isn't `<set>/<name>`, or that the icons layer
-  doesn't resolve, fails the build, naming the page and the icon. A site wires nothing beyond the
-  plugin it already calls.
+  doesn't resolve, fails the build, naming the page and the icon, and an `svg` holding `data-icon`
+  that isn't a marker, self-closed, unquoted, or not empty, fails it, naming the page and its tag;
+  a comment's text is left as it is. A site wires nothing beyond the plugin it already calls.
 - `./browser.js`'s `showsGlyphs`, a shell check, which the crawl runs on every copied page too: at
   390px each header button, Pages where the shell has one, Help, and Theme, and the keys help
   dialog's Close shows one glyph, the icons module's svg, and its key hint in a `kbd`, both

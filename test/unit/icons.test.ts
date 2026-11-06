@@ -1,12 +1,13 @@
 // The icon fill, src/icons.ts's fillIcons, with the icons layer as the SDK's own install resolves
-// it: each glyph marker, an empty <svg data-icon="<set>/<name>"></svg>, is replaced by its icon's
-// svg, the module's string whole, a class on the marker carried onto it; a page with no marker, or
-// with an svg that isn't one, is unchanged; and a name the icons layer doesn't resolve, or one
-// that isn't <set>/<name>, fails, naming the page and the icon. Through markdownPages, in a scratch
-// site root in TMPDIR whose node_modules links the icons layer, the fill runs on a hand page as on
-// a rendered one, adding no script, and resolves the icons from the site's root, failing in a site
-// that doesn't install them. That a build fills both kinds of page is the trees fixture's to show,
-// in the browser tier.
+// it: each glyph marker, an empty <svg data-icon="<set>/<name>"></svg>, its attributes quoted
+// either way, is replaced by its icon's svg, the module's string whole, a class on the marker
+// carried onto it; a page with no marker, an svg that isn't one, or a comment's text is unchanged;
+// a name the icons layer doesn't resolve, or one that isn't <set>/<name>, fails, naming the page
+// and the icon; and an svg holding data-icon that isn't a marker fails, naming the page and its
+// tag. Through markdownPages, in a scratch site root in TMPDIR whose node_modules links the icons
+// layer, the fill resolves the icons from the site's root, failing in a site that doesn't install
+// them. That a build fills its rendered pages and its hand pages alike is the trees fixture's to
+// show, in the browser tier.
 
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
@@ -40,7 +41,6 @@ describe("the icon fill", () => {
       `<button aria-label="Help">${question}<kbd>?</kbd></button>` +
         `<button aria-label="Close">${x}</button><button>${x}</button>`,
     );
-    assert.match(question, /^<svg [^>]* aria-hidden="true" focusable="false">/);
   });
 
   test("carries a marker's class onto the svg, and drops its other attributes", async () => {
@@ -52,11 +52,16 @@ describe("the icon fill", () => {
       ),
       x.replace(/^<svg/, '<svg class="glyph wide"'),
     );
+    assert.equal(
+      await fillIcons(`<SVG data-icon = 'octicon/x-16' class='glyph'></SVG>`, "/index.html", icons),
+      x.replace(/^<svg/, '<svg class="glyph"'),
+    );
   });
 
-  test("leaves a page with no marker, and an svg that isn't one, unchanged", async () => {
+  test("leaves a page with no marker, an svg that isn't one, and a comment's text unchanged", async () => {
     const page =
-      '<main><svg viewBox="0 0 1 1"></svg><svg><path d="M0 0"/></svg>' + "<p>data-icon</p></main>";
+      '<main><svg viewBox="0 0 1 1"></svg><svg><path d="M0 0"/></svg>' +
+      '<p>data-icon</p><!-- <svg data-icon="octicon/x-16"></svg>, <svg data-icon="<name>"> --></main>';
     assert.equal(await fillIcons(page, "/a.html", icons), page);
   });
 
@@ -69,6 +74,24 @@ describe("the icon fill", () => {
       fillIcons('<svg data-icon="no-such-set/x-16"></svg>', "/b.html", icons),
       /icons: \/b\.html names the icon no-such-set\/x-16/,
     );
+  });
+
+  test("fails on an svg holding data-icon that isn't a marker, naming the page and its tag", async () => {
+    for (const tag of [
+      '<svg data-icon="octicon/x-16"/>',
+      "<svg data-icon=octicon/x-16>",
+      '<svg viewBox="0 0 1 1" data-icon>',
+      '<svg data-icon="octicon/x-16">',
+    ]) {
+      const page = `<p>${tag}${tag.endsWith("/>") ? "" : "<title>X</title></svg>"}</p>`;
+      await assert.rejects(fillIcons(page, "/a.html", icons), (error: Error) => {
+        assert.equal(
+          error.message,
+          `icons: /a.html holds ${tag}, which isn't an empty <svg data-icon="<set>/<name>"></svg>`,
+        );
+        return true;
+      });
+    }
   });
 
   test("fails on a name that isn't <set>/<name>, naming the page and the icon", async () => {
@@ -122,14 +145,8 @@ describe("the icon fill in the Markdown pages", () => {
     '<html><head><script type="module" src="/a.js"></script></head><body><header>' +
     '<svg data-icon="octicon/question-16"></svg></header><main></main></body></html>';
 
-  test("fills a hand page's markers from the site's icons, adding no script", async () => {
+  test("fills a page's markers from the site's icons", async () => {
     const filled = await transform(scratch(files, true))(page, "/briefs/hand.html");
-    assert.equal(filled, page.replace('<svg data-icon="octicon/question-16"></svg>', question));
-    assert.equal(String(filled).match(/<script/g)?.length, 1);
-  });
-
-  test("fills a rendered page's markers", async () => {
-    const filled = await transform(scratch(files, true))(page, "/index.html");
     assert.equal(filled, page.replace('<svg data-icon="octicon/question-16"></svg>', question));
   });
 

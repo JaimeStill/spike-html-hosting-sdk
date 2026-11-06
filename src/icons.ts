@@ -6,9 +6,12 @@
 // the icon's own standing. The page gains the icon's markup alone, never a script.
 //
 // A marker whose name isn't <set>/<name>, each a run of lowercase letters, digits, and hyphens, or
-// whose icon the icons layer doesn't resolve, fails the build, naming the page and the icon, so no
-// marker reaches a built page empty. The icon is resolved as the site resolves it, from the site's
-// root, so the build fills it from the icons layer the site installs, the SDK's peer.
+// whose icon the icons layer doesn't resolve, fails the build, naming the page and the icon, and so
+// does an svg holding data-icon that isn't a marker, self-closed, unquoted, or not empty, naming
+// the page and its tag, so no marker reaches a built page empty. An HTML comment's text is neither
+// filled nor checked, so a comment may show a marker. The icon is resolved as the site resolves
+// it, from the site's root, so the build fills it from the icons layer the site installs, the
+// SDK's peer.
 //
 // markdown-pages.ts's plugin runs the fill on every page the build writes, its rendered pages and
 // a site's hand pages alike, so a site that calls markdownPages takes it with no config of its own.
@@ -24,14 +27,22 @@ export const iconsPackage = "@jaimestill/spike-html-hosting-icons";
 export type LoadIcon = (icon: string) => Promise<string>;
 
 /** An empty svg element, its attributes captured; a marker when they hold data-icon. */
-const svgElement = /<svg(\s[^>]*)?>\s*<\/svg>/g;
+const svgElement = /<svg(\s[^>]*)?>\s*<\/svg>/gi;
+
+/** An svg's start tag holding data-icon, however written; each must open a marker. */
+const iconTag = /<svg\s[^>]*?(?<=\s)data-icon(?=[\s=/>])[^>]*>/gi;
+
+/** An HTML comment, whose text holds no marker. */
+const comment = /<!--[\s\S]*?-->/g;
 
 /** A marker's icon name, <set>/<name>. */
 const iconName = /^[a-z0-9-]+\/[a-z0-9-]+$/;
 
-/** The value of the double-quoted attribute name in an element's attributes, if it has one. */
-const attributeValue = (attributes: string, name: string): string | undefined =>
-  new RegExp(`\\s${name}="([^"]*)"`).exec(attributes)?.[1];
+/** The value of the quoted attribute name in an element's attributes, if it has one. */
+const attributeValue = (attributes: string, name: string): string | undefined => {
+  const match = new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`).exec(attributes);
+  return match === null ? undefined : (match[1] ?? match[2]);
+};
 
 /** Loads each icon from the icons layer as the site at root resolves it, its module imported once
  * per build. */
@@ -58,11 +69,26 @@ export function siteIcons(root: string): LoadIcon {
 
 /** The page's html, page its path as a failure names it, with every glyph marker replaced by its
  * icon's svg from load, the marker's class carried onto it; rejects on a marker whose name isn't
- * <set>/<name> or whose icon load can't give, naming the page and the icon. */
+ * <set>/<name> or whose icon load can't give, naming the page and the icon, and on an svg holding
+ * data-icon that isn't a marker, naming the page and its tag. */
 export async function fillIcons(html: string, page: string, load: LoadIcon): Promise<string> {
+  const comments = [...html.matchAll(comment)].map(({ index, 0: text }) => [
+    index,
+    index + text.length,
+  ]);
+  const outside = ({ index }: { index: number }): boolean =>
+    !comments.some(([start, end]) => index > start && index < end);
   const markers = [...html.matchAll(svgElement)].filter(
-    ([, attributes]) => attributeValue(attributes ?? "", "data-icon") !== undefined,
+    (marker) => outside(marker) && attributeValue(marker[1] ?? "", "data-icon") !== undefined,
   );
+  const opens = new Set(markers.map(({ index }) => index));
+  for (const { index, 0: tag } of html.matchAll(iconTag)) {
+    if (!opens.has(index) && outside({ index })) {
+      throw new Error(
+        `icons: ${page} holds ${tag}, which isn't an empty <svg data-icon="<set>/<name>"></svg>`,
+      );
+    }
+  }
   if (markers.length === 0) return html;
   const svgs = await Promise.all(
     markers.map(async ([, attributes = ""]) => {

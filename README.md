@@ -138,7 +138,9 @@ in every page the build writes, the rendered pages' shell and a site's hand page
 icon's `svg` from spike-html-hosting-icons, resolved from the site's root, so a site wires nothing
 beyond the plugin. The page gains the icon's markup and no script. A `class` on the marker carries
 onto the `svg`, and any other attribute is dropped; a name that isn't `<set>/<name>`, or that the
-icons layer doesn't resolve, fails the build, naming the page and the icon:
+icons layer doesn't resolve, fails the build, naming the page and the icon, and an `svg` holding
+`data-icon` that isn't a marker, self-closed, unquoted, or not empty, fails it, naming the page and
+its tag. A comment's text is neither filled nor checked:
 
 ```html
 <svg data-icon="octicon/question-16"></svg>
