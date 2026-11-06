@@ -9,7 +9,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 ## [0.3.0] - 2026-11-05
 
 The pages' navigation: each page's front matter, section tree, and site index written as the
-light-DOM markup of spike-html-hosting-components v0.2.0's elements, which the shell loads, the
+light-DOM markup of spike-html-hosting-components v0.2.1's elements, which the shell loads, the
 site index in a Pages drawer where its column doesn't fit, and tables that scroll in named regions.
 A site made from v0.2.0 takes the template's `index.html` and `package.json`'s components pin
 again, and one that imported `frontMatterTable` takes
@@ -18,7 +18,7 @@ again, and one that imported `frontMatterTable` takes
 ### Added
 
 - `markdownPages` writes each page's data as the light-DOM markup of
-  spike-html-hosting-components v0.2.0's elements: an `sl-section-tree` of the page's h2s and
+  spike-html-hosting-components v0.2.1's elements: an `sl-section-tree` of the page's h2s and
   their h3s, by the ids the headings carry, in a `div.section-tree` before main; an
   `sl-page-header` at the top of main, a dl of the front matter's keys and values in source order,
   escaped; and an `sl-site-index` of every page the site builds, nested by directory, after main
@@ -58,7 +58,7 @@ again, and one that imported `frontMatterTable` takes
   fills with the page's bindings and its character-key switch, and the Theme button; the Pages and
   Help buttons carry `aria-label`s, so the dialog names them without their key hints' brackets. A
   site made from v0.2.0 adds the dialog and the Help button to its own shell. The template pins
-  `github:JaimeStill/spike-html-hosting-components#v0.2.0`, as the SDK's dev dependency does.
+  `github:JaimeStill/spike-html-hosting-components#v0.2.1`, as the SDK's dev dependency does.
 
 ### Changed
 

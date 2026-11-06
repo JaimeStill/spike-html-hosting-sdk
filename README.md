@@ -43,7 +43,7 @@ shell loads, each pinned exactly:
 pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.3.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
-  github:JaimeStill/spike-html-hosting-components#v0.2.0 \
+  github:JaimeStill/spike-html-hosting-components#v0.2.1 \
   vite eslint
 ```
 
@@ -244,7 +244,7 @@ repository's highest plain `vX.Y.Z` tag.
 ### The pages
 
 `markdownPages` writes each page's data as the light-DOM markup of spike-html-hosting-components
-v0.2.0's elements, so with no script the page renders it as its own, and each element, once its
+v0.2.1's elements, so with no script the page renders it as its own, and each element, once its
 module defines it, styles and marks it. The section tree, in a div, comes before main, then main,
 opened by the page header, then the site index in the Pages drawer:
 
@@ -316,7 +316,7 @@ shell's header is a wrapping row of the site nav, then the Pages, Help, and Them
 
 The shell wires the components in: it loads their five modules, `site-nav.js`, `site-index.js`,
 `page-header.js`, `section-tree.js`, and `drawer.js`, render-blocking like the foundation's, from
-`github:JaimeStill/spike-html-hosting-components#v0.2.0`; places `sl-site-nav`, which takes no
+`github:JaimeStill/spike-html-hosting-components#v0.2.1`; places `sl-site-nav`, which takes no
 content, at its header's start; and adds the Pages button beside the Theme button, as the
 components' README gives it. keys.js clicks the button on P, as it does Theme on T; `site.css`
 shows it only below 86rem, the drawer's dock, and only once the drawer is defined, so with no
