@@ -12,7 +12,10 @@
 // otherwise, a docked drawer beside main at its start with the Pages button hidden, and the button
 // shown otherwise. With a sheet that holds the end column to 16rem on a page with no section tree,
 // the between-docks check fails on the index, naming main's off-center margins, and with the
-// guide's tree moved to the start column it fails naming the tree. With the shell's keys help
+// guide's tree moved to the start column it fails naming the tree. The index and the orphan page
+// are shorter than the viewport at 1200px and 1600px, so the body's min-height leaves room under
+// them, and with v0.3.0's grid, whose rows stretch into it, the under-header check and the crawl
+// fail on the index, naming the width and main's gap. With the shell's keys help
 // dialog removed, the Theme button's binding removed, or a handler that opens the Pages drawer on
 // P whatever the switch says, the keys help check fails, naming the page and the assertion.
 
@@ -31,6 +34,7 @@ import {
   keepsNavigationWords,
   opensKeysHelp,
   shell,
+  startsUnderHeader,
 } from "../../src/browser.ts";
 import { docks } from "../../src/markdown-pages.ts";
 import { served } from "../../src/served.ts";
@@ -269,6 +273,67 @@ describe("the fixture site with its index off-center between the docks", () => {
           error.message,
           /\/fixture-site\/guide\/: at 1200px the section tree is docked beside main/,
         );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site's short pages", () => {
+  for (const path of ["", "orphan.html"]) {
+    for (const width of [1200, 1600]) {
+      test(`${path || "the index"} is shorter than a ${width}px viewport`, async () => {
+        const page = await browser.open("about:blank");
+        try {
+          await page.cdp("Emulation.setDeviceMetricsOverride", {
+            width,
+            height: 900,
+            deviceScaleFactor: 1,
+            mobile: false,
+          });
+          await page.goto(`${server.origin}${path}`);
+          await page.evaluate(SETTLED);
+          // The header's and main's heights, and the docked drawer's, the rows' content, apart
+          // from where the grid places them.
+          const content: number = await page.evaluate(`(() => {
+            const height = (selector) => document.querySelector(selector)?.getBoundingClientRect().height ?? 0;
+            const drawer = document.querySelector("sl-drawer#pages:state(docked)") ? height("sl-drawer#pages") : 0;
+            return height("body > header") + Math.max(height("main"), drawer);
+          })()`);
+          assert.ok(content < 900, `its rows' content, ${content}px, leaves room in the viewport`);
+        } finally {
+          await page.close();
+        }
+      });
+    }
+  }
+});
+
+describe("the fixture site with v0.3.0's stretched rows", () => {
+  // v0.3.0's grid, its rows left to stretch into the body's min-height.
+  const css = "@media (width >= 70rem) { body { align-content: normal !important; } }";
+  const named =
+    /\/fixture-site\/: at 1200px main starts directly under the header, [\d.]+px below it, past the layout's 0px/;
+
+  test("the under-header check fails on the index, naming the width and the gap", async () => {
+    const page = await withSheet(css);
+    try {
+      await assert.rejects(startsUnderHeader(page, server.origin), (error: Error) => {
+        assert.match(error.message, named);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("the crawl fails on the index, naming the width and the gap", async () => {
+    const page = await withSheet(css);
+    try {
+      await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
+        assert.match(error.message, named);
         return true;
       });
     } finally {

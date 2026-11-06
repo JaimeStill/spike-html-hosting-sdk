@@ -22,7 +22,8 @@
  * - Narrower than 70rem: one column. The section tree is a bar stuck to the top of the viewport,
  *   its wrapper display: contents so the bar's containing block is the body, and the page's flow
  *   places it before main; the site index is still the drawer.
- * Main's track and its reading width may shrink, and each table scrolls sideways in its region,
+ * At both grid widths the rows pack at the top, so main starts directly under the header on a page
+ * shorter than the viewport, as on a taller one. Main's track and its reading width may shrink, and each table scrolls sideways in its region,
  * so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
  * below a shadow sheet's reach, are painted here: the section in view and the page on screen in a
  * heavier weight. The shell's header holds the site nav, then the Pages, Help, and Theme buttons,
@@ -81,13 +82,17 @@
   }
 
   /* Wide enough for main's 80ch and the section tree's 16rem column beside it. Main is centered
-     between equal side columns; only a page with a tree holds the end column to 16rem, below. */
+     between equal side columns; only a page with a tree holds the end column to 16rem, below. The
+     rows pack at the top: the foundation's reset gives the body a min-height of the viewport's, and
+     on a page shorter than that, rows left to stretch would share the room left over and push main
+     down from the header; on a taller page there is no room left over, and nothing changes. */
   @media (width >= 70rem) {
     body {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr);
       column-gap: var(--space-l);
       align-items: start;
+      align-content: start;
     }
 
     body > header {

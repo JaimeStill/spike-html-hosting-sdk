@@ -13,7 +13,9 @@
 // definition would hang; every request the page makes resolves under the base, and none fails; in
 // a 1600px viewport the site's layout holds main to a reading width, centered; at 1200px, between
 // the layout's docks, main is centered on a page with no section tree, and the tree is docked
-// beside it on a page with one; ? opens the shell's keys help dialog, which the foundation's keys
+// beside it on a page with one; at 390px, between the docks, and at 1600px, main starts directly
+// under the header, the gap from the header's bottom, or the section tree bar's where it sits
+// between them, no more than the layout's own, however short the page; ? opens the shell's keys help dialog, which the foundation's keys
 // module fills with the page's bindings, P, ?, T, and the tree's H and L, and its character-key
 // switch turns them off, so L moves to no section and P opens no drawer, and on again; in a 390px
 // viewport nothing scrolls sideways; at a phone's width, a px below and at each of the layout's
@@ -34,7 +36,7 @@
 // every custom element on it defined, every request under the base and none failed, its main
 // held to a reading width, centered, in a 1600px viewport, nothing scrolling sideways in a 390px
 // one, its navigation laid out as the shell check has it at the same widths, its layout between
-// the docks and its keys help as the shell checks have them, and its title its source's front
+// the docks, its main under the header, and its keys help as the shell checks have them, and its title its source's front
 // matter name, or, for a source with no name, its first h1's text. Its Pages button is hidden at
 // 1600px, where the site index is docked, and at 390px is shown and opens the Pages drawer as a
 // modal by its click and by P, its aria-expanded true while the drawer is open and false once
@@ -391,6 +393,74 @@ async function assertBetweenDocks(page: Page, url: string): Promise<void> {
   }
 }
 
+/** The widths main is checked to start under the header at, each with the viewport setter its
+ * check uses: a phone's, where the body is one column; BETWEEN, a grid with the drawer undocked;
+ * and 1600px, a grid with it docked. */
+const UNDER: [number, (page: Page) => Promise<unknown>][] = [
+  [390, narrow],
+  [BETWEEN, between],
+  [1600, wide],
+];
+
+/** The loaded page's gap between the header and main: main's top less the bottom of the box above
+ * it, the header's, or the section tree's where it is the bar between them; and the layout's own
+ * gap there. That is the body's row-gap, normal being 0, and the box's block-end margin and main's
+ * block-start margin, summed in the grid and collapsed to the larger in the one column's block
+ * flow, where main's start margin is also the largest of those that collapse through its top: its
+ * first in-flow child's, through each empty one, and on down while no padding, border, or new
+ * formatting context separates them, as a heading's opening margin does on a page with no front
+ * matter. A docked tree is beside main, not above it, so it is left out. */
+const UNDER_HEADER = `(() => {
+  const main = document.querySelector("main");
+  const tree = document.querySelector("sl-section-tree");
+  const above = tree && !tree.matches(":state(docked)") && tree.getBoundingClientRect().height > 0
+    ? tree
+    : document.querySelector("body > header");
+  const length = (value) => parseFloat(value) || 0;
+  const grid = /grid|flex/.test(getComputedStyle(document.body).display);
+  let start = length(getComputedStyle(main).marginBlockStart);
+  for (let parent = grid ? null : main; parent; ) {
+    const style = getComputedStyle(parent);
+    if (style.display !== "block" || style.overflow !== "visible" ||
+        length(style.paddingBlockStart) > 0 || length(style.borderBlockStartWidth) > 0) break;
+    let child = parent.firstElementChild;
+    while (child) {
+      const own = getComputedStyle(child);
+      if (own.display !== "none" && own.position !== "absolute" && own.position !== "fixed") {
+        start = Math.max(start, length(own.marginBlockStart));
+        if (child.getBoundingClientRect().height > 0) break;
+        start = Math.max(start, length(own.marginBlockEnd));
+      }
+      child = child.nextElementSibling;
+    }
+    parent = child;
+  }
+  const end = length(getComputedStyle(above).marginBlockEnd);
+  return {
+    above: above.localName,
+    gap: main.getBoundingClientRect().top - above.getBoundingClientRect().bottom,
+    allowed: length(getComputedStyle(document.body).rowGap) +
+      (grid ? end + start : Math.max(end, start)),
+  };
+})()`;
+
+/** Asserts the loaded page's main starts directly under the header at each of the UNDER widths:
+ * the gap no more than the layout's own, so a short page's grid rows, stretched to the body's
+ * min-height, can't push main down. */
+async function assertUnderHeader(page: Page, url: string): Promise<void> {
+  for (const [width, viewport] of UNDER) {
+    await viewport(page);
+    await page.evaluate(SETTLED);
+    const { above, gap, allowed }: { above: string; gap: number; allowed: number } =
+      await page.evaluate(UNDER_HEADER);
+    assert.ok(
+      gap <= allowed + 0.5,
+      `${url}: at ${width}px main starts directly under the ${above}, ` +
+        `${gap}px below it, past the layout's ${allowed}px`,
+    );
+  }
+}
+
 /** The keys help dialog is open, modal. */
 const HELP = `!!document.querySelector("dialog#help")?.matches(":modal")`;
 
@@ -607,6 +677,13 @@ export const holdsBetweenDocks: Check = async (page, site) => {
   await assertBetweenDocks(page, site);
 };
 
+/** At 390px, between the docks, and at 1600px, main starts directly under the header, however
+ * short the page. */
+export const startsUnderHeader: Check = async (page, site) => {
+  await page.goto(site);
+  await assertUnderHeader(page, site);
+};
+
 /** ? opens the keys help dialog, listing the page's bindings, whose character-key switch turns
  * them off and on again. */
 export const opensKeysHelp: Check = async (page, site) => {
@@ -781,6 +858,8 @@ export const shell: Record<string, Check> = {
   "every request resolves under the base, and none fails": requestsUnderBase,
   "main holds its centered reading width at 1600px": holdsReadingWidth,
   "between the docks main is centered with no section tree, beside a docked one": holdsBetweenDocks,
+  "main starts directly under the header at 390px, between the docks, and at 1600px":
+    startsUnderHeader,
   "? opens the keys help, listing the page's bindings, and its switch turns them off":
     opensKeysHelp,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
@@ -874,6 +953,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await assertPagesButton(page, url);
     await assertNavigation(page, url);
     await assertBetweenDocks(page, url);
+    await assertUnderHeader(page, url);
     await assertKeysHelp(page, url);
     await wide(page);
     const name = data?.name;
