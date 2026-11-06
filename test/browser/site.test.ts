@@ -107,6 +107,7 @@ describe("the fixture site under its base", () => {
       t.diagnostic(`${crawled.pages} pages, ${crawled.links} in-site links`);
       assert.equal(crawled.pages, 4);
       assert.deepEqual(crawled.unreachable, []);
+      assert.deepEqual(crawled.hand, [], "every page is a copied file's");
     } finally {
       await page.close();
     }

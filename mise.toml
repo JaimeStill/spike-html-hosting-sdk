@@ -106,9 +106,16 @@ run = [
 ]
 dir = "{{config_root}}/test/fixtures/noctis"
 
+# The trees fixture, two copied trees and two hand pages, its index among them, built into dist/.
+[tasks."build:fixture-trees"]
+description = "Build the trees fixture, test/fixtures/trees/, with Vite into its dist/, under its base: its two copied trees' pages in their shell and its hand pages"
+depends = ["preflight"]
+run = "../../../node_modules/.bin/vite build --logLevel warn"
+dir = "{{config_root}}/test/fixtures/trees"
+
 [tasks."test:browser"]
-description = "Run the browser tier on the fixture sites' builds, served under their base, in the pinned chrome-headless-shell: the shell checks, the crawl, and the screenshots command, its captures under a scratch TMPDIR, on the fixture site; the palette check on the Noctis fixture's two builds"
-depends = ["preflight browser", "build:fixture", "build:fixture-noctis"]
+description = "Run the browser tier on the fixture sites' builds, served under their base, in the pinned chrome-headless-shell: the shell checks, the crawl, and the screenshots command, its captures under a scratch TMPDIR, on the fixture site; the palette check on the Noctis fixture's two builds; the shell checks on each hand page and a rendered page, and the crawl, on the trees fixture"
+depends = ["preflight browser", "build:fixture", "build:fixture-noctis", "build:fixture-trees"]
 run = "BROWSER_EXECUTABLE=$(mise which chrome-headless-shell) node --test 'test/browser/*.test.ts'"
 
 [tasks."test:scaffold"]

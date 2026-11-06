@@ -1,0 +1,66 @@
+<!doctype html>
+<!-- The trees fixture's index, a hand page at the base, as the root's index is: no Markdown fills
+     it. Its header is the shell's but for the Pages button, which a page with no Pages drawer
+     leaves out, with its script; its main links the two trees' copied pages, under their
+     directories, and the hand page at a path elsewhere under the base. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The trees fixture</title>
+    <link rel="stylesheet" href="@jaimestill/spike-html-apps-foundation/page-full.css" />
+    <link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/register-full.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/preferences.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
+  </head>
+  <body>
+    <header>
+      <sl-site-nav></sl-site-nav>
+      <button
+        type="button"
+        commandfor="help"
+        command="show-modal"
+        aria-label="Help"
+        data-keys="?"
+      >
+        Help <span aria-hidden="true"><kbd>?</kbd></span>
+      </button>
+      <button
+        type="button"
+        commandfor="theme"
+        command="--open"
+        aria-label="Theme"
+        data-keys="t"
+      >
+        Theme <span aria-hidden="true"><kbd>T</kbd></span>
+      </button>
+    </header>
+    <main>
+      <h1>The trees fixture</h1>
+      <p>Two copied trees and a hand page, one site.</p>
+      <ul>
+        <li><a href="github/profile/">The charter</a>, from the .github repository</li>
+        <li><a href="org/briefs/orientation.html">The orientation brief</a>, from the org repository</li>
+        <li><a href="briefs/orientation.html">The orientation brief, by hand</a></li>
+      </ul>
+    </main>
+    <sl-theme-menu id="theme"></sl-theme-menu>
+    <dialog id="help" aria-labelledby="help-title">
+      <h2 id="help-title">Keyboard shortcuts</h2>
+      <div data-keys-list></div>
+      <footer>
+        <button
+          type="button"
+          commandfor="help"
+          command="close"
+          aria-label="Close"
+          data-keys="?"
+        >
+          Close <span aria-hidden="true"><kbd>?</kbd></span>
+        </button>
+      </footer>
+    </dialog>
+  </body>
+</html>

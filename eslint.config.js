@@ -17,6 +17,7 @@ export default defineConfig([
     "test/fixtures/site/dist/",
     "test/fixtures/noctis/dist/",
     "test/fixtures/noctis/plain/dist/",
+    "test/fixtures/trees/dist/",
     "template/",
   ]),
   ...config,

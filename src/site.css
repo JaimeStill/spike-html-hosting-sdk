@@ -4,7 +4,8 @@
  * page header, tables, and code blocks. Its own layer, site, declared after the foundation's
  * layers, which the page entry declares first, so it wins over them. Every length is a --space-*
  * token, so the reader's Space profile changes it, but main's reading width, in ch, the side
- * columns' 16rem minimum, and the two widths the layout changes at.
+ * columns' 16rem minimum, the two widths the layout changes at, a callout's rule, the
+ * foundation's --line-m, and its icon, 1em, the size of its title's text.
  *
  * The renderer (markdown-pages.ts) writes the section tree's div, when the page has one, then
  * main, then the site index in the Pages drawer, an sl-drawer. Each side column docks only where it
@@ -27,7 +28,10 @@
  * and each table scrolls sideways in its region, so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
  * below a shadow sheet's reach, are painted here: the section in view and the page on screen in a
  * heavier weight. The shell's header holds the site nav, then the Pages, Help, and Theme buttons,
- * in a row.
+ * in a row. A GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule
+ * at its start and its title, the kind's octicon and its name, in its kind's color, the
+ * foundation's palette color GitHub gives it: note blue, tip green, important purple, warning
+ * yellow, and caution red.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -164,5 +168,60 @@
   pre {
     margin-block: var(--space-m);
     overflow-x: auto;
+  }
+
+  /* A GitHub alert: its kind's color, which its rule and its title take; the body text keeps the
+     page's. */
+  .markdown-alert {
+    --alert-color: var(--blue);
+    margin-block: var(--space-m);
+    padding-block: var(--space-xs);
+    padding-inline: var(--space-m) 0;
+    border-inline-start: var(--line-m) solid var(--alert-color);
+  }
+
+  .markdown-alert-tip {
+    --alert-color: var(--green);
+  }
+
+  .markdown-alert-important {
+    --alert-color: var(--purple);
+  }
+
+  .markdown-alert-warning {
+    --alert-color: var(--yellow);
+  }
+
+  .markdown-alert-caution {
+    --alert-color: var(--red);
+  }
+
+  .markdown-alert > :first-child {
+    margin-block-start: 0;
+  }
+
+  .markdown-alert > :last-child {
+    margin-block-end: 0;
+  }
+
+  /* The title: the octicon, sized to the text, then the kind's name, close above the body. */
+  .markdown-alert-title {
+    margin-block-end: var(--space-2xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--alert-color);
+    font-weight: 600;
+  }
+
+  .markdown-alert-title + * {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .markdown-alert-title > svg {
+    flex: none;
+    inline-size: 1em;
+    block-size: 1em;
+    fill: currentColor;
   }
 }

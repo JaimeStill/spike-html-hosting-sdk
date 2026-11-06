@@ -66,7 +66,7 @@ const modules: Record<string, string[]> = {
   ],
   "./syntax.js": ["builtinSyntax", "checkSyntax", "createSyntax"],
   "./eslint.js": ["build", "config"],
-  "./content.js": ["blob", "checkContent"],
+  "./content.js": ["blob", "checkContent", "copiedFiles", "treeDir"],
   "./served.js": ["base", "command", "served"],
   "./browser.js": [
     "blocksRender",

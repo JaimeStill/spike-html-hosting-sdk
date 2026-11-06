@@ -3,7 +3,9 @@
 // (served.ts), and asserts with node's assert, throwing on the first failure, so a site's test
 // calls it inside its own node:test test and owns the browser, the server, and the page.
 //
-// The shell checks run on a site's index, the page its shell builds, and the root's one page: the
+// The shell checks run on a page of the site, its index unless the site's test gives another: a
+// Markdown site's index, the page its shell builds, a hand page at the base, or a hand page at any
+// path under it, each checked under the site's base. On that page: the
 // Theme button and T open the theme menu, whose CSS module script the build rewrote, so its sheet
 // is adopted with no stylesheet fetched for it; stepping the color, space, and type rows each to a
 // profile past its default, which the full entry registers, sets that facet's attribute on the
@@ -32,8 +34,9 @@
 // which the build wrote from the theme; a registered palette whose code renders plain, with no
 // syntax theme for it or no rule selecting it, fails, named.
 //
-// The crawl runs on a Markdown site: from the index, every link into the site is followed,
-// breadth first, and each page reached loads with a 2xx, its one module script render-blocking,
+// The crawl runs on a Markdown site, one tree or several: from the index, every link into the site
+// is followed, breadth first, and each copied file's page reached loads with a 2xx, its one module
+// script render-blocking,
 // every custom element on it defined, every request under the base and none failed, its main
 // held to a reading width, centered, in a 1600px viewport, nothing scrolling sideways in a 390px
 // one, its navigation laid out as the shell check has it at the same widths, its layout between
@@ -44,11 +47,15 @@
 // Escape closes it. Each page's main opens with its page header, whose dl holds a dt
 // and a dd per front matter key, in source order, each key and value as the source holds it, and
 // none for a source with no front matter; no front matter table remains, and no key's line shows
-// as body text. Each page's site index, in its Pages drawer, links every page the build writes,
+// as body text. Each page's site index, in its Pages drawer, links every copied file's page,
 // each once, and no other. Every in-site link reaches a built page, and an element with its
-// fragment's id when it has one. The crawl checks a page for every file content.json records, and
-// no other: a page no link from the index reaches is crawled from once the links run out, and
-// returned, for the test's diagnostics.
+// fragment's id when it has one. The crawl checks a page for every Markdown file content.json
+// records, every tree's: a page no link from the index reaches is crawled from once the links run
+// out, and returned, for the test's diagnostics. A page reached that no record names is a hand
+// page the site also builds, a hand index at the base or a hand page elsewhere: it loads with a
+// 2xx, every request under the base and none failed, its ids are the targets of the fragments
+// linking it, and its links are followed, but the copied pages' checks are left to the shell
+// checks, which a site runs on each hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -64,11 +71,12 @@ import { SETTLED, until } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import { parse } from "yaml";
 
-import type { Content } from "./content.ts";
+import { copiedFiles } from "./content.ts";
 import { docks, frontMatterText, pageUrl } from "./markdown-pages.ts";
 
-/** A check on a fresh page of the site whose URL under the base, as served() gives it, is site. */
-export type Check = (page: Page, site: string) => Promise<void>;
+/** A check on a fresh page of the site whose URL under the base, as served() gives it, is site:
+ * the page at url, a URL under site, site itself, its index, when none is given. */
+export type Check = (page: Page, site: string, url?: string) => Promise<void>;
 
 /** Clicks the element the selector names at its center, as a person's mouse does. */
 async function click(page: Page, selector: string): Promise<void> {
@@ -568,9 +576,9 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
 /** The Theme button and T each open the theme menu, which adopts its sheet, the constructed
  * CSSStyleSheet the build made of its CSS module script, onto the document, in its layer; no
  * stylesheet is fetched for it, and its chunk loads on the first open. */
-export const opensThemeMenu: Check = async (page, site) => {
+export const opensThemeMenu: Check = async (page, site, url = site) => {
   const take = await record(page);
-  await page.goto(site);
+  await page.goto(url);
   // The entry ran before first paint: sl-theme-menu is defined, the menu itself not loaded.
   assert.equal(await page.evaluate(`!!customElements.get("sl-theme-menu")`), true);
   assert.equal(await page.evaluate("document.adoptedStyleSheets.length"), 0);
@@ -601,8 +609,8 @@ export const opensThemeMenu: Check = async (page, site) => {
 /** Stepping each facet's row, color, space, and type, to the profile after its default sets the
  * facet's attribute on the root; every row offers more than its default, as the full entry
  * registers every built-in profile. */
-export const stepsEachFacet: Check = async (page, site) => {
-  await page.goto(site);
+export const stepsEachFacet: Check = async (page, site, url = site) => {
+  await page.goto(url);
   await press(page, "t");
   await until(page, MODAL);
 
@@ -639,73 +647,73 @@ export const stepsEachFacet: Check = async (page, site) => {
 };
 
 /** The page's one module script, the build's entry, is render-blocking. */
-export const blocksRender: Check = async (page, site) => {
-  await page.goto(site);
-  assert.deepEqual(await page.evaluate(BLOCKING), [true], `${site}: its entry blocks render`);
+export const blocksRender: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  assert.deepEqual(await page.evaluate(BLOCKING), [true], `${url}: its entry blocks render`);
 };
 
 /** Once the page loads, every element on it whose name holds a hyphen is defined: a shell that
  * fails to load a component's module leaves its element undefined, named. */
-export const definesEveryElement: Check = async (page, site) => {
-  await page.goto(site);
-  await assertDefined(page, site);
+export const definesEveryElement: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertDefined(page, url);
 };
 
 /** Every request the page makes, the menu's chunk on its first open included, resolves under the
  * base, and none fails or answers an error. */
-export const requestsUnderBase: Check = async (page, site) => {
+export const requestsUnderBase: Check = async (page, site, url = site) => {
   const take = await record(page);
-  await page.goto(site);
+  await page.goto(url);
   await click(page, "button[commandfor=theme]");
   await until(page, MODAL);
-  assertLoaded(site, site, take());
+  assertLoaded(url, site, take());
 };
 
 /** In a 1600px viewport, main holds its reading width, centered. */
-export const holdsReadingWidth: Check = async (page, site) => {
+export const holdsReadingWidth: Check = async (page, site, url = site) => {
   await wide(page);
-  await page.goto(site);
-  await assertReadingWidth(page, site);
+  await page.goto(url);
+  await assertReadingWidth(page, url);
 };
 
 /** Between the layout's docks, main is centered on a page with no section tree, and the tree is
  * docked beside it on a page with one. */
-export const holdsBetweenDocks: Check = async (page, site) => {
-  await page.goto(site);
-  await assertBetweenDocks(page, site);
+export const holdsBetweenDocks: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertBetweenDocks(page, url);
 };
 
 /** At 390px, between the docks, and at 1600px, main starts directly under the header, however
  * short the page. */
-export const startsUnderHeader: Check = async (page, site) => {
-  await page.goto(site);
-  await assertUnderHeader(page, site);
+export const startsUnderHeader: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertUnderHeader(page, url);
 };
 
 /** ? opens the keys help dialog, listing the page's bindings, whose character-key switch turns
  * them off and on again. */
-export const opensKeysHelp: Check = async (page, site) => {
-  await page.goto(site);
-  await assertKeysHelp(page, site);
+export const opensKeysHelp: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertKeysHelp(page, url);
 };
 
 /** In a 390px viewport, nothing on the page scrolls sideways. */
-export const fitsNarrowWidth: Check = async (page, site) => {
-  await page.goto(site);
-  await assertNoSidewaysScroll(page, site);
+export const fitsNarrowWidth: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertNoSidewaysScroll(page, url);
 };
 
 /** At a phone's width, a px below and at each of the layout's docks, and at 1400px, no navigation
  * link breaks inside a word, and every docked side column is at least 16rem wide. */
-export const keepsNavigationWords: Check = async (page, site) => {
-  await page.goto(site);
-  await assertNavigation(page, site);
+export const keepsNavigationWords: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertNavigation(page, url);
 };
 
 /** A choice the menu never saves, stepped and then cancelled, stores nothing, and a reload shows
  * none of it: the site leaves the reader's choice to the menu's Save. */
-export const staysUnsaved: Check = async (page, site) => {
-  await page.goto(site);
+export const staysUnsaved: Check = async (page, site, url = site) => {
+  await page.goto(url);
   const stored = `localStorage.getItem(${JSON.stringify(KEY)})`;
   assert.equal(await page.evaluate(stored), null, "nothing is stored before a choice");
   await press(page, "t");
@@ -715,7 +723,7 @@ export const staysUnsaved: Check = async (page, site) => {
   await press(page, "Escape");
   await until(page, `!document.querySelector("sl-theme-menu dialog")`);
   assert.equal(await page.evaluate(stored), null, "a cancelled choice stores nothing");
-  await page.goto(site);
+  await page.goto(url);
   assert.equal(await page.evaluate(stored), null, "nothing is stored after a reload");
   assert.notEqual(
     await page.evaluate(`document.documentElement.getAttribute("data-palette")`),
@@ -783,10 +791,10 @@ const attribute = (name: string): string => `document.documentElement.getAttribu
  * token's color differs from the page's text color. It fails naming the palette and the scheme
  * for a registered palette whose code renders plain: no token carries a color for it, as on a
  * build with no syntax theme for it, or a token keeps the page's text color, as where no rule
- * selects the palette's. It runs on url, a page with highlighted code, which a site's test gives:
- * its index, when the index holds some. The menu is cancelled after, so nothing is stored.
+ * selects the palette's. It runs on url, a page with highlighted code, which a site's test gives,
+ * or on site, its index, when the index holds some. The menu is cancelled after, so nothing is stored.
  */
-export const highlightsEachPalette: Check = async (page, url) => {
+export const highlightsEachPalette: Check = async (page, site, url = site) => {
   await page.goto(url);
   const palettes: string[] = await page.evaluate(PALETTES);
   assert.ok(palettes.length > 0, `${url}: the registry lists a color profile`);
@@ -866,13 +874,13 @@ export const shell: Record<string, Check> = {
   "the theme menu stays unsaved: no stored choice persists": staysUnsaved,
 };
 
-/** Each copied file's page of the site at root, by its path under the base (x.md at x.html,
- * dir/README.md at dir/, the root's README.md at the base itself), to its source's front matter,
- * null when it has none, read with yaml as the build reads it. */
+/** Each copied file's page of the site at root, every tree's, by its path under the base (x.md at
+ * x.html, dir/README.md at dir/, a single tree's root README.md at the base itself, each of
+ * several trees' under its directory), to its source's front matter, null when it has none, read
+ * with yaml as the build reads it. */
 function sources(root: string): Map<string, Record<string, unknown> | null> {
-  const content: Content = JSON.parse(readFileSync(join(root, "content.json"), "utf8"));
   return new Map(
-    Object.keys(content.files)
+    copiedFiles(root)
       .filter((path) => path.endsWith(".md"))
       .map((path) => {
         const page = pageUrl("README.md", path).replace(/^\.\/$/, "");
@@ -884,16 +892,19 @@ function sources(root: string): Map<string, Record<string, unknown> | null> {
   );
 }
 
-/** What a crawl reached: its pages and in-site links counted, and the paths under the base of the
- * pages no link from the index reaches. */
+/** What a crawl reached: its pages, the hand pages among them, and in-site links counted; the
+ * paths under the base of the copied pages no link from the index reaches; and those of the hand
+ * pages it reached, in the order it reached them. */
 export interface Crawled {
   pages: number;
   links: number;
   unreachable: string[];
+  hand: string[];
 }
 
-/** Crawls every page of the Markdown site at root, whose URL under the base is site, from its
- * index, checking each as this module's header lists; resolves to what it reached. */
+/** Crawls every copied page of the Markdown site at root, whose URL under the base is site, from
+ * its index, checking each as this module's header lists, and loading each hand page it reaches;
+ * resolves to what it reached. */
 export async function crawl(page: Page, site: string, root: string): Promise<Crawled> {
   const pages = sources(root);
   /** Each page reached, by its URL, to the ids its elements carry. */
@@ -903,12 +914,26 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
   /** The copied files' pages no link from the index reaches: once the links run out, the crawl
    * starts again from the first page not reached, so each is checked as a linked one is. */
   const unreachable: string[] = [];
+  /** The hand pages reached, by their paths under the base. */
+  const hand: string[] = [];
   const next = (): string | undefined => {
     const url = [...pages.keys()].map((path) => `${site}${path}`).find((u) => !reached.has(u));
     if (url !== undefined) unreachable.push(url.slice(site.length));
     return url;
   };
   const queue = [site];
+  /** Records the loaded page at url as reached, with its ids, and queues its in-site links. */
+  const visit = async (url: string): Promise<void> => {
+    const { ids, hrefs }: { ids: string[]; hrefs: string[] } = await page.evaluate(`({
+      ids: [...document.querySelectorAll("[id]")].map((element) => element.id),
+      hrefs: [...document.querySelectorAll("a[href]")].map((a) => a.href),
+    })`);
+    reached.set(url, new Set(ids));
+    for (const href of hrefs.filter((href) => href.startsWith(site))) {
+      links.push({ from: url, href });
+      queue.push(href.split("#")[0]);
+    }
+  };
   const take = await record(page);
   await wide(page);
   for (let url = queue.shift() ?? next(); url !== undefined; url = queue.shift() ?? next()) {
@@ -916,10 +941,15 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     take();
     await page.goto(url);
     assertLoaded(url, site, take());
+    const path = url.slice(site.length);
+    if (!pages.has(path)) {
+      // A hand page: what it links is followed, and its ids are what links to it reach.
+      hand.push(path);
+      await visit(url);
+      continue;
+    }
     assert.deepEqual(await page.evaluate(BLOCKING), [true], `${url}: its entry blocks render`);
     await assertDefined(page, url);
-    const path = url.slice(site.length);
-    assert.ok(pages.has(path), `${url} is a copied file's page`);
     const data = pages.get(path) ?? null;
     const shown: {
       title: string;
@@ -979,19 +1009,10 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     assert.deepEqual(
       shown.index.toSorted(),
       [...pages.keys()].map((path) => `${site}${path}`).sort(),
-      `${url}: its site index links every page the build writes, each once`,
+      `${url}: its site index links every copied page, each once`,
     );
     assert.ok(shown.drawer, `${url}: its site index is in the Pages drawer`);
-
-    const { ids, hrefs }: { ids: string[]; hrefs: string[] } = await page.evaluate(`({
-      ids: [...document.querySelectorAll("[id]")].map((element) => element.id),
-      hrefs: [...document.querySelectorAll("a[href]")].map((a) => a.href),
-    })`);
-    reached.set(url, new Set(ids));
-    for (const href of hrefs.filter((href) => href.startsWith(site))) {
-      links.push({ from: url, href });
-      queue.push(href.split("#")[0]);
-    }
+    await visit(url);
   }
 
   for (const { from, href } of links) {
@@ -1003,9 +1024,12 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     }
   }
   assert.deepEqual(
-    [...reached.keys()].map((url) => url.slice(site.length)).sort(),
+    [...reached.keys()]
+      .map((url) => url.slice(site.length))
+      .filter((path) => !hand.includes(path))
+      .sort(),
     [...pages.keys()].sort(),
-    "the crawl checked every copied file's page, and no other",
+    "the crawl checked every copied file's page",
   );
-  return { pages: reached.size, links: links.length, unreachable };
+  return { pages: reached.size, links: links.length, unreachable, hand };
 }
