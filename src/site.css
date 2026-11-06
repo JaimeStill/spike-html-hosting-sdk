@@ -23,8 +23,8 @@
  *   its wrapper display: contents so the bar's containing block is the body, and the page's flow
  *   places it before main; the site index is still the drawer.
  * At both grid widths the rows pack at the top, so main starts directly under the header on a page
- * shorter than the viewport, as on a taller one. Main's track and its reading width may shrink, and each table scrolls sideways in its region,
- * so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
+ * shorter than the viewport, as on a taller one. Main's track and its reading width may shrink,
+ * and each table scrolls sideways in its region, so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
  * below a shadow sheet's reach, are painted here: the section in view and the page on screen in a
  * heavier weight. The shell's header holds the site nav, then the Pages, Help, and Theme buttons,
  * in a row.

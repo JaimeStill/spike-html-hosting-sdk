@@ -191,7 +191,8 @@ on the page defined, so a module the shell fails to load fails naming its elemen
 request under the base, and none failed; main's centered reading width at 1600px; at 1200px, between
 the docks, main centered on a page with no section tree and the tree docked beside it on a page with
 one; at 390px, at 1200px, and at 1600px, main starting directly under the header, however short the
-page, no further below it, or below the section tree's bar between them, than the layout's own gap;
+page, never into it, or into the section tree's bar between them, and no further below it than on a
+page taller than the viewport;
 ? opening the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the
 tree's H and L, and whose character-key switch turns them off, so L and P do nothing, and on again;
 nothing scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of
@@ -201,12 +202,12 @@ left unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin,
 resolves to the pages and links it reached and the pages no link reaches. Each page it reaches loads
 with a 2xx, its one module script render-blocking, every custom element on it defined, every request
 under the base and none failed, main at its centered reading width at 1600px, nothing scrolling
-sideways at 390px, its navigation, its layout between the docks, its main under the header, and its
-keys help as the shell checks have them, and its title its source's front matter name or first h1. Its main opens with its
-page header, whose dt and dd pairs are the source's front matter keys and values, in order, with no
-front matter table left; its site index, in its Pages drawer, links every page the build writes,
-each once, and no other; its Pages button is hidden at 1600px and at 390px opens the drawer by its
-click and by P, its `aria-expanded` following the drawer open and closed; and every in-site link
+sideways at 390px, its navigation, its layout between the docks, its main under the header, and
+its keys help as the shell checks have them, and its title its source's front matter name or first
+h1. Its main opens with its page header, whose dt and dd pairs are the source's front matter keys
+and values, in order, with no front matter table left; its site index, in its Pages drawer, links
+every page the build writes, each once, and no other; its Pages button is hidden at 1600px and at
+390px opens the drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and every in-site link
 reaches a built page, and its fragment's element. Since each page's index links every other, the
 crawl reaches every page from the index.
 

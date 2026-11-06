@@ -19,9 +19,9 @@ Main directly under the header on a page shorter than the viewport.
   docked drawer, and the section tree, each held in view as the page scrolls, are unchanged.
 - `./browser.js`: `startsUnderHeader`, in `shell`, and the crawl assert, at 390px, at 1200px, and
   at 1600px, that main starts directly under the header, or under the section tree's bar where it
-  sits between them, no further below it than the layout's own gap: the body's row-gap and the
-  block margins that meet there. The fixture site's index and orphan page are shorter than the
-  viewport, and with v0.3.0's rows both checks fail on the index.
+  sits between them, never into it and no further below it than on the same page made taller than
+  the viewport. The fixture site's index and orphan page are shorter than the viewport, and with
+  v0.3.0's rows both checks fail on the index.
 
 ## [0.3.0] - 2026-11-05
 

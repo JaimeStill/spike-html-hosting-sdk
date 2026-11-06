@@ -13,9 +13,11 @@
 // shown otherwise. With a sheet that holds the end column to 16rem on a page with no section tree,
 // the between-docks check fails on the index, naming main's off-center margins, and with the
 // guide's tree moved to the start column it fails naming the tree. The index and the orphan page
-// are shorter than the viewport at 1200px and 1600px, so the body's min-height leaves room under
-// them, and with v0.3.0's grid, whose rows stretch into it, the under-header check and the crawl
-// fail on the index, naming the width and main's gap. With the shell's keys help
+// are shorter than the viewport at 390px, 1200px, and 1600px, so the body's min-height leaves room
+// under them, and with v0.3.0's grid, whose rows stretch into it, the under-header check and the
+// crawl fail on the index, naming the width and main's gap; at 390px, with a flex column whose auto
+// margin pushes main to the body's end, the check fails as well, and with main pulled up into the
+// header it fails naming the overlap. With the shell's keys help
 // dialog removed, the Theme button's binding removed, or a handler that opens the Pages drawer on
 // P whatever the switch says, the keys help check fails, naming the page and the assertion.
 
@@ -283,13 +285,17 @@ describe("the fixture site with its index off-center between the docks", () => {
 
 describe("the fixture site's short pages", () => {
   for (const path of ["", "orphan.html"]) {
-    for (const width of [1200, 1600]) {
+    for (const [width, height] of [
+      [390, 844],
+      [1200, 900],
+      [1600, 900],
+    ]) {
       test(`${path || "the index"} is shorter than a ${width}px viewport`, async () => {
         const page = await browser.open("about:blank");
         try {
           await page.cdp("Emulation.setDeviceMetricsOverride", {
             width,
-            height: 900,
+            height,
             deviceScaleFactor: 1,
             mobile: false,
           });
@@ -302,7 +308,10 @@ describe("the fixture site's short pages", () => {
             const drawer = document.querySelector("sl-drawer#pages:state(docked)") ? height("sl-drawer#pages") : 0;
             return height("body > header") + Math.max(height("main"), drawer);
           })()`);
-          assert.ok(content < 900, `its rows' content, ${content}px, leaves room in the viewport`);
+          assert.ok(
+            content < height,
+            `its rows' content, ${content}px, leaves room in the viewport`,
+          );
         } finally {
           await page.close();
         }
@@ -334,6 +343,42 @@ describe("the fixture site with v0.3.0's stretched rows", () => {
     try {
       await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
         assert.match(error.message, named);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with main pushed down or up at 390px", () => {
+  test("the under-header check fails with main at the end of a flex column", async () => {
+    // An auto margin takes the room a short page leaves, as no margin of the layout's own would.
+    const page = await withSheet(
+      "@media (width < 70rem) { body { display: flex; flex-direction: column; } " +
+        "main { margin-block-start: auto; } }",
+    );
+    try {
+      await assert.rejects(startsUnderHeader(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: at 390px main starts directly under the header, [\d.]+px below it, past the layout's [\d.]+px/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("the under-header check fails with main pulled up into the header", async () => {
+    const page = await withSheet("@media (width < 70rem) { main { margin-block-start: -3rem; } }");
+    try {
+      await assert.rejects(startsUnderHeader(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: at 390px main starts under the header, not into it/,
+        );
         return true;
       });
     } finally {
