@@ -24,14 +24,15 @@
  *   its wrapper display: contents so the bar's containing block is the body, and the page's flow
  *   places it before main; the site index is still the drawer.
  * At both grid widths the rows pack at the top, so main starts directly under the header on a page
- * shorter than the viewport, as on a taller one. Main's track and its reading width may shrink,
- * and each table scrolls sideways in its region, so no page is wider than a 390px viewport. The marks the components set on the light-DOM links,
- * below a shadow sheet's reach, are painted here: the section in view and the page on screen in a
- * heavier weight. The shell's header holds the site nav, then the Pages, Help, and Theme buttons,
- * in a row. A GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule
- * at its start and its title, the kind's octicon and its name, in its kind's color, the
- * foundation's palette color GitHub gives it: note blue, tip green, important purple, warning
- * yellow, and caution red.
+ * shorter than the viewport, as on a taller one. Main's track and its reading width may shrink, and
+ * each table scrolls sideways in its region, so no page is wider than a 390px viewport. The marks
+ * the components set on the light-DOM links, below a shadow sheet's reach, are painted here: the
+ * section in view and the page on screen in a heavier weight. The shell's header holds the site
+ * nav, then the Pages, Help, and Theme buttons, in a row, each button, and the keys help's Close,
+ * its glyph and its key hint in a row of their own. A GitHub alert, as the renderer writes it
+ * through marked-alert, is a callout: a rule at its start and its title, the kind's octicon and its
+ * name, in its kind's color, the foundation's palette color GitHub gives it: note blue, tip green,
+ * important purple, warning yellow, and caution red.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -57,6 +58,16 @@
     margin-inline-end: auto;
   }
 
+  /* Each of the shell's glyph buttons, the header's and the keys help's Close, is its glyph, a
+     block in the reset, and its key hint in a row, centered on the text's line, as the section
+     tree's buttons are. */
+  body > header > button,
+  dialog#help button[command="close"] {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
   /* The Pages button, shown only where the site index is the drawer and once the drawer is
      defined, so with no script, or on a page with no drawer, it is never shown. */
   .pages-opener {
@@ -65,7 +76,7 @@
 
   @media (width < 86rem) {
     body:has(sl-drawer:defined) .pages-opener {
-      display: inline-block;
+      display: inline-flex;
     }
   }
 

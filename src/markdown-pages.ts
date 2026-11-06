@@ -26,8 +26,11 @@
 // or a URL with a scheme, passes through. A GitHub alert, a blockquote opening [!NOTE], [!TIP],
 // [!IMPORTANT], [!WARNING], or [!CAUTION], renders as marked-alert renders it, as GitHub does: a
 // div.markdown-alert.markdown-alert-<kind>, its first line a p.markdown-alert-title of the kind's
-// octicon, an svg aria-hidden, and its kind as visible text, "Important", which site.css draws as
-// a callout.
+// octicon and its kind as visible text, "Important", which site.css draws as a callout. Each
+// kind's octicon is the icons layer's (icons.ts), in place of marked-alert's own, through its
+// variants: info-16 for a note, light-bulb-16 for a tip, report-16 for important, alert-16 for a
+// warning, and stop-16 for caution, each an svg 1em square in currentColor, aria-hidden and
+// focusable="false".
 //
 // Each page's data is written as the light-DOM markup the components slot, so with no script it
 // renders as the page's own: the page header, at the top of main, where GitHub shows the front
@@ -45,6 +48,10 @@
 // button. Each body table is wrapped in a div.table-region, a region named by its header cells
 // that a keyboard focuses, as Shiki's tabindex makes each code block, which scrolls the table
 // sideways in a viewport narrower than it.
+//
+// Every page the build writes, each rendered page and each of a site's hand pages, has its glyph
+// markers filled with their icons at build, by icons.ts's fill, and a marker the icons layer
+// doesn't resolve fails the build, naming the page and the icon.
 //
 // Each fenced block is highlighted at build, so no script reaches the page: marked's own code
 // renderer, on the page's Marked instance, renders it through the build's Shiki highlighter
@@ -70,6 +77,11 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, posix, resolve } from "node:path";
 
+import alertIcon from "@jaimestill/spike-html-hosting-icons/octicon/alert-16";
+import infoIcon from "@jaimestill/spike-html-hosting-icons/octicon/info-16";
+import lightBulbIcon from "@jaimestill/spike-html-hosting-icons/octicon/light-bulb-16";
+import reportIcon from "@jaimestill/spike-html-hosting-icons/octicon/report-16";
+import stopIcon from "@jaimestill/spike-html-hosting-icons/octicon/stop-16";
 import { Marked, Parser, Renderer } from "marked";
 import type { Tokens } from "marked";
 import markedAlert from "marked-alert";
@@ -79,6 +91,8 @@ import type { Plugin } from "vite";
 import { parse } from "yaml";
 
 import { treeDir } from "./content.ts";
+import { fillIcons, siteIcons } from "./icons.ts";
+import type { LoadIcon } from "./icons.ts";
 import { builtinSyntax, createSyntax } from "./syntax.ts";
 import type { Syntax, SyntaxTheme } from "./syntax.ts";
 
@@ -208,6 +222,16 @@ function frontMatter(
   return { data: data as Record<string, unknown>, body: text.slice(match[0].length) };
 }
 
+/** Each GitHub alert kind's octicon, from the icons layer, as marked-alert's variants take it; the
+ * title, the kind's name, is marked-alert's own. */
+const alertVariants = [
+  { type: "note", icon: infoIcon },
+  { type: "tip", icon: lightBulbIcon },
+  { type: "important", icon: reportIcon },
+  { type: "warning", icon: alertIcon },
+  { type: "caution", icon: stopIcon },
+];
+
 /** The language label of a fence's info string: its first word, none for an unlabeled fence, as
  * marked's own code renderer reads it. */
 const fenceLabel = (lang: string | undefined): string => /^\S*/.exec(lang ?? "")?.[0] ?? "";
@@ -230,7 +254,7 @@ export function render(
   // first depth-1 heading it meets is the file's first h1.
   // marked-alert's walkTokens turns an alert's blockquote into its alert token before marked
   // walks the token's children, so a link inside an alert is placed as any other.
-  const marked = new Marked(gfmHeadingId(), markedAlert(), {
+  const marked = new Marked(gfmHeadingId(), markedAlert({ variants: alertVariants }), {
     walkTokens(token) {
       if (token.type === "link") token.href = place(token.href, path, source);
       if (token.type === "heading") tokens.push(token as Tokens.Heading);
@@ -434,12 +458,15 @@ export function markdownPages(options: Options): Plugin {
   let stylesheet: string | undefined;
   let base = "/";
   let assetsDir = "assets";
+  /** The icons layer as the site resolves it, which fills every page's glyph markers. */
+  let icons: LoadIcon | undefined;
 
   return {
     name: "site:markdown-pages",
     apply: "build",
     config(config) {
       root = normalizePath(resolve(config.root ?? process.cwd()));
+      icons = siteIcons(root);
       ids.clear();
       const dirs = new Set<string>();
       for (const { dir, tree } of trees) {
@@ -552,12 +579,18 @@ export function markdownPages(options: Options): Plugin {
       return fill(shell, page, siteIndex(titles, file));
     },
     // After Vite's own transform of the page, so the link, to an asset the build emits, is
-    // written as it is and never resolved as a source.
+    // written as it is and never resolved as a source. Every page the build writes passes here,
+    // a hand page as a rendered one, so each has its glyph markers filled.
     transformIndexHtml: {
       order: "post",
-      handler(_html, ctx) {
-        if (stylesheet === undefined || !ids.has(normalizePath(ctx.filename))) return;
-        return [{ tag: "link", attrs: { rel: "stylesheet", href: stylesheet }, injectTo: "head" }];
+      async handler(page, ctx) {
+        if (icons === undefined) throw new Error("markdown-pages: a page transforms before config");
+        const html = await fillIcons(page, ctx.path, icons);
+        if (stylesheet === undefined || !ids.has(normalizePath(ctx.filename))) return html;
+        return {
+          html,
+          tags: [{ tag: "link", attrs: { rel: "stylesheet", href: stylesheet }, injectTo: "head" }],
+        };
       },
     },
   };

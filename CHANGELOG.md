@@ -6,6 +6,50 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-06
+
+Glyphs from the icons layer, spike-html-hosting-icons, filled into every page at build, and the
+shell's header showing them. A site must now pin the icons layer, `v0.1.0`, beside the components,
+which peer it too: it isn't on the npm registry, so a site that leaves it out fails its install,
+or, with `autoInstallPeers` off, its build. A site takes the template's header and keys help
+dialog again, each button's word replaced by its glyph marker, or the shell checks fail on it.
+
+### Added
+
+- The icons layer,
+  [spike-html-hosting-icons](https://github.com/JaimeStill/spike-html-hosting-icons), as a peer at
+  its `github:` tag, `v0.1.0`, beside the foundation and the tooling: a site installs it.
+- `markdownPages` fills every glyph marker, an empty `<svg data-icon="<set>/<name>"></svg>`, in
+  every page the build writes, the rendered pages' shell and a site's hand pages alike, with that
+  icon's `svg` from the icons layer, resolved from the site's root, and adds no script. A `class`
+  on the marker carries onto the `svg`; a name that isn't `<set>/<name>`, or that the icons layer
+  doesn't resolve, fails the build, naming the page and the icon, and an `svg` holding `data-icon`
+  that isn't a marker, self-closed, unquoted, or not empty, fails it, naming the page and its tag;
+  a comment's text is left as it is. A site wires nothing beyond the plugin it already calls.
+- `./browser.js`'s `showsGlyphs`, a shell check, which the crawl runs on every copied page too: at
+  390px each header button, Pages where the shell has one, Help, and Theme, and the keys help
+  dialog's Close shows one glyph, the icons module's svg, and its key hint in a `kbd`, both
+  rendered, and no word, named by its `aria-label`, Pages, Help, Theme, and Close. A missing or
+  wrong glyph, or a word shown, fails it, naming the page and the button.
+
+### Changed
+
+- A GitHub alert's title shows the icons layer's Octicon in place of marked-alert's own, through
+  its `variants`: `info-16` for a note, `light-bulb-16` for a tip, `report-16` for important,
+  `alert-16` for a warning, and `stop-16` for caution, each 1em square in `currentColor`,
+  `aria-hidden` and `focusable="false"`, the kind's name still its visible text.
+- The template's header buttons show Octicons' `list-unordered-16` for Pages, `question-16` for
+  Help, and `gear-16` for Theme, each with its key hint in a `kbd` and its name in its
+  `aria-label`, the word no longer shown; the keys help dialog's Close shows `x-16` with its ?
+  hint, named Close. The keys help still lists P Pages, ? Help, and T Theme. Each is a glyph
+  marker the build fills, as spike-html-hosting-components' README gives the shell. `site.css`
+  lays each of the shell's buttons, the header's and the keys help's Close, out as its glyph and
+  its key hint in a row, centered on the line, the glyph a block in the foundation's reset.
+- The template pins spike-html-hosting-components at `v0.4.0`, from `v0.3.0`, and the icons layer
+  at `v0.1.0`; the SDK's own dev dependency on the components moves to `v0.4.0` with it.
+- The reusable workflows, `site-ci.yml` and `site-pages.yml`, run `jdx/mise-action` at `v5.2.7`,
+  from `v5.2.6`: a failed tool download is retried with backoff, and logs its HTTP status.
+
 ## [0.4.0] - 2026-11-06
 
 Several copied trees as one site, a root-style site with a hand index beside its rendered pages,
@@ -217,7 +261,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.2.0...v0.3.0

@@ -20,7 +20,9 @@
 // header it fails naming the overlap. With the shell's keys help
 // dialog removed, the Theme button's binding removed, the Theme button's kbd removed, as its markup
 // before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the switch says,
-// the keys help check fails, naming the page and the assertion.
+// the keys help check fails, naming the page and the assertion. With the Help button's glyph
+// removed, the Theme button's word shown beside its glyph, or the keys help's Close showing the
+// Help button's glyph, the glyph check fails, naming the page and the button.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -37,6 +39,7 @@ import {
   keepsNavigationWords,
   opensKeysHelp,
   shell,
+  showsGlyphs,
   startsUnderHeader,
 } from "../../src/browser.ts";
 import { docks } from "../../src/markdown-pages.ts";
@@ -461,4 +464,46 @@ describe("the fixture site with its keys help wrong", () => {
       await page.close();
     }
   });
+});
+
+describe("the fixture site with its glyphs wrong", () => {
+  /** Opens a page that runs script once its document is parsed, before the check reads it. */
+  async function withChange(script: string): Promise<Page> {
+    const page = await browser.open("about:blank");
+    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
+      source: `document.addEventListener("DOMContentLoaded", () => { ${script} });`,
+    });
+    return page;
+  }
+
+  for (const { change, script, message } of [
+    {
+      change: "the Help button's glyph removed",
+      script: `document.querySelector("header [commandfor=help] svg").remove();`,
+      message: /\/fixture-site\/: the Help button shows its glyph and its key hint/,
+    },
+    {
+      change: "the Theme button's word shown beside its glyph",
+      script: `document.querySelector("header [commandfor=theme]").prepend("Theme ");`,
+      message: /\/fixture-site\/: the Theme button shows its glyph and its key hint, no word/,
+    },
+    {
+      change: "the keys help's Close showing the Help button's glyph",
+      script: `document.querySelector("#help [command=close] svg").replaceWith(
+        document.querySelector("header [commandfor=help] svg").cloneNode(true));`,
+      message: /\/fixture-site\/: the keys help's Close shows its glyph and its key hint/,
+    },
+  ]) {
+    test(`${change} fails the glyph check`, async () => {
+      const page = await withChange(script);
+      try {
+        await assert.rejects(showsGlyphs(page, server.origin), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
 });
