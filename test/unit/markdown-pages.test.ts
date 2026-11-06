@@ -1,20 +1,20 @@
 // The Markdown pages' rendering, on small files: each copied file's page path, the links it
 // rewrites (to a copied file's page, relative to the linking page, its fragment kept; to an
-// external file's blob at the pinned commit), the links it passes through, and the build failing
-// on a relative link it can't place. The front matter is parsed, never rendered as body text,
-// and shown in the page header as a dl of its keys and values in source order, escaped; a file
-// with none shows an empty header and takes its title from its first h1, and one with neither a
-// name nor an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section
-// tree lists the h2s and their h3s by those ids, docked from the layout's tree dock. The site index
-// nests every page by directory, each directory labeled by its index page or its name, and marks
-// none current, in the Pages drawer docked from the layout's index dock. Each body table is in a
-// named region a keyboard focuses. Each GitHub alert is marked-alert's callout, its kind's name
-// visible text and its octicon aria-hidden, a link in it placed as any other; a plain blockquote
-// stays one. Several trees, configured to the plugin in a scratch root in TMPDIR, build each file to
-// its page under its tree's directory, the repository's name with a leading dot dropped, and the
-// site index lists them all, nested by those directories; a failure names a page by its tree's
-// directory, and a site's own input at a copied page's path fails the build. Each site's browser
-// tier crawls its built pages themselves.
+// external file's blob at the pinned commit), the links it passes through, and the build failing on
+// a relative link it can't place. The front matter is parsed, never rendered as body text, and
+// shown in the page header as a dl of its keys and values in source order, escaped; a file with
+// none shows an empty header and takes its title from its first h1, and one with neither a name nor
+// an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section tree lists
+// the h2s and their h3s by those ids, docked from the layout's tree dock. The site index nests
+// every page by directory, each directory labeled by its index page or its name, and marks none
+// current, in the Pages drawer docked from the layout's index dock. Each body table is in a named
+// region a keyboard focuses. Each GitHub alert is marked-alert's callout, its kind's name visible
+// text and its octicon aria-hidden, a link in it placed as any other; a plain blockquote stays one.
+// Several trees, configured to the plugin in a scratch root in TMPDIR, build each file to its page
+// under its tree's directory, the repository's name with a leading dot dropped, and the site index
+// lists them all, nested by those directories; a failure names a page by its tree's directory, and
+// a site's own input at a copied page's path fails the build. Each site's browser tier crawls its
+// built pages themselves.
 // Adapted from spike-html-hosting-architecture (de46c65): test/unit/markdown-pages.test.ts, on
 // src/markdown-pages.ts.
 

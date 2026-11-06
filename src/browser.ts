@@ -5,27 +5,26 @@
 //
 // The shell checks run on a page of the site, its index unless the site's test gives another: a
 // Markdown site's index, the page its shell builds, a hand page at the base, or a hand page at any
-// path under it, each checked under the site's base. On that page: the
-// Theme button and T open the theme menu, whose CSS module script the build rewrote, so its sheet
-// is adopted with no stylesheet fetched for it; stepping the color, space, and type rows each to a
-// profile past its default, which the full entry registers, sets that facet's attribute on the
-// root; the page's one module script, its entry, is render-blocking; once it loads, every element
-// on the page whose name holds a hyphen, a custom element's, is defined, so a shell that fails to
-// load a component's module fails naming its tag, where the capture run's wait for each element's
-// definition would hang; every request the page makes resolves under the base, and none fails; in
-// a 1600px viewport the site's layout holds main to a reading width, centered; at 1200px, between
-// the layout's docks, main is centered on a page with no section tree, and the tree is docked
-// beside it on a page with one; at 390px, between the docks, and at 1600px, main starts directly
-// under the header, the gap from the header's bottom, or the section tree bar's where it sits
-// between them, never below zero and no more than on a page taller than the viewport, however
-// short the page; ? opens the shell's keys help dialog, which the foundation's keys module fills
-// with the page's bindings, P, ?, T, and the tree's H and L, and its character-key switch turns
-// them off, so L moves to no section and P opens no drawer, and on again; in a 390px viewport
-// nothing scrolls sideways; at a phone's width, a px below and at each of the layout's
-// docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word breaks across lines
-// and every docked side column is at least 16rem wide; and a choice the menu never saves leaves
-// nothing stored, so a reload shows none of it. shell lists them by name, for a site to make a test
-// of each.
+// path under it, each checked under the site's base. On that page: the Theme button and T open the
+// theme menu, whose CSS module script the build rewrote, so its sheet is adopted with no stylesheet
+// fetched for it; stepping the color, space, and type rows each to a profile past its default,
+// which the full entry registers, sets that facet's attribute on the root; the page's one module
+// script, its entry, is render-blocking; once it loads, every element on the page whose name holds
+// a hyphen, a custom element's, is defined, so a shell that fails to load a component's module
+// fails naming its tag, where the capture run's wait for each element's definition would hang;
+// every request the page makes resolves under the base, and none fails; in a 1600px viewport the
+// site's layout holds main to a reading width, centered; at 1200px, between the layout's docks,
+// main is centered on a page with no section tree, and the tree is docked beside it on a page with
+// one; at 390px, between the docks, and at 1600px, main starts directly under the header, the gap
+// from the header's bottom, or the section tree bar's where it sits between them, never below zero
+// and no more than on a page taller than the viewport, however short the page; ? opens the shell's
+// keys help dialog, which the foundation's keys module fills with the page's bindings, P, ?, T, and
+// the tree's H and L, and its character-key switch turns them off, so L moves to no section and P
+// opens no drawer, and on again; in a 390px viewport nothing scrolls sideways; at a phone's width,
+// a px below and at each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no
+// navigation link's word breaks across lines and every docked side column is at least 16rem wide;
+// and a choice the menu never saves leaves nothing stored, so a reload shows none of it. shell
+// lists them by name, for a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the theme menu to each palette the
@@ -36,26 +35,25 @@
 //
 // The crawl runs on a Markdown site, one tree or several: from the index, every link into the site
 // is followed, breadth first, and each copied file's page reached loads with a 2xx, its one module
-// script render-blocking,
-// every custom element on it defined, every request under the base and none failed, its main
-// held to a reading width, centered, in a 1600px viewport, nothing scrolling sideways in a 390px
-// one, its navigation laid out as the shell check has it at the same widths, its layout between
-// the docks, its main under the header, and its keys help as the shell checks have them, and its
-// title its source's front matter name, or, for a source with no name, its first h1's text. Its Pages button is hidden at
-// 1600px, where the site index is docked, and at 390px is shown and opens the Pages drawer as a
-// modal by its click and by P, its aria-expanded true while the drawer is open and false once
-// Escape closes it. Each page's main opens with its page header, whose dl holds a dt
-// and a dd per front matter key, in source order, each key and value as the source holds it, and
-// none for a source with no front matter; no front matter table remains, and no key's line shows
-// as body text. Each page's site index, in its Pages drawer, links every copied file's page,
-// each once, and no other. Every in-site link reaches a built page, and an element with its
-// fragment's id when it has one. The crawl checks a page for every Markdown file content.json
-// records, every tree's: a page no link from the index reaches is crawled from once the links run
-// out, and returned, for the test's diagnostics. A page reached that no record names is a hand
-// page the site also builds, a hand index at the base or a hand page elsewhere: it loads with a
-// 2xx, every request under the base and none failed, its ids are the targets of the fragments
-// linking it, and its links are followed, but the copied pages' checks are left to the shell
-// checks, which a site runs on each hand page by its URL; it is returned too.
+// script render-blocking, every custom element on it defined, every request under the base and none
+// failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
+// sideways in a 390px one, its navigation laid out as the shell check has it at the same widths,
+// its layout between the docks, its main under the header, and its keys help as the shell checks
+// have them, and its title its source's front matter name, or, for a source with no name, its first
+// h1's text. Its Pages button is hidden at 1600px, where the site index is docked, and at 390px is
+// shown and opens the Pages drawer as a modal by its click and by P, its aria-expanded true while
+// the drawer is open and false once Escape closes it. Each page's main opens with its page header,
+// whose dl holds a dt and a dd per front matter key, in source order, each key and value as the
+// source holds it, and none for a source with no front matter; no front matter table remains, and
+// no key's line shows as body text. Each page's site index, in its Pages drawer, links every copied
+// file's page, each once, and no other. Every in-site link reaches a built page, and an element
+// with its fragment's id when it has one. The crawl checks a page for every Markdown file
+// content.json records, every tree's: a page no link from the index reaches is crawled from once
+// the links run out, and returned, for the test's diagnostics. A page reached that no record names
+// is a hand page the site also builds, a hand index at the base or a hand page elsewhere: it loads
+// with a 2xx, every request under the base and none failed, its ids are the targets of the
+// fragments linking it, and its links are followed, but the copied pages' checks are left to the
+// shell checks, which a site runs on each hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -788,11 +786,11 @@ const attribute = (name: string): string => `document.documentElement.getAttribu
  * for each palette profiles("color") lists, the theme menu's color row, which lists the same, is
  * stepped to it, and its scheme row to light and then to dark; in each, every token carrying the
  * palette's --shiki-<palette> variable renders the color the variable resolves to there, and some
- * token's color differs from the page's text color. It fails naming the palette and the scheme
- * for a registered palette whose code renders plain: no token carries a color for it, as on a
- * build with no syntax theme for it, or a token keeps the page's text color, as where no rule
- * selects the palette's. It runs on url, a page with highlighted code, which a site's test gives,
- * or on site, its index, when the index holds some. The menu is cancelled after, so nothing is stored.
+ * token's color differs from the page's text color. It fails naming the palette and the scheme for
+ * a registered palette whose code renders plain: no token carries a color for it, as on a build
+ * with no syntax theme for it, or a token keeps the page's text color, as where no rule selects the
+ * palette's. It runs on url, a page with highlighted code, which a site's test gives, or on site,
+ * its index, when the index holds some. The menu is cancelled after, so nothing is stored.
  */
 export const highlightsEachPalette: Check = async (page, site, url = site) => {
   await page.goto(url);
