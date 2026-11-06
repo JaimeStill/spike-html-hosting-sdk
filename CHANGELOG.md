@@ -47,6 +47,8 @@ dialog again, each button's word replaced by its glyph marker, or the shell chec
   its key hint in a row, centered on the line, the glyph a block in the foundation's reset.
 - The template pins spike-html-hosting-components at `v0.4.0`, from `v0.3.0`, and the icons layer
   at `v0.1.0`; the SDK's own dev dependency on the components moves to `v0.4.0` with it.
+- The reusable workflows, `site-ci.yml` and `site-pages.yml`, run `jdx/mise-action` at `v5.2.7`,
+  from `v5.2.6`: a failed tool download is retried with backoff, and logs its HTTP status.
 
 ## [0.4.0] - 2026-11-06
 
