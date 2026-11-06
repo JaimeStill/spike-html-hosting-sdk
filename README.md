@@ -194,7 +194,8 @@ one; at 390px, at 1200px, and at 1600px, main starting directly under the header
 page, never into it, or into the section tree's bar between them, and no further below it than on a
 page taller than the viewport;
 ? opening the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the
-tree's H and L, and whose character-key switch turns them off, so L and P do nothing, and on again;
+tree's H and L, and whose character-key switch turns them off, so L and P do nothing, and on again,
+with every header control that binds a key showing it in a `kbd`;
 nothing scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of
 the layout's docks, and at 1400px, with no navigation link's word broken across lines (a hyphenated
 compound may wrap after its hyphen) and every docked side column at least 16rem wide; and the menu
@@ -334,8 +335,8 @@ page has, the Pages button's P, the Help button's ?, the Theme button's T, and t
 H and L, and with the reader's settings, among them the switch that turns the character keys off
 (WCAG 2.1.4). The Help button, between Pages and Theme, opens it by the invoker command
 `show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
-its element's `aria-label`, else by its text less each `kbd`; the Pages and Help buttons, and the
-dialog's Close, carry `aria-label`s, the names they have with their key hints, each a `kbd` alone,
+its element's `aria-label`, else by its text less each `kbd`; the Pages, Help, and Theme buttons,
+and the dialog's Close, carry `aria-label`s, the names they have with their key hints, each a `kbd` alone,
 `aria-hidden`. The SDK's template and fixture shells carry it; a site made from an earlier
 template, or the root's own shell, adds it.
 
@@ -362,7 +363,9 @@ template, or the root's own shell, adds it.
   <button type="button" commandfor="help" command="show-modal" aria-label="Help" data-keys="?">
     Help <span aria-hidden="true"><kbd>?</kbd></span>
   </button>
-  <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
+  <button type="button" commandfor="theme" command="--open" aria-label="Theme" data-keys="t">
+    Theme <span aria-hidden="true"><kbd>T</kbd></span>
+  </button>
 </header>
 <main></main>
 <sl-theme-menu id="theme"></sl-theme-menu>

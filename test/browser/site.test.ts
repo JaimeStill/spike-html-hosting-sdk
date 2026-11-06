@@ -18,8 +18,9 @@
 // crawl fail on the index, naming the width and main's gap; at 390px, with a flex column whose auto
 // margin pushes main to the body's end, the check fails as well, and with main pulled up into the
 // header it fails naming the overlap. With the shell's keys help
-// dialog removed, the Theme button's binding removed, or a handler that opens the Pages drawer on
-// P whatever the switch says, the keys help check fails, naming the page and the assertion.
+// dialog removed, the Theme button's binding removed, the Theme button's kbd removed, as its markup
+// before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the switch says,
+// the keys help check fails, naming the page and the assertion.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -415,6 +416,25 @@ describe("the fixture site with its keys help wrong", () => {
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
         assert.match(error.message, /\/fixture-site\/: the keys help lists the page's bindings/);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("a header control that binds a key without showing it fails the keys help check", async () => {
+    // The Theme button's markup before v0.3.1: its label alone, no kbd.
+    const page = await browser.open("about:blank");
+    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
+      source: `document.addEventListener("DOMContentLoaded", () => { const theme = document.querySelector("header [commandfor=theme]"); theme.removeAttribute("aria-label"); theme.textContent = "Theme"; });`,
+    });
+    try {
+      await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: every header control that binds a key shows it in a kbd/,
+        );
         return true;
       });
     } finally {

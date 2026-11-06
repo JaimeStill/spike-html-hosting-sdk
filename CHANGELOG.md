@@ -22,6 +22,11 @@ Main directly under the header on a page shorter than the viewport.
   sits between them, never into it and no further below it than on the same page made taller than
   the viewport. The fixture site's index and orphan page are shorter than the viewport, and with
   v0.3.0's rows both checks fail on the index.
+- The template's and the fixture site's Theme button shows its key, T, as the Pages and Help
+  buttons show theirs: `Theme <span aria-hidden="true"><kbd>T</kbd></span>`, with
+  `aria-label="Theme"`, which the keys help names its row by. `opensKeysHelp`, in `shell`, and the
+  crawl assert that every control in the header with `data-keys` shows its key in a `kbd`; the
+  Theme button's earlier markup, its label alone, fails it.
 
 ## [0.3.0] - 2026-11-05
 

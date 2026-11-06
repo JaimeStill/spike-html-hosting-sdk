@@ -456,6 +456,13 @@ const HELP_ROWS = `[...document.querySelectorAll("#help [data-keys-table] tbody 
     off: tr.hasAttribute("data-keys-off"),
   }))`;
 
+/** The header's controls that bind a key, each as its data-keys and the text of the kbd elements
+ * it shows, joined by a space. */
+const HEADER_KEYS = `[...document.querySelectorAll("header [data-keys]")].map((control) => ({
+    keys: control.dataset.keys,
+    shown: [...control.querySelectorAll("kbd")].map((kbd) => kbd.textContent).join(" "),
+  }))`;
+
 /** A row of the keys help dialog's bindings table, as HELP_ROWS reads it. */
 type HelpRow = { keys: string; action: string; off: boolean };
 
@@ -485,12 +492,19 @@ async function turnCharacterKeys(page: Page): Promise<HelpRow[]> {
  * button's; T, the Theme button's; and, where the page has a section tree, H and L, its previous
  * and next section. Turning its character-key switch off marks each of them off, and L then marks
  * no other section and P opens no drawer; turning it on again, L moves to another section. The
- * reader's keys settings are cleared after, so no other check runs with the keys off.
+ * reader's keys settings are cleared after, so no other check runs with the keys off. Every
+ * control in the header that binds a key shows it, in a kbd, as the help's row names it.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
   await between(page);
   await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
   await page.evaluate(SETTLED);
+  const controls: { keys: string; shown: string }[] = await page.evaluate(HEADER_KEYS);
+  assert.deepEqual(
+    controls.map(({ keys }) => ({ keys, shown: keys.toUpperCase() })),
+    controls,
+    `${url}: every header control that binds a key shows it in a kbd`,
+  );
   try {
     await press(page, "?");
     await until(page, HELP).catch(() => assert.fail(`${url}: ? opens the keys help dialog`));
