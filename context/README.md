@@ -1,9 +1,8 @@
 # spike-html-hosting-sdk
 
 spike-html-hosting-sdk is the site SDK and template of spike-html-hosting, released by tag, which a
-site pins; it names no site that consumes it (principles/downward-dependencies.md). package.json's
-version is the next release, which `release.yml` tags when it lands on main; the first is v0.1.0.
-This context records only working knowledge the code and the README do not express.
+site pins; it names no site that consumes it (principles/downward-dependencies.md). This context
+records only working knowledge the code and the README do not express.
 
 ## Capability map
 
@@ -22,7 +21,7 @@ This context records only working knowledge the code and the README do not expre
   show the hoist: their `link:`s put the plugin at its realpath in this repository's install, which
   holds rolldown. The SDK lints itself with its own export (`eslint.config.js` imports
   `src/eslint.ts`) and formats itself with its own Prettier configuration (`.prettierrc.json` names
-  `src/prettier.json`). The sites still hold their copies until they move to the package.
+  `src/prettier.json`).
 - **The pack check:** `test/pack/pack.test.ts`, the check's last step: a pack of the build,
   installed into a scratch site with no network, its dependencies and peers linked from the
   repository's own install, since pnpm's offline install holds no metadata after a frozen install.

@@ -5,7 +5,7 @@ It holds what a GitHub Pages site consumes by tag: the template a site starts fr
 builds and tests with, the currency bin it runs, and the reusable workflows it calls.
 
 Each release is a `vX.Y.Z` tag, cut by the release workflow when a version lands on main, whose
-tree is the package as `pnpm pack` makes it, its build included. The first is v0.1.0.
+tree is the package as `pnpm pack` makes it, its build included.
 
 ## A new site
 
@@ -185,32 +185,41 @@ for (const [name, check] of Object.entries(shell)) {
 }
 ```
 
-The shell checks are the theme menu opened by the Theme button and by T, with its sheet adopted;
-each facet stepped and set on the root; the one render-blocking module script; every custom element
-on the page defined, so a module the shell fails to load fails naming its element's tag; every
-request under the base, and none failed; main's centered reading width at 1600px; at 1200px, between
-the docks, main centered on a page with no section tree and the tree docked beside it on a page with
-one; at 390px, at 1200px, and at 1600px, main starting directly under the header, however short the
-page, never into it, or into the section tree's bar between them, and no further below it than on a
-page taller than the viewport;
-? opening the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the
-tree's H and L, and whose character-key switch turns them off, so L and P do nothing, and on again,
-with every header control that binds a key showing it in a `kbd`;
-nothing scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of
-the layout's docks, and at 1400px, with no navigation link's word broken across lines (a hyphenated
-compound may wrap after its hyphen) and every docked side column at least 16rem wide; and the menu
-left unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which
-resolves to the pages and links it reached and the pages no link reaches. Each page it reaches loads
-with a 2xx, its one module script render-blocking, every custom element on it defined, every request
-under the base and none failed, main at its centered reading width at 1600px, nothing scrolling
-sideways at 390px, its navigation, its layout between the docks, its main under the header, and
-its keys help as the shell checks have them, and its title its source's front matter name or first
-h1. Its main opens with its page header, whose dt and dd pairs are the source's front matter keys
-and values, in order, with no front matter table left; its site index, in its Pages drawer, links
-every page the build writes, each once, and no other; its Pages button is hidden at 1600px and at
-390px opens the drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and every in-site link
-reaches a built page, and its fragment's element. Since each page's index links every other, the
-crawl reaches every page from the index.
+The shell checks, each named in `shell`, assert these:
+
+- The Theme button and T open the theme menu, and its sheet is adopted.
+- Stepping each facet sets it on the root.
+- The page's one module script is render-blocking.
+- Every custom element on the page is defined, so a module the shell fails to load fails the check,
+  which names its element's tag.
+- Every request resolves under the base, and none fails.
+- Main holds its centered reading width at 1600px.
+- At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
+  beside it on a page with one.
+- At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
+  page: never into the header, or into the section tree's bar between them, and no further below
+  it than on a page taller than the viewport.
+- ? opens the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the tree's H
+  and L. Its character-key switch turns them off, so L and P do nothing, and on again. Every header
+  control that binds a key shows it in a `kbd`.
+- Nothing scrolls sideways at 390px.
+- At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
+  word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
+  column is at least 16rem wide.
+- The theme menu stays unsaved: no stored choice persists.
+
+A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves to the
+pages and links it reached and the pages no link reaches. Each page it reaches loads with a 2xx,
+its one module script render-blocking, every custom element on it defined, every request under the
+base and none failed, main at its centered reading width at 1600px, nothing scrolling sideways at
+390px, its navigation, its layout between the docks, its main under the header, and its keys help
+as the shell checks have them, and its title its source's front matter name or first h1. Its main
+opens with its page header, whose dt and dd pairs are the source's front matter keys and values,
+in order, with no front matter table left; its site index, in its Pages drawer, links every page
+the build writes, each once, and no other; its Pages button is hidden at 1600px and at 390px opens
+the drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and
+every in-site link reaches a built page, and its fragment's element. Since each page's index links
+every other, the crawl reaches every page from the index.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -337,8 +346,8 @@ H and L, and with the reader's settings, among them the switch that turns the ch
 `show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
 its element's `aria-label`, else by its text less each `kbd`; the Pages, Help, and Theme buttons,
 and the dialog's Close, carry `aria-label`s, the names they have with their key hints, each a
-`kbd` alone, `aria-hidden`. The SDK's template and fixture shells carry it; a site made from an
-earlier template, or the root's own shell, adds it.
+`kbd` alone, `aria-hidden`. The SDK's template and fixture shells carry it; a site whose shell
+lacks it adds it.
 
 ```html
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
@@ -382,10 +391,6 @@ earlier template, or the root's own shell, adds it.
 
 `cssModuleScripts` parses every module under `node_modules/@jaimestill/`, the components' among
 them, so their sheets build to constructed `CSSStyleSheet`s as the foundation's do.
-
-The page header replaces v0.2.0's front matter table: `frontMatterTable` and its
-`table.front-matter` are gone, a breaking change at 0.y, so a site that imported it takes
-`pageHeader` instead.
 
 ### Syntax themes
 
@@ -525,8 +530,8 @@ resolves it through `exports` and bundles it into the page's sheet:
 exports alone:
 
 - `package.json`, its name the repository's, the SDK at its tag, the peers and the components at
-  their pins, with typescript, prettier, and `@types/node`; `mise.toml`, the toolchain and the tasks:
-  install, check and its steps, screenshots, and currency, the SDK's bin;
+  their pins, with typescript, prettier, and `@types/node`; `mise.toml`, the toolchain and the
+  tasks: install, check and its steps, screenshots, and currency, the SDK's bin;
   `scripts/preflight.sh`, which runs before node_modules exists, so the site holds its copy.
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`, the
   shell, with the foundation's full page entry, its preferences and keys modules, the components'
