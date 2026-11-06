@@ -53,7 +53,17 @@ function listFiles(dir: string): string[] {
 /** The exported names each JS export holds, by its subpath. */
 const modules: Record<string, string[]> = {
   "./render-blocking.js": ["renderBlocking"],
-  "./markdown-pages.js": ["frontMatterTable", "markdownPages", "pageFile", "pageUrl", "render"],
+  "./markdown-pages.js": [
+    "docks",
+    "frontMatterText",
+    "markdownPages",
+    "pageFile",
+    "pageHeader",
+    "pageUrl",
+    "render",
+    "sectionTree",
+    "siteIndex",
+  ],
   "./syntax.js": ["builtinSyntax", "checkSyntax", "createSyntax"],
   "./eslint.js": ["build", "config"],
   "./content.js": ["blob", "checkContent"],
@@ -61,8 +71,13 @@ const modules: Record<string, string[]> = {
   "./browser.js": [
     "blocksRender",
     "crawl",
+    "definesEveryElement",
+    "fitsNarrowWidth",
     "highlightsEachPalette",
+    "holdsBetweenDocks",
     "holdsReadingWidth",
+    "keepsNavigationWords",
+    "opensKeysHelp",
     "opensThemeMenu",
     "requestsUnderBase",
     "shell",

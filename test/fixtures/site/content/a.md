@@ -6,6 +6,6 @@ tags:
   - two
 ---
 
-Its body, after the front matter's table.
+Its body, after its page header.
 
 [Back to the index](README.md)

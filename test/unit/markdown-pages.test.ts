@@ -2,17 +2,27 @@
 // rewrites (to a copied file's page, relative to the linking page, its fragment kept; to an
 // external file's blob at the pinned commit), the links it passes through, and the build failing
 // on a relative link it can't place. The front matter is parsed, never rendered as body text,
-// and shown as a table of its keys and values in source order, escaped; a file with none shows no
-// table and takes its title from its first h1, and one with neither a name nor an h1 fails the
-// build. Headings carry GitHub's ids, counted per page. Each site's browser tier crawls its
-// built pages themselves.
+// and shown in the page header as a dl of its keys and values in source order, escaped; a file
+// with none shows an empty header and takes its title from its first h1, and one with neither a
+// name nor an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section
+// tree lists the h2s and their h3s by those ids, docked from the layout's tree dock. The site index
+// nests every page by directory, each directory labeled by its index page or its name, and marks
+// none current, in the Pages drawer docked from the layout's index dock. Each body table is in a
+// named region a keyboard focuses. Each site's browser tier crawls its built pages themselves.
 // Adapted from spike-html-hosting-architecture (de46c65): test/unit/markdown-pages.test.ts, on
 // src/markdown-pages.ts.
 
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
-import { frontMatterTable, pageFile, pageUrl, render } from "../../src/markdown-pages.ts";
+import {
+  pageFile,
+  pageHeader,
+  pageUrl,
+  render,
+  sectionTree,
+  siteIndex,
+} from "../../src/markdown-pages.ts";
 import type { Source } from "../../src/markdown-pages.ts";
 
 const source: Source = {
@@ -82,36 +92,37 @@ describe("the Markdown pages", () => {
     assert.throws(() => render("a.md", "---\nname: 1\n---\n", source), /a\.md's front matter name/);
   });
 
-  test("show the front matter as a table of its keys and values, in source order, escaped", () => {
+  test("show the front matter in the page header, its keys and values in order, escaped", () => {
     const { data } = render(
       "a.md",
-      "---\nz: last <b>\nname: A & B\ncount: 2\nempty:\nlist: [x, <y>]\nmap: { k: v }\n---\n",
+      "---\nz: last <b>\nname: A & B\ncount: 2\nempty:\nlist: [x, <y>]\nmap: { k: v, n: [1, 2] }\n---\n",
       source,
     );
     assert.equal(
-      frontMatterTable(data),
-      '<table class="front-matter"><tbody>' +
-        '<tr><th scope="row">z</th><td>last &lt;b&gt;</td></tr>' +
-        '<tr><th scope="row">name</th><td>A &amp; B</td></tr>' +
-        '<tr><th scope="row">count</th><td>2</td></tr>' +
-        '<tr><th scope="row">empty</th><td></td></tr>' +
-        '<tr><th scope="row">list</th><td><table><tbody><tr><td>x</td><td>&lt;y&gt;</td></tr>' +
-        "</tbody></table></td></tr>" +
-        '<tr><th scope="row">map</th><td><table><tbody><tr><th scope="row">k</th><td>v</td></tr>' +
-        "</tbody></table></td></tr>" +
-        "</tbody></table>\n",
+      pageHeader(data),
+      "<sl-page-header><dl>" +
+        "<dt>z</dt><dd>last &lt;b&gt;</dd>" +
+        "<dt>name</dt><dd>A &amp; B</dd>" +
+        "<dt>count</dt><dd>2</dd>" +
+        "<dt>empty</dt><dd></dd>" +
+        "<dt>list</dt><dd>x, &lt;y&gt;</dd>" +
+        "<dt>map</dt><dd>k: v, n: 1, 2</dd>" +
+        "</dl></sl-page-header>\n",
     );
-    assert.equal(frontMatterTable(render("a.md", "---\n---\n# T\n", source).data), "");
+    assert.equal(
+      pageHeader(render("a.md", "---\n---\n# T\n", source).data),
+      "<sl-page-header></sl-page-header>\n",
+    );
   });
 
-  test("title a file with no front matter by its first h1, with no table", () => {
+  test("title a file with no front matter by its first h1, with an empty header", () => {
     const { data, title, html } = render(
       "a.md",
       "Intro.\n\n## Not this\n\n# The *first* `h1` [link](a.md)\n\n# Second\n",
       source,
     );
     assert.equal(data, null);
-    assert.equal(frontMatterTable(data), "");
+    assert.equal(pageHeader(data), "<sl-page-header></sl-page-header>\n");
     assert.equal(title, "The first h1 link");
     assert.ok(html.startsWith("<p>Intro.</p>"), html);
     // Front matter without a name falls back to the h1 too.
@@ -134,5 +145,85 @@ describe("the Markdown pages", () => {
     const want = ["a-cli-domains-commands", "same", "same-1"];
     assert.deepEqual(ids(render("a.md", body, source).html), want);
     assert.deepEqual(ids(render("a.md", body, source).html), want);
+  });
+
+  test("list the h2s in the section tree, their h3s nested, by the ids the headings carry", () => {
+    const { html, headings } = render(
+      "a.md",
+      file(
+        "# Title\n\n### Before\n\n## Café & *crème*\n\n### A `b`\n\n#### Deep\n\n### C\n\n" +
+          "## Same\n\n## Same\n",
+      ),
+      source,
+    );
+    const tree = sectionTree(headings);
+    assert.equal(
+      tree,
+      '<sl-section-tree dock="70rem"><ul>' +
+        '<li><a href="#before">Before</a></li>' +
+        '<li><a href="#caf%C3%A9--cr%C3%A8me">Café &amp; crème</a>' +
+        '<ul><li><a href="#a-b">A b</a></li><li><a href="#c">C</a></li></ul></li>' +
+        '<li><a href="#same">Same</a></li>' +
+        '<li><a href="#same-1">Same</a></li>' +
+        "</ul></sl-section-tree>",
+    );
+    // Every href names an id a heading of the page carries.
+    const ids = new Set([...html.matchAll(/<h[23] id="([^"]*)"/g)].map((m) => m[1]));
+    for (const href of hrefs(tree)) {
+      assert.ok(ids.has(decodeURIComponent(href.slice(1))), `${href} names a heading's id`);
+    }
+    assert.equal(sectionTree(render("a.md", file("# Only a title\n"), source).headings), "");
+  });
+
+  test("nest the site index by directory, each labeled by its index page or its name, in the Pages drawer", () => {
+    const titles = new Map([
+      ["README.md", "The <site>"],
+      ["z.md", "Zed"],
+      ["a.md", "A & B"],
+      ["dir/README.md", "The directory"],
+      ["dir/b.md", "B"],
+      ["dir/sub/c.md", "C"],
+      ["bare/d.md", "D"],
+    ]);
+    const index = siteIndex(titles, "dir/b.md");
+    assert.equal(
+      index,
+      '<sl-drawer class="site-index" label="Pages" id="pages" dock="86rem">' +
+        "<sl-site-index><ul>" +
+        '<li><a href="../">The &lt;site&gt;</a></li>' +
+        '<li><a href="../a.html">A &amp; B</a></li>' +
+        '<li><span>bare</span><ul><li><a href="../bare/d.html">D</a></li></ul></li>' +
+        '<li><a href="./">The directory</a><ul>' +
+        '<li><a href="b.html">B</a></li>' +
+        '<li><span>sub</span><ul><li><a href="sub/c.html">C</a></li></ul></li>' +
+        "</ul></li>" +
+        '<li><a href="../z.html">Zed</a></li>' +
+        "</ul></sl-site-index></sl-drawer>",
+    );
+    // From the root's index, the same entries link relative to it.
+    assert.deepEqual(hrefs(siteIndex(titles, "README.md")), [
+      "./",
+      "a.html",
+      "bare/d.html",
+      "dir/",
+      "dir/b.html",
+      "dir/sub/c.html",
+      "z.html",
+    ]);
+  });
+
+  test("wrap every body table in a region a keyboard focuses, named by its header", () => {
+    const { html } = render(
+      "a.md",
+      file("| A & *b* | `c` |\n| --- | --- |\n| 1 | 2 |\n\nText.\n\n|  |  |\n|--|--|\n| x | y |\n"),
+      source,
+    );
+    const regions = [...html.matchAll(/<div ([^>]*)>\n<table>/g)].map((m) => m[1]);
+    assert.deepEqual(regions, [
+      'class="table-region" role="region" aria-label="Table: A &amp; b, c" tabindex="0"',
+      'class="table-region" role="region" aria-label="Table" tabindex="0"',
+    ]);
+    assert.equal(html.match(/<table>/g)?.length, 2);
+    assert.equal(html.match(/<\/table>\n<\/div>/g)?.length, 2, "each region closes on its table");
   });
 });
