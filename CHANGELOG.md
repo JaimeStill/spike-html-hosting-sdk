@@ -28,11 +28,12 @@ again, and one that imported `frontMatterTable` takes
   exported.
 - Each body table is wrapped in a `div.table-region`, `role="region"`, named by its header cells,
   with `tabindex="0"`, which scrolls it sideways.
-- `site.css` docks each side column only where it fits at 16rem beside main's 80ch: from 86rem
-  three columns, the docked drawer, main centered, and the tree; from 70rem the tree beside main
-  on a page that has one, main centered on a page that hasn't, and the index in the drawer; narrower, one column, the tree a bar stuck to the top of the
-  viewport, its wrapper `display: contents`. It shows the Pages button only below 86rem, once the
-  drawer is defined; styles the table regions; and paints the components' `aria-current` marks.
+- `site.css` docks each side column only where it fits at 16rem beside main's 80ch: from 86rem three
+  columns, the docked drawer, main centered, and the tree; from 70rem the tree beside main on a page
+  that has one, main centered on a page that hasn't, and the index in the drawer; narrower, one
+  column, the tree a bar stuck to the top of the viewport, its wrapper `display: contents`. It shows
+  the Pages button only below 86rem, once the drawer is defined; styles the table regions; and
+  paints the components' `aria-current` marks.
 - `./browser.js`: `fitsNarrowWidth`, in `shell`, nothing scrolling sideways at 390px; the crawl
   asserts each page's header against its front matter, its site index, in its Pages drawer,
   against the pages the build writes, and no sideways scroll at 390px.
