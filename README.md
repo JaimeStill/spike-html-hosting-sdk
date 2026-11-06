@@ -336,9 +336,9 @@ H and L, and with the reader's settings, among them the switch that turns the ch
 (WCAG 2.1.4). The Help button, between Pages and Theme, opens it by the invoker command
 `show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
 its element's `aria-label`, else by its text less each `kbd`; the Pages, Help, and Theme buttons,
-and the dialog's Close, carry `aria-label`s, the names they have with their key hints, each a `kbd` alone,
-`aria-hidden`. The SDK's template and fixture shells carry it; a site made from an earlier
-template, or the root's own shell, adds it.
+and the dialog's Close, carry `aria-label`s, the names they have with their key hints, each a
+`kbd` alone, `aria-hidden`. The SDK's template and fixture shells carry it; a site made from an
+earlier template, or the root's own shell, adds it.
 
 ```html
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>

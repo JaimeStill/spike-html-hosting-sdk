@@ -493,7 +493,8 @@ async function turnCharacterKeys(page: Page): Promise<HelpRow[]> {
  * and next section. Turning its character-key switch off marks each of them off, and L then marks
  * no other section and P opens no drawer; turning it on again, L moves to another section. The
  * reader's keys settings are cleared after, so no other check runs with the keys off. Every
- * control in the header that binds a key shows it, in a kbd, as the help's row names it.
+ * control in the header that binds a key shows it in a kbd, upper-cased as the help's rows show
+ * it.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
   await between(page);
