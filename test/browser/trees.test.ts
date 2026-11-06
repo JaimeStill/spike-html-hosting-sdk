@@ -10,8 +10,9 @@
 // drawer wiring would. The crawl, from the hand index, checks every copied page of both
 // trees and loads each hand page it reaches without failing on it, and with a copied page answered
 // 404 it fails, naming the page. The capture file describes the hand pages and every tree's pages
-// at their paths under the base. The hand index and the rendered pages' shell each hold a glyph
-// marker in their Help button, which the build fills with the icons layer's svg, none left.
+// at their paths under the base. The hand pages and the rendered pages' shell hold glyph markers
+// in their buttons, which the build fills with the icons layer's svgs, none left, and the shell
+// checks' glyph check holds each button to its glyph.
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -21,7 +22,9 @@ import { after, before, describe, test } from "node:test";
 import { launch, SETTLED } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Browser } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";
+import paintbrush from "@jaimestill/spike-html-hosting-icons/octicon/paintbrush-16";
 import question from "@jaimestill/spike-html-hosting-icons/octicon/question-16";
+import x from "@jaimestill/spike-html-hosting-icons/octicon/x-16";
 
 import { crawl, requestsUnderBase, shell } from "../../src/browser.ts";
 import { checkContent } from "../../src/content.ts";
@@ -83,24 +86,13 @@ describe("the trees fixture under its base", () => {
     });
   }
 
-  for (const path of ["index.html", "org/briefs/orientation.html"]) {
-    test(`${path}'s glyph marker is filled at build, its Help button showing the icon`, async () => {
+  for (const path of ["index.html", "briefs/orientation.html", "org/briefs/orientation.html"]) {
+    test(`${path}'s glyph markers are filled at build with the icons layer's svgs`, () => {
       const built = readFileSync(join(root, "dist", path), "utf8");
-      assert.ok(built.includes(question), "the built page holds the icons layer's question-16");
-      assert.doesNotMatch(built, /data-icon/);
-      const page = await browser.open("about:blank");
-      try {
-        await page.goto(`${server.origin}${path.replace(/index\.html$/, "")}`);
-        assert.equal(
-          await page.evaluate(
-            `document.querySelectorAll('header button[aria-label="Help"] > ` +
-              `svg[aria-hidden="true"][focusable="false"]').length`,
-          ),
-          1,
-        );
-      } finally {
-        await page.close();
+      for (const [name, svg] of Object.entries({ question, paintbrush, x })) {
+        assert.ok(built.includes(svg), `the built page holds the icons layer's ${name}`);
       }
+      assert.doesNotMatch(built, /data-icon/);
     });
   }
 

@@ -81,6 +81,7 @@ const modules: Record<string, string[]> = {
     "opensThemeMenu",
     "requestsUnderBase",
     "shell",
+    "showsGlyphs",
     "startsUnderHeader",
     "staysUnsaved",
     "stepsEachFacet",

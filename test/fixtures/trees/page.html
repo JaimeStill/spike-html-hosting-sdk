@@ -5,7 +5,7 @@
      written by hand keeps it. Its markup is the fixture site's shell's, index.html there: the
      foundation's full page entry, registrations, preferences, and keys modules, the SDK's site.css,
      the components' five elements, the Pages button and its script, and the Help and Theme
-     buttons, the Help button's glyph a marker the build fills from the icons layer.
+     buttons, each button's glyph a marker the build fills from the icons layer.
      From test/fixtures/site/index.html: its markup, its title the fixture's. -->
 <html lang="en">
   <head>
@@ -45,7 +45,8 @@
         aria-label="Pages"
         data-keys="p"
       >
-        Pages <span aria-hidden="true"><kbd>P</kbd></span>
+        <svg data-icon="octicon/list-unordered-16"></svg>
+        <span aria-hidden="true"><kbd>P</kbd></span>
       </button>
       <button
         type="button"
@@ -55,7 +56,7 @@
         data-keys="?"
       >
         <svg data-icon="octicon/question-16"></svg>
-        Help <span aria-hidden="true"><kbd>?</kbd></span>
+        <span aria-hidden="true"><kbd>?</kbd></span>
       </button>
       <button
         type="button"
@@ -64,7 +65,8 @@
         aria-label="Theme"
         data-keys="t"
       >
-        Theme <span aria-hidden="true"><kbd>T</kbd></span>
+        <svg data-icon="octicon/paintbrush-16"></svg>
+        <span aria-hidden="true"><kbd>T</kbd></span>
       </button>
     </header>
     <main></main>
@@ -80,7 +82,8 @@
           aria-label="Close"
           data-keys="?"
         >
-          Close <span aria-hidden="true"><kbd>?</kbd></span>
+          <svg data-icon="octicon/x-16"></svg>
+          <span aria-hidden="true"><kbd>?</kbd></span>
         </button>
       </footer>
     </dialog>

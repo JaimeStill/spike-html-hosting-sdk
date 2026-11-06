@@ -6,6 +6,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-06
+
+Glyphs from the icons layer, spike-html-hosting-icons, filled into every page at build, and the
+shell's header showing them. A site must now pin the icons layer, `v0.1.0`, beside the components,
+which peer it too: it isn't on the npm registry, so a site that leaves it out fails its install,
+or, with `autoInstallPeers` off, its build. A site takes the template's header and keys help
+dialog again, each button's word replaced by its glyph marker, or the shell checks fail on it.
+
 ### Added
 
 - The icons layer,
@@ -17,6 +25,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   on the marker carries onto the `svg`; a name that isn't `<set>/<name>`, or that the icons layer
   doesn't resolve, fails the build, naming the page and the icon. A site wires nothing beyond the
   plugin it already calls.
+- `./browser.js`'s `showsGlyphs`, a shell check, which the crawl runs on every copied page too: at
+  390px each header button, Pages where the shell has one, Help, and Theme, and the keys help
+  dialog's Close shows one glyph, the icons module's svg, and its key hint in a `kbd`, both
+  rendered, and no word, named by its `aria-label`, Pages, Help, Theme, and Close. A missing or
+  wrong glyph, or a word shown, fails it, naming the page and the button.
 
 ### Changed
 
@@ -24,6 +37,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   its `variants`: `info-16` for a note, `light-bulb-16` for a tip, `report-16` for important,
   `alert-16` for a warning, and `stop-16` for caution, each 1em square in `currentColor`,
   `aria-hidden` and `focusable="false"`, the kind's name still its visible text.
+- The template's header buttons show Octicons' `list-unordered-16` for Pages, `question-16` for
+  Help, and `paintbrush-16` for Theme, each with its key hint in a `kbd` and its name in its
+  `aria-label`, the word no longer shown; the keys help dialog's Close shows `x-16` with its ?
+  hint, named Close. The keys help still lists P Pages, ? Help, and T Theme. Each is a glyph
+  marker the build fills, as spike-html-hosting-components' README gives the shell. `site.css`
+  lays each of the shell's buttons, the header's and the keys help's Close, out as its glyph and
+  its key hint in a row, centered on the line, the glyph a block in the foundation's reset.
+- The template pins spike-html-hosting-components at `v0.4.0`, from `v0.3.0`, and the icons layer
+  at `v0.1.0`; the SDK's own dev dependency on the components moves to `v0.4.0` with it.
 
 ## [0.4.0] - 2026-11-06
 
@@ -236,7 +258,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.2.0...v0.3.0

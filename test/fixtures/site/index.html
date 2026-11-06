@@ -8,11 +8,15 @@
      start, and the site index, the page header, the section tree, and the Pages drawer that holds
      the site index, which markdownPages writes into each page; and the Pages button, which opens
      the drawer below its dock, with the page's script that wires it, and the Help button, which
-     opens the keys help dialog that keys.js fills, as the template's shell.
+     opens the keys help dialog that keys.js fills, as the template's shell. Each header button,
+     and the dialog's Close, shows a glyph marker, which the build fills from the icons layer, and
+     its key hint, named by its aria-label with no word shown.
      Adapted from spike-html-hosting-architecture (1f3bf14): index.html, its title and text the
      fixture's, and the site stylesheet the SDK's.
      Adapted from spike-html-hosting-components (v0.2.2): README.md, sl-drawer's Pages opener, its
      button and its script.
+     Adapted from spike-html-hosting-components (v0.4.0): README.md, the header buttons' and the
+     dialog Close's glyph markers.
      Adapted from spike-html-apps-foundation (18e0c55): demo/keys.html, its Help button and its keys
      help dialog. -->
 <html lang="en">
@@ -53,7 +57,8 @@
         aria-label="Pages"
         data-keys="p"
       >
-        Pages <span aria-hidden="true"><kbd>P</kbd></span>
+        <svg data-icon="octicon/list-unordered-16"></svg>
+        <span aria-hidden="true"><kbd>P</kbd></span>
       </button>
       <button
         type="button"
@@ -62,7 +67,8 @@
         aria-label="Help"
         data-keys="?"
       >
-        Help <span aria-hidden="true"><kbd>?</kbd></span>
+        <svg data-icon="octicon/question-16"></svg>
+        <span aria-hidden="true"><kbd>?</kbd></span>
       </button>
       <button
         type="button"
@@ -71,7 +77,8 @@
         aria-label="Theme"
         data-keys="t"
       >
-        Theme <span aria-hidden="true"><kbd>T</kbd></span>
+        <svg data-icon="octicon/paintbrush-16"></svg>
+        <span aria-hidden="true"><kbd>T</kbd></span>
       </button>
     </header>
     <main></main>
@@ -87,7 +94,8 @@
           aria-label="Close"
           data-keys="?"
         >
-          Close <span aria-hidden="true"><kbd>?</kbd></span>
+          <svg data-icon="octicon/x-16"></svg>
+          <span aria-hidden="true"><kbd>?</kbd></span>
         </button>
       </footer>
     </dialog>
