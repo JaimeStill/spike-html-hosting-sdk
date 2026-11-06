@@ -230,7 +230,7 @@ The shell checks, each named in `shell`, assert these:
   control that binds a key shows it in a `kbd`.
 - At 390px, each header button, Pages where the shell has one, Help, and Theme, and, with the keys
   help open, its Close, shows one glyph, the icons layer's `list-unordered-16`, `question-16`,
-  `paintbrush-16`, and `x-16`, its markup the icons module's own, and its key hint in a `kbd`, both
+  `gear-16`, and `x-16`, its markup the icons module's own, and its key hint in a `kbd`, both
   rendered, and no word, named by its `aria-label`: Pages, Help, Theme, and Close.
 - Nothing scrolls sideways at 390px.
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
@@ -507,7 +507,7 @@ The Pages, Help, and Theme buttons, and the dialog's Close, each show a glyph an
 a `kbd` alone, `aria-hidden`, and no word: each is named by its `aria-label`, Pages, Help, Theme,
 and Close, which the dialog lists. Each glyph is a marker that `markdownPages` fills at build from
 the icons layer, as the components' README gives the shell: Octicons' `list-unordered-16` for
-Pages, `question-16` for Help, `paintbrush-16` for Theme, and `x-16` for Close. A site pins the
+Pages, `question-16` for Help, `gear-16` for Theme, and `x-16` for Close. A site pins the
 icons layer, which the components and the SDK both peer, at `v0.1.0`; a marker the build can't
 fill fails it.
 
@@ -545,7 +545,7 @@ fill fails it.
     <span aria-hidden="true"><kbd>?</kbd></span>
   </button>
   <button type="button" commandfor="theme" command="--open" aria-label="Theme" data-keys="t">
-    <svg data-icon="octicon/paintbrush-16"></svg>
+    <svg data-icon="octicon/gear-16"></svg>
     <span aria-hidden="true"><kbd>T</kbd></span>
   </button>
 </header>

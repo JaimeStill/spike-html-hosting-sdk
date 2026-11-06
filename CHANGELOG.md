@@ -38,7 +38,7 @@ dialog again, each button's word replaced by its glyph marker, or the shell chec
   `alert-16` for a warning, and `stop-16` for caution, each 1em square in `currentColor`,
   `aria-hidden` and `focusable="false"`, the kind's name still its visible text.
 - The template's header buttons show Octicons' `list-unordered-16` for Pages, `question-16` for
-  Help, and `paintbrush-16` for Theme, each with its key hint in a `kbd` and its name in its
+  Help, and `gear-16` for Theme, each with its key hint in a `kbd` and its name in its
   `aria-label`, the word no longer shown; the keys help dialog's Close shows `x-16` with its ?
   hint, named Close. The keys help still lists P Pages, ? Help, and T Theme. Each is a glyph
   marker the build fills, as spike-html-hosting-components' README gives the shell. `site.css`

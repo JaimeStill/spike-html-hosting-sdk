@@ -22,7 +22,7 @@ import { after, before, describe, test } from "node:test";
 import { launch, SETTLED } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Browser } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";
-import paintbrush from "@jaimestill/spike-html-hosting-icons/octicon/paintbrush-16";
+import gear from "@jaimestill/spike-html-hosting-icons/octicon/gear-16";
 import question from "@jaimestill/spike-html-hosting-icons/octicon/question-16";
 import x from "@jaimestill/spike-html-hosting-icons/octicon/x-16";
 
@@ -89,7 +89,7 @@ describe("the trees fixture under its base", () => {
   for (const path of ["index.html", "briefs/orientation.html", "org/briefs/orientation.html"]) {
     test(`${path}'s glyph markers are filled at build with the icons layer's svgs`, () => {
       const built = readFileSync(join(root, "dist", path), "utf8");
-      for (const [name, svg] of Object.entries({ question, paintbrush, x })) {
+      for (const [name, svg] of Object.entries({ question, gear, x })) {
         assert.ok(built.includes(svg), `the built page holds the icons layer's ${name}`);
       }
       assert.doesNotMatch(built, /data-icon/);
