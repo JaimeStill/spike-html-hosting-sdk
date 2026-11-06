@@ -54,6 +54,9 @@ importers:
       '@jaimestill/spike-html-hosting-components':
         specifier: github:JaimeStill/spike-html-hosting-components#v0.3.0
         version: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/ce0a14f7fe23029cbca8d48e15692d1d95e4dc79(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)
+      '@jaimestill/spike-html-hosting-icons':
+        specifier: github:JaimeStill/spike-html-hosting-icons#v0.1.0
+        version: https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5
       '@types/node':
         specifier: 26.6.6
         version: 26.6.6
@@ -157,6 +160,10 @@ packages:
     version: 0.3.0
     peerDependencies:
       '@jaimestill/spike-html-apps-foundation': ^0.3.0
+
+  '@jaimestill/spike-html-hosting-icons@https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5':
+    resolution: {gitHosted: true, integrity: sha512-kBpcLHHIxGTqjl6xtsbiRpN/FqeWBGsdY+yldy1SYt/eMm9tEoGm7M+W1V2SGf/zUeIfIYos27B+YU8roE6SZQ==, tarball: https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5}
+    version: 0.1.0
 
   '@jridgewell/sourcemap-codec@1.6.0':
     resolution: {integrity: sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==}
@@ -1055,6 +1062,8 @@ snapshots:
     dependencies:
       '@jaimestill/spike-html-apps-foundation': https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55
       lit: 3.3.3
+
+  '@jaimestill/spike-html-hosting-icons@https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5': {}
 
   '@jridgewell/sourcemap-codec@1.6.0': {}
 

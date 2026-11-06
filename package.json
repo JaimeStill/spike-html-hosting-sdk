@@ -76,6 +76,7 @@
   "peerDependencies": {
     "@jaimestill/spike-html-apps-foundation": "github:JaimeStill/spike-html-apps-foundation#v0.3.0",
     "@jaimestill/spike-html-apps-tooling": "github:JaimeStill/spike-html-apps-tooling#v0.3.0",
+    "@jaimestill/spike-html-hosting-icons": "github:JaimeStill/spike-html-hosting-icons#v0.1.0",
     "eslint": "^10.14.0",
     "vite": "^8.3.6"
   },
@@ -84,6 +85,7 @@
     "@jaimestill/spike-html-apps-noctis": "github:JaimeStill/spike-html-apps-noctis#v0.1.1",
     "@jaimestill/spike-html-apps-tooling": "github:JaimeStill/spike-html-apps-tooling#v0.3.0",
     "@jaimestill/spike-html-hosting-components": "github:JaimeStill/spike-html-hosting-components#v0.3.0",
+    "@jaimestill/spike-html-hosting-icons": "github:JaimeStill/spike-html-hosting-icons#v0.1.0",
     "@types/node": "26.6.6",
     "eslint": "10.14.0",
     "prettier": "3.9.10",

@@ -44,6 +44,7 @@ pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.4.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.3.0 \
+  github:JaimeStill/spike-html-hosting-icons#v0.1.0 \
   vite eslint
 ```
 
@@ -70,8 +71,8 @@ site reads as they are, each through package.json's `exports`:
 | `./prettier.json` | the Prettier configuration |
 | `./site.css` | the site stylesheet, its `site` layer |
 
-Its peers are vite, eslint, and, at their `github:` tags, spike-html-apps-foundation and
-spike-html-apps-tooling, which a site installs; its own dependencies are exact pins, among them
+Its peers are vite, eslint, and, at their `github:` tags, spike-html-apps-foundation,
+spike-html-apps-tooling, and spike-html-hosting-icons, the icons layer, which a site installs; its own dependencies are exact pins, among them
 vite-plugin-standard-css-modules, which `cssModuleScripts()` configures, and rolldown, whose
 `rolldown/utils` the plugin parses with and doesn't declare. A site declares neither: the plugin
 finds rolldown through pnpm's default hoist, `node_modules/.pnpm/node_modules`, so a site that
@@ -127,6 +128,17 @@ imports it, so each page runs only its own scripts, and a hand page beside the r
 runs the shell's Pages drawer wiring. A page loads three JS files, its entry, the shared `index`
 chunk, and rolldown's runtime, the last two statically from the entry, so they block render as its
 one render-blocking tag does.
+
+`markdownPages` also fills every glyph marker, an empty `<svg data-icon="<set>/<name>"></svg>`,
+in every page the build writes, the rendered pages' shell and a site's hand pages alike, with that
+icon's `svg` from spike-html-hosting-icons, resolved from the site's root, so a site wires nothing
+beyond the plugin. The page gains the icon's markup and no script. A `class` on the marker carries
+onto the `svg`, and any other attribute is dropped; a name that isn't `<set>/<name>`, or that the
+icons layer doesn't resolve, fails the build, naming the page and the icon:
+
+```html
+<svg data-icon="octicon/question-16"></svg>
+```
 
 A site's `eslint.config.js` spreads the configuration, which lints the site's code under the
 config's directory and runs the leftover check, no CSS module script left in the build, over
@@ -424,12 +436,14 @@ since a GFM table has no caption.
 
 A GitHub alert, a blockquote opening `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, or
 `[!CAUTION]`, renders as marked-alert 2.1.2 renders it, as GitHub does: a div of its kind, its
-first line a title of the kind's octicon, `aria-hidden`, and its kind as visible text, and a link
-inside it placed as any other:
+first line a title of the kind's octicon and its kind as visible text, and a link inside it placed
+as any other. Each octicon is the icons layer's, through marked-alert's `variants`: `info-16` for a
+note, `light-bulb-16` for a tip, `report-16` for important, `alert-16` for a warning, and `stop-16`
+for caution, each `aria-hidden` and `focusable="false"`:
 
 ```html
 <div class="markdown-alert markdown-alert-important">
-<p class="markdown-alert-title"><svg … aria-hidden="true">…</svg>Important</p>
+<p class="markdown-alert-title"><svg … aria-hidden="true" focusable="false">…</svg>Important</p>
 <p>…</p>
 </div>
 ```

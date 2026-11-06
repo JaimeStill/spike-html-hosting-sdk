@@ -2,7 +2,8 @@
 <!-- The trees fixture's index, a hand page at the base, as the root's index is: no Markdown fills
      it. Its header is the shell's but for the Pages button, which a page with no Pages drawer
      leaves out, with its script; its main links the two trees' copied pages, under their
-     directories, and the hand page at a path elsewhere under the base. -->
+     directories, and the hand page at a path elsewhere under the base. Its Help button holds a
+     glyph marker, which the build fills from the icons layer. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -25,6 +26,7 @@
         aria-label="Help"
         data-keys="?"
       >
+        <svg data-icon="octicon/question-16"></svg>
         Help <span aria-hidden="true"><kbd>?</kbd></span>
       </button>
       <button

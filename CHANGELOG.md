@@ -6,6 +6,25 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+### Added
+
+- The icons layer,
+  [spike-html-hosting-icons](https://github.com/JaimeStill/spike-html-hosting-icons), as a peer at
+  its `github:` tag, `v0.1.0`, beside the foundation and the tooling: a site installs it.
+- `markdownPages` fills every glyph marker, an empty `<svg data-icon="<set>/<name>"></svg>`, in
+  every page the build writes, the rendered pages' shell and a site's hand pages alike, with that
+  icon's `svg` from the icons layer, resolved from the site's root, and adds no script. A `class`
+  on the marker carries onto the `svg`; a name that isn't `<set>/<name>`, or that the icons layer
+  doesn't resolve, fails the build, naming the page and the icon. A site wires nothing beyond the
+  plugin it already calls.
+
+### Changed
+
+- A GitHub alert's title shows the icons layer's Octicon in place of marked-alert's own, through
+  its `variants`: `info-16` for a note, `light-bulb-16` for a tip, `report-16` for important,
+  `alert-16` for a warning, and `stop-16` for caution, each 1em square in `currentColor`,
+  `aria-hidden` and `focusable="false"`, the kind's name still its visible text.
+
 ## [0.4.0] - 2026-11-06
 
 Several copied trees as one site, a root-style site with a hand index beside its rendered pages,

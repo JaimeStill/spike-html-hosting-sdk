@@ -9,7 +9,8 @@
 // every page by directory, each directory labeled by its index page or its name, and marks none
 // current, in the Pages drawer docked from the layout's index dock. Each body table is in a named
 // region a keyboard focuses. Each GitHub alert is marked-alert's callout, its kind's name visible
-// text and its octicon aria-hidden, a link in it placed as any other; a plain blockquote stays one.
+// text and its octicon the icons layer's, aria-hidden and focusable="false", pinned per kind, a
+// link in it placed as any other; a plain blockquote stays one.
 // Several trees, configured to the plugin in a scratch root in TMPDIR, build each file to its page
 // under its tree's directory, the repository's name with a leading dot dropped, and the site index
 // lists them all, nested by those directories; a failure names a page by its tree's directory, and
@@ -24,6 +25,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, describe, test } from "node:test";
 
+import cautionIcon from "@jaimestill/spike-html-hosting-icons/octicon/stop-16";
+import importantIcon from "@jaimestill/spike-html-hosting-icons/octicon/report-16";
+import noteIcon from "@jaimestill/spike-html-hosting-icons/octicon/info-16";
+import tipIcon from "@jaimestill/spike-html-hosting-icons/octicon/light-bulb-16";
+import warningIcon from "@jaimestill/spike-html-hosting-icons/octicon/alert-16";
 import type { ResolvedConfig, UserConfig } from "vite";
 
 import {
@@ -246,16 +252,8 @@ describe("the Markdown pages", () => {
         "> [!TIP]\n> One.\n\n> Plain quote.\n",
       source,
     );
-    // Each octicon, an svg of one path, aria-hidden, its path left out of the pinned markup.
-    const icons = [...html.matchAll(/<svg [^>]*><path d="[^"]*"><\/path><\/svg>/g)].map((m) =>
-      m[0].replace(/<path d="[^"]*">/, "<path>"),
-    );
-    assert.deepEqual(icons, [
-      '<svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path></path></svg>',
-      '<svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path></path></svg>',
-    ]);
     assert.equal(
-      html.replace(/<svg [^>]*><path d="[^"]*"><\/path><\/svg>/g, "<svg/>"),
+      html.replace(/<svg [^>]*><path [^>]*\/><\/svg>/g, "<svg/>"),
       '<h1 id="t">T</h1>\n' +
         '<div class="markdown-alert markdown-alert-important">\n' +
         '<p class="markdown-alert-title"><svg/>Important</p>\n' +
@@ -268,6 +266,33 @@ describe("the Markdown pages", () => {
         "</div>\n" +
         "<blockquote>\n<p>Plain quote.</p>\n</blockquote>\n",
     );
+  });
+
+  test("draw each alert kind's title with its Octicon from the icons layer", () => {
+    const kinds = [
+      ["NOTE", "Note", noteIcon, "info-16"],
+      ["TIP", "Tip", tipIcon, "light-bulb-16"],
+      ["IMPORTANT", "Important", importantIcon, "report-16"],
+      ["WARNING", "Warning", warningIcon, "alert-16"],
+      ["CAUTION", "Caution", cautionIcon, "stop-16"],
+    ] as const;
+    for (const [marker, title, icon, name] of kinds) {
+      const { html } = render("a.md", `# T\n\n> [!${marker}]\n> Body.\n`, source);
+      const callout = html.slice(html.indexOf("<div"));
+      // The callout's markup, its glyph's path data left out of the pin.
+      assert.equal(
+        callout.replace(/ d="[^"]*"/, ' d="…"'),
+        `<div class="markdown-alert markdown-alert-${marker.toLowerCase()}">\n` +
+          '<p class="markdown-alert-title"><svg xmlns="http://www.w3.org/2000/svg" width="1em" ' +
+          'height="1em" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path ' +
+          `fill="currentColor" d="…"/></svg>${title}</p>\n` +
+          "<p>Body.</p>\n" +
+          "</div>\n",
+        `the ${title} callout`,
+      );
+      // The glyph is the icons layer's octicon/<name> whole, its path data with it.
+      assert.ok(callout.includes(`<p class="markdown-alert-title">${icon}${title}</p>`), name);
+    }
   });
 
   test("name a page of one of several trees by its tree's directory in a failure", () => {
