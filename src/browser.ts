@@ -83,12 +83,38 @@ import { docks, frontMatterText, pageUrl } from "./markdown-pages.ts";
  * the page at url, a URL under site, site itself, its index, when none is given. */
 export type Check = (page: Page, site: string, url?: string) => Promise<void>;
 
-/** Clicks the element the selector names at its center, as a person's mouse does. */
+/** The center of the element the selector names, once it is in the viewport and the element a
+ * click there reaches, it or one inside it, so nothing covers it; else the state that keeps it
+ * from being clicked: the page's scroll, the element's box, the viewport's width, and what a click
+ * there reaches instead, as a string. */
+const target = (selector: string): string => `(() => {
+  const element = document.querySelector(${JSON.stringify(selector)});
+  if (!element) return "none in the page";
+  const rect = element.getBoundingClientRect();
+  const x = rect.x + rect.width / 2;
+  const y = rect.y + rect.height / 2;
+  const inside = rect.width > 0 && rect.height > 0 && x >= 0 && y >= 0 &&
+    x < innerWidth && y < innerHeight;
+  const hit = inside ? document.elementFromPoint(x, y) : null;
+  if (hit && element.contains(hit)) return { x, y };
+  const reached = hit ? hit.localName + (hit.id ? "#" + hit.id : "") : "nothing in the viewport";
+  return "at scroll " + scrollY + ", its box " +
+    [rect.x, rect.y, rect.width, rect.height].map(Math.round).join(" ") + " in a " +
+    innerWidth + "px viewport, a click at its center reaches " + reached;
+})()`;
+
+/** Clicks the element the selector names at its center, as a person's mouse does, once it is in
+ * the viewport and nothing covers it there, waiting as until() does; else throws, naming the
+ * state that keeps it from being clicked. A click whose press and release land on no element of
+ * its own is a click on nothing, so the wait is what makes a click on a page still settling
+ * reach its element, never a fixed sleep. */
 async function click(page: Page, selector: string): Promise<void> {
-  const { x, y } = await page.evaluate(`(() => {
-    const rect = document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();
-    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-  })()`);
+  const point = `(${target(selector)})`;
+  // Past the wait, the state read once more is what the error names.
+  await until(page, `typeof ${point} === "object"`).catch(() => undefined);
+  const at: { x: number; y: number } | string = await page.evaluate(point);
+  if (typeof at === "string") throw new Error(`${selector} isn't clickable: ${at}`);
+  const { x, y } = at;
   for (const type of ["mousePressed", "mouseReleased"]) {
     await page.cdp("Input.dispatchMouseEvent", { type, x, y, button: "left", clickCount: 1 });
   }
@@ -575,8 +601,20 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
     );
   }
   try {
-    await click(page, "header button[commandfor=help]");
-    await until(page, HELP).catch(() => assert.fail(`${url}: the Help button opens the keys help`));
+    const opens = `${url}: the Help button opens the keys help`;
+    // No dialog is open, the keys help the check before closed among them, and the page is at its
+    // top, so the Help button is in the viewport: a section move the check before left scrolling
+    // smoothly may land after the scroll to the top above, so the top is taken again until it holds.
+    await until(page, `!document.querySelector("dialog[open]")`).catch(() =>
+      assert.fail(`${opens}; a dialog is still open before its click`),
+    );
+    await until(page, `scrollY === 0 || void scrollTo({ top: 0, behavior: "instant" })`).catch(() =>
+      assert.fail(`${opens}; the page doesn't stay at its top before its click`),
+    );
+    await click(page, "header button[commandfor=help]").catch((error: Error) =>
+      assert.fail(`${opens}; ${error.message}`),
+    );
+    await until(page, HELP).catch(() => assert.fail(opens));
     const closing: Shown[] = await page.evaluate(glyphsShown(close));
     assert.deepEqual(
       closing,
