@@ -22,12 +22,12 @@
 // the tree's H and L, and its character-key switch turns them off, so L moves to no section and P
 // opens no drawer, and on again; in a 390px viewport each header button, Pages where the shell has
 // one, Help, and Theme, and the keys help's Close each show one glyph, the icons layer's svg for
-// list-unordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, both
-// rendered, and no word, each named by its aria-label; nothing scrolls sideways at 390px; at a
-// phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and at
-// 1400px, no navigation link's word breaks across lines and every docked side column is at least
-// 16rem wide; and a choice the menu never saves leaves nothing stored, so a reload shows none of
-// it. shell lists them by name, for a site to make a test of each.
+// list-unordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, both rendered, and
+// no word, each named by its aria-label; nothing scrolls sideways at 390px; at a phone's width, a
+// px below and at each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no
+// navigation link's word breaks across lines and every docked side column is at least 16rem wide;
+// and a choice the menu never saves leaves nothing stored, so a reload shows none of it. shell
+// lists them by name, for a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the theme menu to each palette the
@@ -70,8 +70,8 @@ import { join } from "node:path";
 
 import { SETTLED, until } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
-import listUnorderedIcon from "@jaimestill/spike-html-hosting-icons/octicon/list-unordered-16";
 import gearIcon from "@jaimestill/spike-html-hosting-icons/octicon/gear-16";
+import listUnorderedIcon from "@jaimestill/spike-html-hosting-icons/octicon/list-unordered-16";
 import questionIcon from "@jaimestill/spike-html-hosting-icons/octicon/question-16";
 import xIcon from "@jaimestill/spike-html-hosting-icons/octicon/x-16";
 import { parse } from "yaml";
