@@ -16,14 +16,14 @@
      it on ?; keys.js fills the dialog's [data-keys-list] as it opens with every binding the page
      has, the section tree's H and L among them, and the reader's switch that turns the character
      keys off (WCAG 2.1.4). The Pages and Help buttons, and the dialog's Close, are named by their
-     aria-label, the text their bracketed key hint, aria-hidden, follows, which the dialog lists.
+     aria-label, the text their key hint, a kbd alone and aria-hidden, follows, which the dialog lists.
      Adapted from spike-html-hosting (cb0511c): index.html, its title and text this site's, and its
      page a shell.
      Adapted from spike-html-hosting (fba414c): index.html, its full page entry, its keys module,
      and the Theme button that keys.js clicks on T.
      Adapted from spike-html-hosting-architecture (27d70e1): index.html, its title the site's
      repository and its stylesheet the SDK's.
-     Adapted from spike-html-hosting-components (v0.2.1): README.md, sl-drawer's Pages opener, its
+     Adapted from spike-html-hosting-components (v0.2.2): README.md, sl-drawer's Pages opener, its
      button and its script.
      Adapted from spike-html-apps-foundation (18e0c55): demo/keys.html, its Help button and its keys
      help dialog.
@@ -66,7 +66,7 @@
         aria-label="Pages"
         data-keys="p"
       >
-        Pages <span aria-hidden="true">[<kbd>P</kbd>]</span>
+        Pages <span aria-hidden="true"><kbd>P</kbd></span>
       </button>
       <button
         type="button"
@@ -75,7 +75,7 @@
         aria-label="Help"
         data-keys="?"
       >
-        Help <span aria-hidden="true">[<kbd>?</kbd>]</span>
+        Help <span aria-hidden="true"><kbd>?</kbd></span>
       </button>
       <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
     </header>
@@ -92,7 +92,7 @@
           aria-label="Close"
           data-keys="?"
         >
-          Close <span aria-hidden="true">[<kbd>?</kbd>]</span>
+          Close <span aria-hidden="true"><kbd>?</kbd></span>
         </button>
       </footer>
     </dialog>

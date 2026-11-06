@@ -43,7 +43,7 @@ shell loads, each pinned exactly:
 pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.3.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
-  github:JaimeStill/spike-html-hosting-components#v0.2.1 \
+  github:JaimeStill/spike-html-hosting-components#v0.2.2 \
   vite eslint
 ```
 
@@ -244,7 +244,7 @@ repository's highest plain `vX.Y.Z` tag.
 ### The pages
 
 `markdownPages` writes each page's data as the light-DOM markup of spike-html-hosting-components
-v0.2.1's elements, so with no script the page renders it as its own, and each element, once its
+v0.2.2's elements, so with no script the page renders it as its own, and each element, once its
 module defines it, styles and marks it. The section tree, in a div, comes before main, then main,
 opened by the page header, then the site index in the Pages drawer:
 
@@ -316,7 +316,7 @@ shell's header is a wrapping row of the site nav, then the Pages, Help, and Them
 
 The shell wires the components in: it loads their five modules, `site-nav.js`, `site-index.js`,
 `page-header.js`, `section-tree.js`, and `drawer.js`, render-blocking like the foundation's, from
-`github:JaimeStill/spike-html-hosting-components#v0.2.1`; places `sl-site-nav`, which takes no
+`github:JaimeStill/spike-html-hosting-components#v0.2.2`; places `sl-site-nav`, which takes no
 content, at its header's start; and adds the Pages button beside the Theme button, as the
 components' README gives it. keys.js clicks the button on P, as it does Theme on T; `site.css`
 shows it only below 86rem, the drawer's dock, and only once the drawer is defined, so with no
@@ -330,10 +330,10 @@ page has, the Pages button's P, the Help button's ?, the Theme button's T, and t
 H and L, and with the reader's settings, among them the switch that turns the character keys off
 (WCAG 2.1.4). The Help button, between Pages and Theme, opens it by the invoker command
 `show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
-its element's `aria-label`, else by its text less each `kbd`, so the Pages and Help buttons, whose
-bracketed key hints leave a bracket pair in that text, carry `aria-label`s, the names they had
-with their hints `aria-hidden`. The SDK's template and fixture shells carry it; a site made from an
-earlier template, or the root's own shell, adds it.
+its element's `aria-label`, else by its text less each `kbd`; the Pages and Help buttons, and the
+dialog's Close, carry `aria-label`s, the names they have with their key hints, each a `kbd` alone,
+`aria-hidden`. The SDK's template and fixture shells carry it; a site made from an earlier
+template, or the root's own shell, adds it.
 
 ```html
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
@@ -353,10 +353,10 @@ earlier template, or the root's own shell, adds it.
 <header>
   <sl-site-nav></sl-site-nav>
   <button type="button" class="pages-opener" aria-controls="pages" aria-haspopup="dialog" aria-expanded="false" aria-label="Pages" data-keys="p">
-    Pages <span aria-hidden="true">[<kbd>P</kbd>]</span>
+    Pages <span aria-hidden="true"><kbd>P</kbd></span>
   </button>
   <button type="button" commandfor="help" command="show-modal" aria-label="Help" data-keys="?">
-    Help <span aria-hidden="true">[<kbd>?</kbd>]</span>
+    Help <span aria-hidden="true"><kbd>?</kbd></span>
   </button>
   <button type="button" commandfor="theme" command="--open" data-keys="t">Theme</button>
 </header>
@@ -367,7 +367,7 @@ earlier template, or the root's own shell, adds it.
   <div data-keys-list></div>
   <footer>
     <button type="button" commandfor="help" command="close" aria-label="Close" data-keys="?">
-      Close <span aria-hidden="true">[<kbd>?</kbd>]</span>
+      Close <span aria-hidden="true"><kbd>?</kbd></span>
     </button>
   </footer>
 </dialog>
