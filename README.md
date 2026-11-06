@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.3.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.3.1 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.3.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.3.1 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,7 +40,7 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.3.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.3.1 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.2.2 \
@@ -64,7 +64,7 @@ site reads as they are, each through package.json's `exports`:
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
 | `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, `keepsNavigationWords`, `holdsBetweenDocks`, and `opensKeysHelp`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, `keepsNavigationWords`, `holdsBetweenDocks`, `startsUnderHeader`, and `opensKeysHelp`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl |
 | `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
@@ -190,7 +190,9 @@ each facet stepped and set on the root; the one render-blocking module script; e
 on the page defined, so a module the shell fails to load fails naming its element's tag; every
 request under the base, and none failed; main's centered reading width at 1600px; at 1200px, between
 the docks, main centered on a page with no section tree and the tree docked beside it on a page with
-one; ? opening the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the
+one; at 390px, at 1200px, and at 1600px, main starting directly under the header, however short the
+page, no further below it, or below the section tree's bar between them, than the layout's own gap;
+? opening the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the
 tree's H and L, and whose character-key switch turns them off, so L and P do nothing, and on again;
 nothing scrolling sideways at 390px; the navigation laid out, at 390px, a pixel below and at each of
 the layout's docks, and at 1400px, with no navigation link's word broken across lines (a hyphenated
@@ -199,8 +201,8 @@ left unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin,
 resolves to the pages and links it reached and the pages no link reaches. Each page it reaches loads
 with a 2xx, its one module script render-blocking, every custom element on it defined, every request
 under the base and none failed, main at its centered reading width at 1600px, nothing scrolling
-sideways at 390px, its navigation, its layout between the docks, and its keys help as the shell
-checks have them, and its title its source's front matter name or first h1. Its main opens with its
+sideways at 390px, its navigation, its layout between the docks, its main under the header, and its
+keys help as the shell checks have them, and its title its source's front matter name or first h1. Its main opens with its
 page header, whose dt and dd pairs are the source's front matter keys and values, in order, with no
 front matter table left; its site index, in its Pages drawer, links every page the build writes,
 each once, and no other; its Pages button is hidden at 1600px and at 390px opens the drawer by its

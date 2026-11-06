@@ -6,6 +6,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-05
+
+Main directly under the header on a page shorter than the viewport.
+
+### Fixed
+
+- `site.css` packs the grid's rows at the top, `align-content: start`, at 70rem and wider. The
+  foundation's reset gives the body a min-height of the viewport's, and on a shorter page v0.3.0's
+  rows stretched into the room left over, pushing main down from the header: hundreds of pixels on
+  a short page between the docks, and at 1600px on a page with no docked drawer. A taller page, the
+  docked drawer, and the section tree, each held in view as the page scrolls, are unchanged.
+- `./browser.js`: `startsUnderHeader`, in `shell`, and the crawl assert, at 390px, at 1200px, and
+  at 1600px, that main starts directly under the header, or under the section tree's bar where it
+  sits between them, no further below it than the layout's own gap: the body's row-gap and the
+  block margins that meet there. The fixture site's index and orphan page are shorter than the
+  viewport, and with v0.3.0's rows both checks fail on the index.
+
 ## [0.3.0] - 2026-11-05
 
 The pages' navigation: each page's front matter, section tree, and site index written as the
@@ -148,7 +165,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/releases/tag/v0.1.0
