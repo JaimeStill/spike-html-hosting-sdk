@@ -3,7 +3,7 @@
 // built with a Noctis syntax theme appended to the SDK's into dist/, and without it into
 // plain/dist/ (mise run build:fixture-noctis builds both). Each is served under its base by Vite's
 // preview, as served() serves a site, in the pinned chrome-headless-shell. The check passes the
-// first, with noctis in the theme menu, and fails the second, naming noctis, whose code renders
+// first, with noctis in the settings, and fails the second, naming noctis, whose code renders
 // plain there. The Noctis copy the first build reads is held to its record.
 
 import assert from "node:assert/strict";
@@ -79,7 +79,7 @@ describe("the palette check on the Noctis fixture", () => {
     assert.deepEqual(checkContent(join(root, "syntax/noctis")), []);
   });
 
-  // The check holds the menu's color row to the registry's list, so noctis is in the menu too.
+  // The check holds the settings' color row to the registry's list, so the settings offer noctis.
   test("both builds register noctis after every built-in palette", async () => {
     for (const { origin } of [noctis, plain]) {
       const page = await browser.open("about:blank");

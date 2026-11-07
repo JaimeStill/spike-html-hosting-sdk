@@ -215,36 +215,50 @@ every request still held under the base `site` names.
 
 The shell checks, each named in `shell`, assert these:
 
-- The Settings button and S open the theme menu, and its sheet is adopted. Until the Settings
-  dialog holds the reader's settings, the shell's script opens the menu in its place.
-- Stepping each facet sets it on the root.
+- The Settings button and S open the Settings dialog, whose `sl-settings` renders with its
+  sheets adopted, the foundation's `theme-menu.css` among them, and no stylesheet fetched; Escape
+  closes it.
+- Stepping each facet in the settings sets it on the root, with no Save.
 - The page's one module script is render-blocking.
 - Every custom element on the page is defined, so a module the shell fails to load fails the check,
   which names its element's tag.
-- Every request resolves under the base, and none fails.
+- Every request, with Settings and Help opened, resolves under the base, and none fails; the
+  foundation's `theme-menu.js` and `keys-help.js`, which `sl-settings` and `sl-shortcuts` stand in
+  for, are never requested.
 - Main holds its centered reading width at 1600px.
 - At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
   beside it on a page with one.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into the header, or into the section tree's bar between them, and no further below
   it than on a page taller than the viewport.
-- ? opens the shell's keys help dialog, which lists the page's bindings, P, ?, S, and the tree's H
-  and L. Its character-key switch turns them off, so L and P do nothing, and on again. Every header
-  control that binds a key shows it in a `kbd`.
-- At 390px, each header button, Pages where the shell has one, Help, and Settings, and, with the
-  keys help open, its Close, shows one glyph, the icons layer's `list-unordered-16`,
+- ? opens Help, whose `sl-shortcuts` lists exactly the page's bindings, as the foundation's keys
+  module holds them, the shell's P, ?, S, and the tree's H and L among them, and Escape closes it.
+  The character-key switch in Settings turns them off, so L and P do nothing, and on again. Every
+  header control that binds a key shows it in a `kbd`.
+- Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
+  components' shortcut dialog pattern: it is named by a heading inside it through
+  `aria-labelledby`, and has a Close, a glyph button with `command="close"` for it showing
+  `<kbd>Esc</kbd>`; its opener shows its key in a `kbd`, has a name, its `aria-label`, and an
+  interest hint holding that name. It fails naming each dialog and what it lacks.
+- At 390px, each header button, Pages where the shell has one, Help, and Settings, and, with each
+  shortcut dialog open, its Close, shows one glyph, the icons layer's `list-unordered-16`,
   `question-16`, `gear-16`, and `x-16`, its markup the icons module's own, and its key hint in a
-  `kbd`, both rendered, and no word, named by its `aria-label`: Pages, Help, Settings, and Close.
+  `kbd`, Esc for a Close, both rendered, and no word, named by its `aria-label`: Pages, Help,
+  Settings, and Close.
 - Every glyph button the page renders, its own and those in the components' shadow roots, is at
   least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
-  space.
+  space, and with each shortcut dialog open, its own, its Close among them.
 - At 390px, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one line
   at the header's inline end, on the site nav's first line, and at 390px nothing scrolls sideways.
 - Nothing scrolls sideways at 390px.
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
   word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
   column is at least 16rem wide.
-- The theme menu stays unsaved: no stored choice persists.
+- A change in the settings is stored at once, kept as the dialog closes, and applied after a
+  reload.
+
+A check that changes the reader's stored theme or keys settings removes them after, so the checks
+run in any order.
 
 A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves to a
 `Crawled`, `{ pages, links, unreachable, hand }`: the pages it reached and the in-site links it
@@ -252,20 +266,20 @@ counted, the copied pages no link from the index reaches, and the hand pages it 
 file's page it reaches loads with a 2xx, its one module script render-blocking, every custom element
 on it defined, every request under the base and none failed, main at its centered reading width at
 1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
-under the header, its keys help, its glyph buttons and their size, and its header's row as the shell
-checks have them, and its title its source's front matter name or first h1. Its main opens with its
-page header, whose dt and dd pairs are the source's front matter keys and values, in order, with no
-front matter table left; its site index, in its Pages drawer, links every copied page the build
-writes, each once, and no hand page; its Pages button is hidden at 1600px and at 390px opens the
-drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and every
-in-site link reaches a built page, and its fragment's element. Since each page's index links every
-other, the crawl reaches every page from the index. It checks a page for every Markdown file
-`content.json` records, every tree's, crawling from one no link reaches once the links run out. A
-page it reaches that no record names is a hand page the site builds, as a root-style site's index
-is: it loads with a 2xx, every request under the base and none failed, its ids the targets of the
-fragments linking it, and its links followed, but the copied pages' checks are left to the shell
-checks, which the site runs on it by its URL; `Crawled.hand` lists each, by its path under the base,
-in the order the crawl reached it.
+under the header, its Help and the switch in Settings, its shortcut dialogs, its glyph buttons and
+their size, and its header's row as the shell checks have them, and its title its source's front
+matter name or first h1. Its main opens with its page header, whose dt and dd pairs are the source's
+front matter keys and values, in order, with no front matter table left; its site index, in its
+Pages drawer, links every copied page the build writes, each once, and no hand page; its Pages
+button is hidden at 1600px and at 390px opens the drawer by its click and by P, its `aria-expanded`
+following the drawer open and closed; and every in-site link reaches a built page, and its
+fragment's element. Since each page's index links every other, the crawl reaches every page from the
+index. It checks a page for every Markdown file `content.json` records, every tree's, crawling from
+one no link reaches once the links run out. A page it reaches that no record names is a hand page
+the site builds, as a root-style site's index is: it loads with a 2xx, every request under the base
+and none failed, its ids the targets of the fragments linking it, and its links followed, but the
+copied pages' checks are left to the shell checks, which the site runs on it by its URL;
+`Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -384,7 +398,7 @@ export default defineConfig({
 ```
 
 A hand page loads what it uses, `renderBlocking` keeping each page to its own scripts; the
-fixture's index carries the shell's header, theme menu, and keys help dialog, but no Pages button
+fixture's index carries the shell's header and its Help and Settings dialogs, but no Pages button
 or drawer, since it has no site index. The site's browser tier runs the shell checks on each hand
 page by its URL, and on a rendered page, and the crawl tolerates the hand pages it reaches:
 
@@ -491,13 +505,14 @@ Main's track may shrink, main breaks long words while the components' navigation
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
 shell's header is the site nav, taking the rest of the row and wrapping its own links, and one
 group of buttons at its inline end, `header-actions`, Pages, Help, and Settings, which never wraps
-and stays on the nav's first line at every width. Each button, and the keys help's Close, is a
-glyph button, laid out by the components' `glyph-button.css`, which the shell links between the
+and stays on the nav's first line at every width. Each button, and each shortcut dialog's Close, is
+a glyph button, laid out by the components' `glyph-button.css`, which the shell links between the
 foundation's entry and `site.css`.
 
-The shell wires the components in: it loads their five modules, `site-nav.js`, `site-index.js`,
-`page-header.js`, `section-tree.js`, and `drawer.js`, render-blocking like the foundation's, from
-`github:JaimeStill/spike-html-hosting-components#v0.4.0`; places `sl-site-nav`, which takes no
+The shell wires the components in: it loads their seven modules, `site-nav.js`, `site-index.js`,
+`page-header.js`, `section-tree.js`, `drawer.js`, `shortcuts.js`, and `settings.js`,
+render-blocking like the foundation's, from `github:JaimeStill/spike-html-hosting-components`, at
+a release that holds `sl-shortcuts` and `sl-settings`; places `sl-site-nav`, which takes no
 content, at its header's start, with no `src`, so it lists the components' built `SITES`; and adds
 the Pages button first in the header's group, as the components' README gives it. keys.js clicks the
 button on P, as it does Settings on S; `site.css` shows it only below 86rem, the drawer's dock, and
@@ -506,21 +521,24 @@ page's own; and the page's script opens the drawer on its click and keeps its `a
 step with the drawer's `open` and `close` events. The drawer, open, is a modal: Escape or its Close
 button closes it.
 
-A site's shell carries the keys help dialog, as the foundation's keys module gives it: a
-`dialog#help` holding a `[data-keys-list]`, which keys.js fills as it opens with every binding the
-page has, the Pages button's P, the Help button's ?, the Settings button's S, and the section
-tree's H and L, and with the reader's settings, among them the switch that turns the character keys
-off (WCAG 2.1.4). The Help button, between Pages and Settings, opens it by the invoker command
-`show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
-its element's `aria-label`, else by its text less each `kbd`. The SDK's template and fixture
-shells carry it; a site whose shell lacks it adds it.
+A site's shell carries two shortcut dialogs, as the components' README gives the pattern: a key
+and its opener, a glyph button in the header with `commandfor` and `command="show-modal"`, open a
+native modal dialog named by its heading through `aria-labelledby`, holding what its operation
+needs, and closed by its Close, a glyph button with `command="close"` showing `<kbd>Esc</kbd>`, or
+by Escape. Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds
+`sl-shortcuts` alone: it lists every binding the page has outside the dialog, the Pages button's
+P, the Help button's ?, the Settings button's S, and the section tree's H and L, each named by its
+element's `aria-label` or its registered label. Settings, under S, opens `dialog#settings`, headed
+"Settings", which holds `sl-settings`: the theme, a row each for color, scheme, space, and type
+beside a preview, and the keyboard, among it the switch that turns the character keys off (WCAG
+2.1.4), each change applied and stored at once, with no Save and no Cancel. Neither loads the
+foundation's `theme-menu.js` or `keys-help.js`. `site.css` gives both dialogs the foundation theme
+menu's width, the viewport less `--space-s` on each side, up to 56rem. The SDK's template and
+fixture shells carry them; a site whose shell lacks them adds them.
 
-The Settings button, under S, sends `show-modal` to `dialog#settings`; until that dialog holds the
-reader's settings, the shell's script cancels the command and opens the theme menu in its place.
-
-The Pages, Help, and Settings buttons, and the dialog's Close, each of the class `glyph-button`,
+The Pages, Help, and Settings buttons, and each dialog's Close, each of the class `glyph-button`,
 show a glyph and their key hint, a `kbd` alone, `aria-hidden`, and no word: each is named by its
-`aria-label`, Pages, Help, Settings, and Close, which the dialog lists, and shows that name in its
+`aria-label`, Pages, Help, Settings, and Close, which Help lists, and shows that name in its
 interest hint, a `glyph-hint` popover its `interestfor` names. Each glyph is a marker that
 `markdownPages` fills at build from the icons layer, as the components' README gives the shell:
 Octicons' `list-unordered-16` for Pages, `question-16` for Help, `gear-16` for Settings, and
@@ -537,6 +555,8 @@ fill fails it.
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
 <script type="module" blocking="render">
   const drawer = document.querySelector("sl-drawer#pages");
   const opener = document.querySelector(".pages-opener");
@@ -544,13 +564,6 @@ fill fails it.
   const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
   drawer.addEventListener("open", expanded);
   drawer.addEventListener("close", expanded);
-</script>
-<script type="module" blocking="render">
-  const menu = document.querySelector("sl-theme-menu#theme");
-  document.querySelector("dialog#settings").addEventListener("command", (event) => {
-    event.preventDefault();
-    menu.show();
-  });
 </script>
 …
 <header>
@@ -602,11 +615,9 @@ fill fails it.
   </div>
 </header>
 <main></main>
-<sl-theme-menu id="theme"></sl-theme-menu>
-<dialog id="settings" aria-label="Settings"></dialog>
 <dialog id="help" aria-labelledby="help-title">
   <h2 id="help-title">Keyboard shortcuts</h2>
-  <div data-keys-list></div>
+  <sl-shortcuts></sl-shortcuts>
   <footer>
     <button
       type="button"
@@ -614,14 +625,32 @@ fill fails it.
       commandfor="help"
       command="close"
       aria-label="Close"
-      data-keys="?"
       interestfor="help-close-hint"
       aria-description=""
     >
       <svg data-icon="octicon/x-16"></svg>
-      <span aria-hidden="true"><kbd>?</kbd></span>
+      <span aria-hidden="true"><kbd>Esc</kbd></span>
     </button>
     <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+  </footer>
+</dialog>
+<dialog id="settings" aria-labelledby="settings-title">
+  <h2 id="settings-title">Settings</h2>
+  <sl-settings></sl-settings>
+  <footer>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="settings"
+      command="close"
+      aria-label="Close"
+      interestfor="settings-close-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/x-16"></svg>
+      <span aria-hidden="true"><kbd>Esc</kbd></span>
+    </button>
+    <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
   </footer>
 </dialog>
 ```
@@ -700,7 +729,8 @@ as marked renders them; and a palette with no syntax theme matches no rule, so i
 `syntax: []` highlights nothing and emits no stylesheet.
 
 `highlightsEachPalette`, a `Check` outside `shell`, holds a page's highlighted code to its syntax
-themes: it steps the theme menu to each palette the registry lists, in light and then in dark, and
+themes: it opens Settings by S and steps its settings to each palette the registry lists, in light
+and then in dark, and
 in each checks that every token renders its palette's color and some token differs from the page's
 text color, failing on a palette whose code renders plain, naming the palette and the scheme. It
 runs on a page with highlighted code, which the site's test gives, as the template's runs it on
@@ -773,11 +803,12 @@ exports alone:
   exists, so the site holds its copy.
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`, the
   shell, with the foundation's full page entry, its preferences and keys modules, the components'
-  five modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
+  seven modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
   the Help button on ?, and the Settings button on S, each a glyph button showing its glyph and its
-  key hint, named by its `aria-label` and its interest hint, the keys help dialog, its Close showing
-  its glyph, the scripts that open the Pages drawer and, until `dialog#settings` holds the reader's
-  settings, the theme menu, and the components' `glyph-button.css` and the SDK's stylesheet; the
+  key hint, named by its `aria-label` and its interest hint, the Help and Settings shortcut
+  dialogs, holding `sl-shortcuts` and `sl-settings`, each Close showing its glyph and Esc, the
+  script that opens the Pages drawer, and the components' `glyph-button.css` and the SDK's
+  stylesheet; the
   sample copied tree, `content/` and `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as

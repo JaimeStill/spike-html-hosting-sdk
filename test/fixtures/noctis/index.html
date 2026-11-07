@@ -3,10 +3,15 @@
      shell with spike-html-apps-noctis registered as its README's "Use" describes, its sheet,
      noctis.css, linked after the foundation's entry, and its registration module, noctis.js,
      imported beside the foundation's, before preferences.js, so the registry lists noctis when the
-     reader's choice applies and the theme menu offers it after every built-in profile. The entry
-     is the full one, so the menu offers every built-in palette beside noctis.
+     reader's choice applies and the settings offer it after every built-in profile. The entry is
+     the full one, so the settings offer every built-in palette beside noctis. Of the fixture site's
+     header it keeps only what the palette check opens: the Settings button, which keys.js clicks
+     on S, and its shortcut dialog, dialog#settings, holding the components' sl-settings, whose
+     module it imports, with the components' glyph-button.css linked before the SDK's site.css.
      Adapted from spike-html-hosting-sdk (237a769): test/fixtures/site/index.html, its title and
-     Noctis's sheet and module. -->
+     Noctis's sheet and module.
+     Adapted from spike-html-hosting-components (e3e60a8): README.md, the Settings opener and its
+     shortcut dialog. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -14,17 +19,52 @@
     <title>The Noctis fixture</title>
     <link rel="stylesheet" href="@jaimestill/spike-html-apps-foundation/page-full.css" />
     <link rel="stylesheet" href="@jaimestill/spike-html-apps-noctis/noctis.css" />
+    <link rel="stylesheet" href="@jaimestill/spike-html-hosting-components/glyph-button.css" />
     <link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/register-full.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-noctis/noctis.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/preferences.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
   </head>
   <body>
     <header>
-      <button type="button" commandfor="theme" command="--open" data-keys="s">Settings</button>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="glyph-button"
+          commandfor="settings"
+          command="show-modal"
+          aria-label="Settings"
+          data-keys="s"
+          interestfor="settings-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/gear-16"></svg>
+          <span aria-hidden="true"><kbd>S</kbd></span>
+        </button>
+        <div id="settings-hint" class="glyph-hint" popover="hint" aria-hidden="true">Settings</div>
+      </div>
     </header>
     <main></main>
-    <sl-theme-menu id="theme"></sl-theme-menu>
+    <dialog id="settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">Settings</h2>
+      <sl-settings></sl-settings>
+      <footer>
+        <button
+          type="button"
+          class="glyph-button"
+          commandfor="settings"
+          command="close"
+          aria-label="Close"
+          interestfor="settings-close-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/x-16"></svg>
+          <span aria-hidden="true"><kbd>Esc</kbd></span>
+        </button>
+        <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+      </footer>
+    </dialog>
   </body>
 </html>

@@ -15,32 +15,65 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 - `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 1120px,
   and 1376px the header's `header-actions` group holds its rendered buttons on one line, at the
   header's inline end and on the site nav's first line, and at 390px nothing scrolls sideways.
+- `./browser.js`'s `followsShortcutDialogs`, a shell check, which the crawl runs too: every dialog
+  a keyed `show-modal` opener opens, a `button[data-keys][commandfor][command=show-modal]`,
+  follows the components' shortcut dialog pattern. A page fails, naming the dialog and what it
+  lacks, where the dialog has no name from a heading inside it by `aria-labelledby`, no Close, a
+  glyph button with `command="close"` for it showing `<kbd>Esc</kbd>`, or where its opener
+  doesn't show its key in a `kbd`, has no `aria-label`, or has no interest hint holding that name.
+- `./browser.js`'s `opensSettings`, in place of `opensThemeMenu`: the Settings button and S open
+  `dialog#settings`, whose `sl-settings` renders, its shadow root adopting the build's constructed
+  sheets, the foundation's `theme-menu.css` among them, with no stylesheet fetched; Escape closes
+  it.
+- `./browser.js`'s `storesAtOnce`, in place of `staysUnsaved`: a step of the settings' color row
+  is stored at once, kept as the dialog closes, and applied after a reload.
 
 ### Changed
 
 - The template's header is the site nav and one group of buttons at its inline end,
   `<div class="header-actions">`: Pages under P, Help under ?, and Settings under S, Octicons'
-  `gear-16`, in place of Theme under T. Each, and the keys help's Close, is a glyph button of the
-  class `glyph-button`, with an empty `aria-description` and an interest hint, a `glyph-hint`
-  popover holding its name, as spike-html-hosting-components' README gives the header. The
-  Settings button sends `show-modal` to `dialog#settings`; until that dialog holds the reader's
-  settings, the shell's script cancels the command and opens the theme menu in its place. The
-  shell links the components' `glyph-button.css` between the foundation's entry and `site.css`.
-  A site takes the template's header again, or the shell checks fail on it.
+  `gear-16`, in place of Theme under T. Each is a glyph button of the class `glyph-button`, with
+  an empty `aria-description` and an interest hint, a `glyph-hint` popover holding its name, as
+  spike-html-hosting-components' README gives the header. The Settings button sends `show-modal`
+  to `dialog#settings`, its shortcut dialog. The shell links the components' `glyph-button.css`
+  between the foundation's entry and `site.css`. A site takes the template's header again, or the
+  shell checks fail on it.
 - `site.css` lays the header out as the nav, taking the rest of the row and wrapping its own
   links, and the `header-actions` group, which never wraps and stays on the nav's first line at
   every width. It drops its own row for the shell's buttons, which `glyph-button.css` lays out,
   and its Pages button rules sit outside its layer, after `glyph-button.css`, whose unlayered
   `display` would otherwise win.
 - The shell checks and the crawl expect Settings under S where they expected Theme under T: the
-  theme menu checks open the menu by the Settings button and S, the keys help lists S Settings,
-  and the glyph check names the Settings button. The screenshots' theme menu state opens the menu
-  by the Settings button's click.
+  keys help lists S Settings, and the glyph check names the Settings button.
 
 - `./screenshots.js`'s `description` captures every page whole at 390x844, 1120x700, and
   1376x860, a phone's width and the layout's two docks, 70rem and 86rem, in place of 1280x800 and
-  390x844, and the index also with Help open, beside its theme menu open, at each: nine states,
-  each named by its width, as `index-help-1120`. `leavesNoCapture` asserts the nine.
+  390x844, and the index also with Help open, beside Settings open, at each: nine states, each
+  named by its width, as `index-help-1120`. `leavesNoCapture` asserts the nine.
+- The template's shell holds the components' two shortcut dialogs in place of the theme menu, the
+  placeholder `dialog#settings`, and the script that bridged them: `dialog#help`, headed "Keyboard
+  shortcuts", holds `sl-shortcuts` alone, with no `[data-keys-list]`, and `dialog#settings`,
+  headed "Settings", holds `sl-settings`. Each is named by its heading through `aria-labelledby`
+  and closed by a Close glyph button showing `x-16` and `<kbd>Esc</kbd>`, with no `data-keys`;
+  Help's Close no longer binds ?. The shell imports the components' `shortcuts.js` and
+  `settings.js`, which need a components release past `v0.4.0`. A site takes the template's
+  shell again, or the shell checks fail on it.
+- `site.css` gives `dialog#help` and `dialog#settings` the foundation theme menu's width,
+  `min(100% - 2 * var(--space-s), 56rem)`, so both shortcut dialogs are the size the settings'
+  rows and preview were laid out for.
+- The theme checks work through `sl-settings`: `stepsEachFacet` and `highlightsEachPalette` step
+  its rows in the Settings dialog, opened by S, and remove the choice they store after, since
+  every step is stored at once. `requestsUnderBase` opens Settings and Help and fails where the
+  foundation's `theme-menu.js` or `keys-help.js` is requested.
+- `opensKeysHelp`: ? opens Help, whose `sl-shortcuts` lists exactly the page's bindings as the
+  foundation's keys module holds them, the shell's P, ?, S, H, and L among them; Escape closes it;
+  the character-key switch, now in Settings' `sl-settings`, turns them off and on again.
+- `showsGlyphs` checks each shortcut dialog's Close, showing `x-16` and Esc, and `hasTargetSize`
+  measures each dialog's glyph buttons, its Close among them, with the dialog open.
+- `./screenshots.js`'s index state with the theme menu open is Settings open, by the Settings
+  button's click and ready once `sl-settings` renders, named as `index-settings-1120`; Help open
+  is ready once `sl-shortcuts` renders its rows. `leavesNoCapture` asserts the nine by those
+  names.
 
 ## [0.5.0] - 2026-11-06
 

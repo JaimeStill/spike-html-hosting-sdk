@@ -17,13 +17,15 @@
 // under them, and with v0.3.0's grid, whose rows stretch into it, the under-header check and the
 // crawl fail on the index, naming the width and main's gap; at 390px, with a flex column whose auto
 // margin pushes main to the body's end, the check fails as well, and with main pulled up into the
-// header it fails naming the overlap. With the shell's keys help
-// dialog removed, the Settings button's binding removed, the Settings button's kbd removed, as the
-// Theme button's markup before v0.3.1 had it, or a handler that opens the Pages drawer on P
-// whatever the switch says, the keys help check fails, naming the page and the assertion. With the
-// Help button's glyph removed, the Settings button's word shown beside its glyph, or the keys
-// help's Close showing the Help button's glyph, the glyph check fails, naming the page and the
-// button. With the glyph buttons' padding and border dropped and their text small, the target size
+// header it fails naming the overlap. With the shell's Help dialog removed, the Settings button's
+// binding removed, a row of Help's list removed, the Settings button's kbd removed, as the Theme
+// button's markup before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the
+// switch in Settings says, the keys help check fails, naming the page and the assertion. With a
+// shortcut dialog's heading name, its Close's Esc, its opener's kbd, or its opener's hint wrong,
+// the shortcut dialog check fails, naming the dialog and what it lacks; with Help holding a
+// [data-keys-list], which loads the foundation's keys-help.js, the request check fails. With the
+// Help button's glyph removed, the Settings button's word shown beside its glyph, or Help's Close
+// showing the Help button's glyph, the glyph check fails, naming the page and the button. With the glyph buttons' padding and border dropped and their text small, the target size
 // check fails, naming the width, the space, and the button; with the header's group wrapping its
 // buttons, or the header wrapping the group under the nav, the header row check fails, naming the
 // width; and with the header too wide for a phone, it fails naming the sideways scroll.
@@ -39,11 +41,13 @@ import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";
 import {
   crawl,
   definesEveryElement,
+  followsShortcutDialogs,
   holdsBetweenDocks,
   keepsNavigationWords,
   hasTargetSize,
   keepsHeaderRow,
   opensKeysHelp,
+  requestsUnderBase,
   shell,
   showsGlyphs,
   startsUnderHeader,
@@ -76,6 +80,15 @@ async function withUndefined(tag: string): Promise<Page> {
         if (name !== ${JSON.stringify(tag)}) define(name, ...rest);
       };
     }`,
+  });
+  return page;
+}
+
+/** Opens a page that runs script once its document is parsed, before the check reads it. */
+async function withChange(script: string): Promise<Page> {
+  const page = await browser.open("about:blank");
+  await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
+    source: `document.addEventListener("DOMContentLoaded", () => { ${script} });`,
   });
   return page;
 }
@@ -398,7 +411,7 @@ describe("the fixture site with main pushed down or up at 390px", () => {
   });
 });
 
-describe("the fixture site with no keys help dialog", () => {
+describe("the fixture site with no Help dialog", () => {
   test("the keys help check fails, naming the page", async () => {
     // The shell's dialog#help removed before any of the page's scripts run.
     const page = await browser.open("about:blank");
@@ -407,7 +420,7 @@ describe("the fixture site with no keys help dialog", () => {
     });
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
-        assert.match(error.message, /\/fixture-site\/: \? opens the keys help dialog/);
+        assert.match(error.message, /\/fixture-site\/: \? opens Help/);
         return true;
       });
     } finally {
@@ -417,7 +430,7 @@ describe("the fixture site with no keys help dialog", () => {
 });
 
 describe("the fixture site with its keys help wrong", () => {
-  test("a binding missing from the dialog fails the keys help check", async () => {
+  test("a shell binding missing fails the keys help check", async () => {
     // The Settings button's S binding removed before keys.js reads the page's bindings.
     const page = await browser.open("about:blank");
     await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
@@ -425,7 +438,33 @@ describe("the fixture site with its keys help wrong", () => {
     });
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
-        assert.match(error.message, /\/fixture-site\/: the keys help lists the page's bindings/);
+        assert.match(
+          error.message,
+          /\/fixture-site\/: the page binds the shell's keys, and Help lists them; S Settings missing/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("a binding Help's list leaves out fails the keys help check", async () => {
+    // Help's last row removed from sl-shortcuts' shadow root each time Help opens, once it renders.
+    const page = await withChange(`
+      const help = document.querySelector("dialog#help");
+      const list = help.querySelector("sl-shortcuts");
+      help.addEventListener("toggle", async (event) => {
+        if (event.newState !== "open") return;
+        await list.updateComplete;
+        list.shadowRoot.querySelector("tbody tr:last-child")?.remove();
+      });`);
+    try {
+      await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: Help lists exactly the page's bindings, as the keys module holds them/,
+        );
         return true;
       });
     } finally {
@@ -474,15 +513,6 @@ describe("the fixture site with its keys help wrong", () => {
 });
 
 describe("the fixture site with its glyphs wrong", () => {
-  /** Opens a page that runs script once its document is parsed, before the check reads it. */
-  async function withChange(script: string): Promise<Page> {
-    const page = await browser.open("about:blank");
-    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
-      source: `document.addEventListener("DOMContentLoaded", () => { ${script} });`,
-    });
-    return page;
-  }
-
   for (const { change, script, message } of [
     {
       change: "the Help button's glyph removed",
@@ -495,10 +525,15 @@ describe("the fixture site with its glyphs wrong", () => {
       message: /\/fixture-site\/: the Settings button shows its glyph and its key hint, no word/,
     },
     {
-      change: "the keys help's Close showing the Help button's glyph",
+      change: "Help's Close showing the Help button's glyph",
       script: `document.querySelector("#help [command=close] svg").replaceWith(
         document.querySelector("header [commandfor=help] svg").cloneNode(true));`,
-      message: /\/fixture-site\/: the keys help's Close shows its glyph and its key hint/,
+      message: /\/fixture-site\/: the Close of Help shows its glyph and its key hint/,
+    },
+    {
+      change: "Settings' Close showing ? for its hint",
+      script: `document.querySelector("#settings [command=close] kbd").textContent = "?";`,
+      message: /\/fixture-site\/: the Close of Settings shows its glyph and its key hint, Esc/,
     },
   ]) {
     test(`${change} fails the glyph check`, async () => {
@@ -513,6 +548,65 @@ describe("the fixture site with its glyphs wrong", () => {
       }
     });
   }
+});
+
+describe("the fixture site with its shortcut dialogs wrong", () => {
+  for (const { change, script, message } of [
+    {
+      change: "Settings named by no heading",
+      script: `document.querySelector("dialog#settings").removeAttribute("aria-labelledby");`,
+      message:
+        /\/fixture-site\/: the shortcut dialog #settings, opened on s, lacks a name from a heading inside it/,
+    },
+    {
+      change: "Settings' Close showing ? in place of Esc",
+      script: `document.querySelector("#settings [command=close] kbd").textContent = "?";`,
+      message: /\/fixture-site\/: the shortcut dialog #settings, opened on s, lacks a Close/,
+    },
+    {
+      change: "the Help button showing no key",
+      script: `document.querySelector("header [commandfor=help] kbd").remove();`,
+      message:
+        /\/fixture-site\/: the shortcut dialog #help, opened on \?, lacks its opener's key, \? in a kbd/,
+    },
+    {
+      change: "the Settings button's hint showing another name",
+      script: `document.getElementById("settings-hint").textContent = "Theme";`,
+      message:
+        /\/fixture-site\/: the shortcut dialog #settings, opened on s, lacks its opener's interest hint/,
+    },
+  ]) {
+    test(`${change} fails the shortcut dialog check`, async () => {
+      const page = await withChange(script);
+      try {
+        await assert.rejects(followsShortcutDialogs(page, server.origin), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
+
+  test("Help holding the foundation's keys help list fails the request check", async () => {
+    // A [data-keys-list] in Help, which keys.js fills by loading its keys-help.js as Help opens.
+    const page = await withChange(
+      `document.querySelector("dialog#help").append(document.createElement("div"));
+      document.querySelector("dialog#help > div:last-child").setAttribute("data-keys-list", "");`,
+    );
+    try {
+      await assert.rejects(requestsUnderBase(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: the foundation's theme-menu\.js and keys-help\.js are never requested/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("the fixture site with its glyph buttons too small", () => {

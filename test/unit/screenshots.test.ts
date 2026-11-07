@@ -1,7 +1,7 @@
 // The capture description at its seam, with no browser: description's pages, each named by its
 // built path without .html, a directory's index by its directory, at its absolute URL path under
 // the base, which is its caption; each page's states at 390px, 1120px, and 1376px, the index's
-// Help and theme-menu states among them, named with the page name's slashes as dashes.
+// Help and Settings states among them, named with the page name's slashes as dashes.
 // contentPages lists the fixture site's pages from its content.json, in the build's order. The
 // browser tier holds the facets and --all to the profiles the fixture site's index registers.
 
@@ -31,7 +31,7 @@ describe("description", () => {
     );
   });
 
-  test("captures every page at 390, 1120, and 1376, and the index's Help and theme menu open", () => {
+  test("captures every page at 390, 1120, and 1376, and the index's Help and Settings open", () => {
     const states = Object.fromEntries(
       described.pages.map(({ name, states }) => [name, states?.map((state) => state.name)]),
     );
@@ -43,9 +43,9 @@ describe("description", () => {
         "index-help-390",
         "index-help-1120",
         "index-help-1376",
-        "index-theme-menu-390",
-        "index-theme-menu-1120",
-        "index-theme-menu-1376",
+        "index-settings-390",
+        "index-settings-1120",
+        "index-settings-1376",
       ],
       a: ["a-390", "a-1120", "a-1376"],
       dir: ["dir-390", "dir-1120", "dir-1376"],
@@ -66,9 +66,9 @@ describe("description", () => {
         ["/fixture-site/, Help open, 390px", "390x844", false, "function"],
         ["/fixture-site/, Help open, 1120px", "1120x700", false, "function"],
         ["/fixture-site/, Help open, 1376px", "1376x860", false, "function"],
-        ["/fixture-site/, the theme menu open, 390px", "390x844", false, "function"],
-        ["/fixture-site/, the theme menu open, 1120px", "1120x700", false, "function"],
-        ["/fixture-site/, the theme menu open, 1376px", "1376x860", false, "function"],
+        ["/fixture-site/, Settings open, 390px", "390x844", false, "function"],
+        ["/fixture-site/, Settings open, 1120px", "1120x700", false, "function"],
+        ["/fixture-site/, Settings open, 1376px", "1376x860", false, "function"],
       ],
     );
   });

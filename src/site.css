@@ -4,10 +4,10 @@
  * page header, tables, and code blocks. Its own layer, site, declared after the foundation's
  * layers, which the page entry declares first, so it wins over them. Every length is a --space-*
  * token, so the reader's Space profile changes it, but main's reading width, in ch, the side
- * columns' 16rem minimum, the two widths the layout changes at, a callout's rule, the
- * foundation's --line-m, and its icon, 1em, the size of its title's text. Only the Pages
- * button's display sits outside the layer, after the components' glyph-button.css, which the page
- * links before this sheet.
+ * columns' 16rem minimum, the two widths the layout changes at, the shortcut dialogs' 56rem cap,
+ * a callout's rule, the foundation's --line-m, and its icon, 1em, the size of its title's text.
+ * Only the Pages button's display sits outside the layer, after the components' glyph-button.css,
+ * which the page links before this sheet.
  *
  * The renderer (markdown-pages.ts) writes the section tree's div, when the page has one, then
  * main, then the site index in the Pages drawer, an sl-drawer. Each side column docks only where it
@@ -32,10 +32,11 @@
  * section in view and the page on screen in a heavier weight. The shell's header holds the site
  * nav, wrapping its links, and one group of glyph buttons at its inline end, Pages, Help, and
  * Settings, on its first line at every width; the components' glyph-button.css lays out each
- * button. A GitHub alert, as the renderer writes it
- * through marked-alert, is a callout: a rule at its start and its title, the kind's octicon and its
- * name, in its kind's color, the foundation's palette color GitHub gives it: note blue, tip green,
- * important purple, warning yellow, and caution red.
+ * button. The shell's two shortcut dialogs, Help and Settings, take the foundation's theme menu
+ * width, the viewport less --space-s on each side, up to 56rem. A GitHub alert, as the renderer
+ * writes it through marked-alert, is a callout: a rule at its start and its title, the kind's
+ * octicon and its name, in its kind's color, the foundation's palette color GitHub gives it: note
+ * blue, tip green, important purple, warning yellow, and caution red.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -69,6 +70,13 @@
     flex: none;
     align-items: center;
     gap: var(--space-2xs);
+  }
+
+  /* The shortcut dialogs, Help and Settings: the foundation theme menu's width, which the
+     settings' rows and preview were laid out for, the viewport less --space-s on each side, up to
+     its 56rem cap; the shortcuts list takes the same, so the two dialogs are one size. */
+  dialog:is(#help, #settings) {
+    inline-size: min(100% - 2 * var(--space-s), 56rem);
   }
 
   /* Body text breaks a word too long for the column; the components' navigation never does. */

@@ -4,8 +4,9 @@
 // description takes the site's root and its page list, each page its built path under dist/, and
 // describes each page captured whole, in tiles, at 390px, 1120px, and 1376px, a phone's width and
 // the layout's two docks, and the index also with Help open, opened by the Help button's click and
-// ready once the keys module has filled its dialog, and with its theme menu open, opened by the
-// Settings button's click and ready once the menu's dialog is open, each at the three widths. A page's
+// ready once its sl-shortcuts has rendered its rows, and with Settings open, opened by the Settings
+// button's click and ready once its sl-settings has rendered its rows, each at the three widths. A
+// page's
 // name is its built path without .html, a directory's index its directory: index.html is --page
 // index, a/index.html --page a, and a/b.html --page a/b; a state's name, which names its files,
 // holds its width and turns the name's slashes to dashes. A page's path is its absolute
@@ -26,7 +27,7 @@
 // capture it printed, so the first run's empty TMPDIR is the output's cleanup, not a capture that
 // never wrote.
 // Adapted from spike-html-apps-foundation (d5037b4): scripts/screenshots.config.ts, its theme
-// menu's open step, viewports, facets, --all, and registry read.
+// menu's open step, now Settings', viewports, facets, --all, and registry read.
 // Adapted from spike-html-apps-components (19d4f59): scripts/screenshots.config.ts, its pages
 // mapped from a list and its server the browser tier's.
 // Adapted from spike-html-hosting-architecture (a09e7db): scripts/screenshots.config.ts, its
@@ -55,7 +56,7 @@ import { copiedFiles } from "./content.ts";
 import { pageFile } from "./markdown-pages.ts";
 import { base, command, served } from "./served.ts";
 
-// The widths each page is captured at: a phone's, below the theme menu's 48rem breakpoint; 70rem,
+// The widths each page is captured at: a phone's, below the settings' 48rem breakpoint; 70rem,
 // where the section tree docks; and 86rem, where the site index docks too, the three-column
 // layout (markdown-pages.ts's docks, at the 16px rem).
 const WIDTHS: Viewport[] = [
@@ -64,25 +65,30 @@ const WIDTHS: Viewport[] = [
   { width: 1376, height: 860 },
 ];
 
-/** Opens the keys help: the Help button's command="show-modal", ready once the foundation's keys
- * module has filled the dialog with its settings. */
+/** Opens Help: the Help button's command="show-modal", ready once the dialog's sl-shortcuts has
+ * rendered a row of the page's bindings. */
 const openHelp: Step = async (page) => {
   await page.evaluate(`document.querySelector("header button[commandfor=help]").click()`);
   await until(page, `document.querySelector("dialog#help")?.open`);
-  await until(page, `!!document.querySelector("#help [data-keys-settings]")`);
+  await until(
+    page,
+    `!!document.querySelector("dialog#help sl-shortcuts")?.shadowRoot?.querySelector("tbody tr")`,
+  );
 };
 
-/**
- * Opens the theme menu: the Settings button's click, whose show-modal the shell's script turns into
- * the menu's open until dialog#settings holds the reader's settings.
- */
-const openThemeMenu: Step = async (page) => {
+/** Opens Settings: the Settings button's command="show-modal", ready once the dialog's sl-settings
+ * has rendered its theme rows. */
+const openSettings: Step = async (page) => {
   await page.evaluate(`document.querySelector("header button[commandfor=settings]").click()`);
-  await until(page, `document.querySelector("sl-theme-menu dialog")?.open`);
+  await until(page, `document.querySelector("dialog#settings")?.open`);
+  await until(
+    page,
+    `!!document.querySelector("dialog#settings sl-settings")?.shadowRoot?.querySelector(".theme-menu-row")`,
+  );
 };
 
-/** A page's states: the whole page at each width, and, for the index, Help open and the theme
- * menu open at each, nine. A state's name, which names its files, holds the width and no
+/** A page's states: the whole page at each width, and, for the index, Help open and Settings open
+ * at each, nine. A state's name, which names its files, holds the width and no
  * directory, so a page name's slashes are dashes there. */
 function states(name: string, caption: string, index: boolean): DescribedState[] {
   const file = name.replaceAll("/", "-");
@@ -104,7 +110,7 @@ function states(name: string, caption: string, index: boolean): DescribedState[]
   return [
     ...whole,
     ...opened("help", "Help", openHelp),
-    ...opened("theme-menu", "the theme menu", openThemeMenu),
+    ...opened("settings", "Settings", openSettings),
   ];
 }
 
@@ -203,8 +209,8 @@ export function capture(root: string, config: string, ...flags: string[]): Captu
 export function leavesNoCapture(root: string, config: string): void {
   const { status, stderr, printed, left } = capture(root, config);
   assert.equal(status, 0, stderr);
-  // The index's nine states: whole, Help open, and the theme menu open, at each width.
-  const states = ["", "help-", "theme-menu-"].flatMap((open) =>
+  // The index's nine states: whole, Help open, and Settings open, at each width.
+  const states = ["", "help-", "settings-"].flatMap((open) =>
     WIDTHS.map(({ width }) => `${open}${width}`),
   );
   for (const state of states) {

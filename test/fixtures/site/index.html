@@ -2,17 +2,18 @@
 <!-- The fixture site's shell, which every page of its build fills (markdown-pages.ts), its title
      the page's name and its main element the page's body: a site's index.html, as the sites write
      it. The foundation's full page entry and its registrations, every built-in profile, so the
-     theme menu offers each, its preferences module, and its keys module, render-blocking; the
+     settings offer each, its preferences module, and its keys module, render-blocking; the
      components' glyph-button.css and the SDK's site.css, each by its package's name, after the
-     entry; and the Settings button, which keys.js clicks on S, opening the theme menu through the
-     page's script until dialog#settings holds the reader's settings. The components' five elements, render-blocking too: the site nav, at the header's
+     entry. The components' seven elements, render-blocking too: the site nav, at the header's
      start, and the site index, the page header, the section tree, and the Pages drawer that holds
-     the site index, which markdownPages writes into each page; and the Pages button, which opens
-     the drawer below its dock, with the page's script that wires it, and the Help button, which
-     opens the keys help dialog that keys.js fills, as the template's shell, the three in the
-     header's header-actions group. Each header button, and the dialog's Close, is a glyph button
-     showing a glyph marker, which the build fills from the icons layer, and its key hint, named by
-     its aria-label with no word shown, and that name in its interest hint.
+     the site index, which markdownPages writes into each page, and the shortcuts list and the
+     settings; and, as the template's shell, the three buttons of the header's header-actions
+     group: Pages, which opens the drawer below its dock, with the page's script that wires it,
+     and Help and Settings, the openers of the shortcut dialogs, dialog#help holding sl-shortcuts
+     and dialog#settings holding sl-settings, each named by its heading and closed by its Close.
+     Each header button, and each dialog's Close, is a glyph button showing a glyph marker, which
+     the build fills from the icons layer, and its key hint, Esc for a Close, named by its
+     aria-label with no word shown, and that name in its interest hint.
      Adapted from spike-html-hosting-architecture (1f3bf14): index.html, its title and text the
      fixture's, and the site stylesheet the SDK's.
      Adapted from spike-html-hosting-components (v0.2.2): README.md, sl-drawer's Pages opener, its
@@ -20,9 +21,9 @@
      Adapted from spike-html-hosting-components (v0.4.0): README.md, the header buttons' and the
      dialog Close's glyph markers.
      Adapted from spike-html-hosting-components (e3e60a8): README.md, sl-drawer's header, its
-     header-actions group, the Settings opener, and each glyph button's class and interest hint.
-     Adapted from spike-html-apps-foundation (18e0c55): demo/keys.html, its Help button and its keys
-     help dialog. -->
+     header-actions group, the Settings opener, each glyph button's class and interest hint, and
+     the shortcut dialogs, Help's and Settings'.
+     Adapted from spike-html-apps-foundation (18e0c55): demo/keys.html, its Help button. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -39,6 +40,8 @@
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
     <script type="module" blocking="render">
       // The Pages button opens the Pages drawer, which holds the site index, and says through
       // aria-expanded whether it is open.
@@ -48,16 +51,6 @@
       const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
       drawer.addEventListener("open", expanded);
       drawer.addEventListener("close", expanded);
-    </script>
-    <script type="module" blocking="render">
-      // Until the Settings dialog holds the reader's settings, the Settings button opens the
-      // theme menu: the show-modal command it sends dialog#settings is cancelled, and the menu
-      // shown in the dialog's place.
-      const menu = document.querySelector("sl-theme-menu#theme");
-      document.querySelector("dialog#settings").addEventListener("command", (event) => {
-        event.preventDefault();
-        menu.show();
-      });
     </script>
   </head>
   <body>
@@ -110,11 +103,9 @@
       </div>
     </header>
     <main></main>
-    <sl-theme-menu id="theme"></sl-theme-menu>
-    <dialog id="settings" aria-label="Settings"></dialog>
     <dialog id="help" aria-labelledby="help-title">
       <h2 id="help-title">Keyboard shortcuts</h2>
-      <div data-keys-list></div>
+      <sl-shortcuts></sl-shortcuts>
       <footer>
         <button
           type="button"
@@ -122,14 +113,32 @@
           commandfor="help"
           command="close"
           aria-label="Close"
-          data-keys="?"
           interestfor="help-close-hint"
           aria-description=""
         >
           <svg data-icon="octicon/x-16"></svg>
-          <span aria-hidden="true"><kbd>?</kbd></span>
+          <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+      </footer>
+    </dialog>
+    <dialog id="settings" aria-labelledby="settings-title">
+      <h2 id="settings-title">Settings</h2>
+      <sl-settings></sl-settings>
+      <footer>
+        <button
+          type="button"
+          class="glyph-button"
+          commandfor="settings"
+          command="close"
+          aria-label="Close"
+          interestfor="settings-close-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/x-16"></svg>
+          <span aria-hidden="true"><kbd>Esc</kbd></span>
+        </button>
+        <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
       </footer>
     </dialog>
   </body>

@@ -6,49 +6,58 @@
 // The shell checks run on a page of the site, its index unless the site's test gives another: a
 // Markdown site's index, the page its shell builds, a hand page at the base, or a hand page at any
 // path under it, each checked under the site's base. On that page: the Settings button and S open
-// the theme menu, which stands in for the Settings dialog until it holds the reader's settings,
-// whose CSS module script the build rewrote, so its sheet is adopted with no stylesheet
-// fetched for it; stepping the color, space, and type rows each to a profile past its default,
-// which the full entry registers, sets that facet's attribute on the root; the page's one module
-// script, its entry, is render-blocking; once it loads, every element on the page whose name holds
-// a hyphen, a custom element's, is defined, so a shell that fails to load a component's module
+// the Settings dialog, a shortcut dialog holding the components' sl-settings, whose shadow root
+// adopts the sheets the build rewrote from its CSS module scripts, the foundation's theme-menu.css
+// among them, with no stylesheet fetched for them, and Escape closes it; stepping the color, space,
+// and type rows of the settings each to a profile past its default, which the full entry
+// registers, sets that facet's attribute on the root at once, and a change is stored at once, kept
+// as the dialog closes, and applied after a reload, with no Save; the page's one module script,
+// its entry, is render-blocking; once it loads, every element on the page whose name holds a
+// hyphen, a custom element's, is defined, so a shell that fails to load a component's module
 // fails naming its tag, where the capture run's wait for each element's definition would hang;
-// every request the page makes resolves under the base, and none fails; in a 1600px viewport the
-// site's layout holds main to a reading width, centered; at 1200px, between the layout's docks,
-// main is centered on a page with no section tree, and the tree is docked beside it on a page with
-// one; at 390px, between the docks, and at 1600px, main starts directly under the header, the gap
-// from the header's bottom, or the section tree bar's where it sits between them, never below zero
-// and no more than on a page taller than the viewport, however short the page; ? opens the shell's
-// keys help dialog, which the foundation's keys module fills with the page's bindings, P, ?, S, and
-// the tree's H and L, and its character-key switch turns them off, so L moves to no section and P
-// opens no drawer, and on again; in a 390px viewport each header button, Pages where the shell has
-// one, Help, and Settings, and the keys help's Close each show one glyph, the icons layer's svg for
-// list-unordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, both rendered, and
-// no word, each named by its aria-label; every rendered glyph button, the page's and its
-// components' in their shadow roots, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at
-// 1600px, in the regular and the compact space profiles; the header's buttons, its header-actions
-// group, share one line at the header's inline end, on the site nav's first line, at the capture
-// widths, 390px, 1120px, and 1376px; nothing scrolls sideways at 390px; at a phone's width, a
-// px below and at each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no
-// navigation link's word breaks across lines and every docked side column is at least 16rem wide;
-// and a choice the menu never saves leaves nothing stored, so a reload shows none of it. shell
-// lists them by name, for a site to make a test of each.
+// every request the page makes, with Settings and Help opened, resolves under the base, none
+// fails, and the foundation's theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts
+// stand in for, are never requested; in a 1600px viewport the site's layout holds main to a
+// reading width, centered; at 1200px, between the layout's docks, main is centered on a page with
+// no section tree, and the tree is docked beside it on a page with one; at 390px, between the
+// docks, and at 1600px, main starts directly under the header, the gap from the header's bottom,
+// or the section tree bar's where it sits between them, never below zero and no more than on a
+// page taller than the viewport, however short the page; ? opens Help, whose sl-shortcuts lists
+// exactly the page's bindings as the foundation's keys module holds them, the shell's P, ?, S, and
+// the tree's H and L among them, Escape closes it, and the character-key switch in Settings turns
+// them off, so L moves to no section and P opens no drawer, and on again; every dialog a keyed
+// show-modal opener opens follows the components' shortcut dialog pattern, named by a heading
+// inside it, closed by a Close glyph button showing Esc, its opener showing its key and named,
+// with an interest hint showing the name; in a 390px viewport each header button, Pages where the
+// shell has one, Help, and Settings, and each shortcut dialog's Close each show one glyph, the
+// icons layer's svg for list-unordered-16, question-16, gear-16, and x-16, and the key hint in a
+// kbd, Esc for a Close, both rendered, and no word, each named by its aria-label; every rendered
+// glyph button, the page's and its components' in their shadow roots, and with each shortcut
+// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the
+// regular and the compact space profiles; the header's buttons, its header-actions group, share
+// one line at the header's inline end, on the site nav's first line, at the capture widths, 390px,
+// 1120px, and 1376px; nothing scrolls sideways at 390px; and at a phone's width, a px below and at
+// each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word
+// breaks across lines and every docked side column is at least 16rem wide. A check that changes
+// the reader's stored theme or keys settings removes them after. shell lists them by name, for a
+// site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
-// test names, since not every site's index holds code: stepping the theme menu to each palette the
-// foundation's registry lists, in light and in dark, recolors every highlighted token to the color
-// its palette's syntax theme gives it there, read from the token's own --shiki-<palette> variable,
-// which the build wrote from the theme; a registered palette whose code renders plain, with no
-// syntax theme for it or no rule selecting it, fails, named.
+// test names, since not every site's index holds code: stepping the settings, in the Settings
+// dialog, to each palette the foundation's registry lists, in light and in dark, recolors every
+// highlighted token to the color its palette's syntax theme gives it there, read from the token's
+// own --shiki-<palette> variable, which the build wrote from the theme; a registered palette whose
+// code renders plain, with no syntax theme for it or no rule selecting it, fails, named.
 //
 // The crawl runs on a Markdown site, one tree or several: from the index, every link into the site
 // is followed, breadth first, and each copied file's page reached loads with a 2xx, its one module
 // script render-blocking, every custom element on it defined, every request under the base and none
 // failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
 // sideways in a 390px one, its navigation laid out as the shell check has it at the same widths,
-// its layout between the docks, its main under the header, its keys help and glyph buttons, their
-// size, and its header's row as the shell checks have them, and its title its source's front matter
-// name, or, for a source with no name, its first h1's text. Its Pages button is hidden at 1600px,
+// its layout between the docks, its main under the header, its Help and the switch in Settings,
+// its shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks
+// have them, and its title its source's front matter name, or, for a source with no name, its
+// first h1's text. Its Pages button is hidden at 1600px,
 // where the site index is docked, and at 390px is shown and opens the Pages drawer as a modal by
 // its click and by P, its aria-expanded true while the drawer is open and false once Escape closes
 // it. Each page's main opens with its page header, whose dl holds a dt and a dd per front matter
@@ -66,7 +75,7 @@
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
-// a page, and the stored choice checked unsaved.
+// a page, and the stored choice checked.
 // Adapted from spike-html-hosting-architecture (a20a1e0): test/browser/site.test.ts, its crawl a
 // function over a page, its sources read from the site's root.
 
@@ -89,19 +98,25 @@ import { docks, frontMatterText, pageUrl } from "./markdown-pages.ts";
  * the page at url, a URL under site, site itself, its index, when none is given. */
 export type Check = (page: Page, site: string, url?: string) => Promise<void>;
 
-/** The center of the element the selector names, once it is in the viewport and the element a
+/** The center of the element the expression gives, once it is in the viewport and the element a
  * click there reaches, it or one inside it, so nothing covers it; else the state that keeps it
  * from being clicked: the page's scroll, the element's box, the viewport's width, and what a click
- * there reaches instead, as a string. */
-const target = (selector: string): string => `(() => {
-  const element = document.querySelector(${JSON.stringify(selector)});
+ * there reaches instead, as a string. The element may be in an open shadow root: the point's
+ * element is followed down through each shadow root it hosts, as a click there reaches it. */
+const target = (element: string): string => `(() => {
+  const element = ${element};
   if (!element) return "none in the page";
   const rect = element.getBoundingClientRect();
   const x = rect.x + rect.width / 2;
   const y = rect.y + rect.height / 2;
   const inside = rect.width > 0 && rect.height > 0 && x >= 0 && y >= 0 &&
     x < innerWidth && y < innerHeight;
-  const hit = inside ? document.elementFromPoint(x, y) : null;
+  let hit = inside ? document.elementFromPoint(x, y) : null;
+  while (hit?.shadowRoot) {
+    const inner = hit.shadowRoot.elementFromPoint(x, y);
+    if (!inner || inner === hit) break;
+    hit = inner;
+  }
   if (hit && element.contains(hit)) return { x, y };
   const reached = hit ? hit.localName + (hit.id ? "#" + hit.id : "") : "nothing in the viewport";
   return "at scroll " + scrollY + ", its box " +
@@ -109,22 +124,26 @@ const target = (selector: string): string => `(() => {
     innerWidth + "px viewport, a click at its center reaches " + reached;
 })()`;
 
-/** Clicks the element the selector names at its center, as a person's mouse does, once it is in
- * the viewport and nothing covers it there, waiting as until() does; else throws, naming the
- * state that keeps it from being clicked. A click whose press and release land on no element of
- * its own is a click on nothing, so the wait is what makes a click on a page still settling
- * reach its element, never a fixed sleep. */
-async function click(page: Page, selector: string): Promise<void> {
-  const point = `(${target(selector)})`;
+/** Clicks the element the expression gives, named name in an error, at its center, as a person's
+ * mouse does, once it is in the viewport and nothing covers it there, waiting as until() does;
+ * else throws, naming the state that keeps it from being clicked. A click whose press and release
+ * land on no element of its own is a click on nothing, so the wait is what makes a click on a page
+ * still settling reach its element, never a fixed sleep. */
+async function clickOn(page: Page, element: string, name: string): Promise<void> {
+  const point = `(${target(element)})`;
   // Past the wait, the state read once more is what the error names.
   await until(page, `typeof ${point} === "object"`).catch(() => undefined);
   const at: { x: number; y: number } | string = await page.evaluate(point);
-  if (typeof at === "string") throw new Error(`${selector} isn't clickable: ${at}`);
+  if (typeof at === "string") throw new Error(`${name} isn't clickable: ${at}`);
   const { x, y } = at;
   for (const type of ["mousePressed", "mouseReleased"]) {
     await page.cdp("Input.dispatchMouseEvent", { type, x, y, button: "left", clickCount: 1 });
   }
 }
+
+/** Clicks the element the selector names in the document, as clickOn() does. */
+const click = (page: Page, selector: string): Promise<void> =>
+  clickOn(page, `document.querySelector(${JSON.stringify(selector)})`, selector);
 
 /** The protocol's Shift modifier bit. */
 const SHIFT = 8;
@@ -150,9 +169,46 @@ async function press(page: Page, key: string): Promise<void> {
   await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...event });
 }
 
-/** The theme menu's dialog is open, modal: the Settings button and S open it, cancelling the
- * show-modal they send dialog#settings, until that dialog holds the reader's settings. */
-const MODAL = `document.querySelector("sl-theme-menu dialog")?.matches(":modal")`;
+/** The Settings dialog, a shortcut dialog, is open, modal. */
+const SETTINGS = `!!document.querySelector("dialog#settings")?.matches(":modal")`;
+
+/** The Settings dialog's sl-settings, the reader's settings. */
+const SETTINGS_ELEMENT = `document.querySelector("dialog#settings sl-settings")`;
+
+/** The settings have rendered their theme rows in their shadow root. */
+const SETTINGS_RENDERED = `!!${SETTINGS_ELEMENT}?.shadowRoot?.querySelector(".theme-menu-row")`;
+
+/** Focus is on the settings' theme row of the section, as the dialog's open puts it on color. */
+const onRow = (section: string): string =>
+  `${SETTINGS_ELEMENT}?.shadowRoot?.activeElement?.closest("[data-section]")?.dataset.section === ${JSON.stringify(section)}`;
+
+/** Opens the Settings dialog by the Settings button's click, or by S, and waits for its settings
+ * to render and focus their first row, color; fails naming the page and how it was opened. */
+async function openSettings(page: Page, url: string, by: "button" | "s"): Promise<void> {
+  const opens = `${url}: ${by === "s" ? "S" : "the Settings button"} opens the Settings dialog`;
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  if (by === "s") await press(page, "s");
+  else {
+    await click(page, "header button[commandfor=settings]").catch((error: Error) =>
+      assert.fail(`${opens}; ${error.message}`),
+    );
+  }
+  await until(page, SETTINGS).catch(() => assert.fail(opens));
+  // The dialog's toggle event, at which the settings focus their first row, is a task after the
+  // open: settled, it has run, so it moves no focus a key pressed next has moved.
+  await page.evaluate(SETTLED);
+  await until(page, `${SETTINGS_RENDERED} && ${onRow("color")}`).catch(() =>
+    assert.fail(`${opens}, its settings rendered and its color row focused`),
+  );
+}
+
+/** Closes the open Settings dialog by Escape. */
+async function closeSettings(page: Page, url: string): Promise<void> {
+  await press(page, "Escape");
+  await until(page, `!${SETTINGS}`).catch(() =>
+    assert.fail(`${url}: Escape closes the Settings dialog`),
+  );
+}
 
 /** The localStorage key the foundation's preferences.js stores the reader's choice under. */
 const KEY = "spike-html-apps-foundation.preferences";
@@ -490,17 +546,55 @@ async function assertUnderHeader(page: Page, url: string): Promise<void> {
   }
 }
 
-/** The keys help dialog is open, modal. */
+/** The Help dialog, a shortcut dialog, is open, modal. */
 const HELP = `!!document.querySelector("dialog#help")?.matches(":modal")`;
 
-/** The keys help dialog's bindings table: each row's keys, as its kbd elements read, and its
- * action, the row's button's label; and which rows are marked off. */
-const HELP_ROWS = `[...document.querySelectorAll("#help [data-keys-table] tbody tr:not([data-keys-fixed])")]
+/** Help's shortcuts list, sl-shortcuts, as it renders in its shadow root: each row's keys, as its
+ * kbd elements read, its action, the row's button's label, and whether it is marked off. */
+const HELP_ROWS = `[...(document.querySelector("dialog#help sl-shortcuts")?.shadowRoot
+    ?.querySelectorAll("tbody tr") ?? [])]
   .map((tr) => ({
     keys: [...tr.cells[0].querySelectorAll("kbd")].map((kbd) => kbd.textContent).join(" "),
     action: tr.cells[1].textContent.trim(),
-    off: tr.hasAttribute("data-keys-off"),
+    off: tr.classList.contains("off"),
   }))`;
+
+/** The localStorage key the foundation's keys.js stores the reader's keys settings under. */
+const KEYS_SETTINGS = "spike-html-apps-foundation.keys";
+
+/**
+ * The page's bindings, as the foundation's keys module holds them with Help closed, read apart
+ * from Help's list, each as HELP_ROWS reads a row: first each data-keys element outside Help that
+ * can act, enabled, not inert, and rendered, in document order, its keys upper-cased as the keys
+ * grammar labels a character key and named by its aria-label, else its text; then each binding
+ * register() added, from the module's store at its well-known global key, which every copy
+ * shares, named by its label. A sequence an earlier binding has is left out, as the module lists
+ * it once. A binding of a character key alone is off while the reader's switch, stored under
+ * KEYS_SETTINGS, has the character keys off.
+ */
+const PAGE_BINDINGS = `(() => {
+  const help = document.querySelector("dialog#help");
+  const store = globalThis[Symbol.for("spike-html-apps-foundation.keys")] ?? { registered: [] };
+  let enabled = true;
+  try {
+    enabled = JSON.parse(localStorage.getItem(${JSON.stringify(KEYS_SETTINGS)}) ?? "{}")?.enabled !== false;
+  } catch {}
+  const label = (keys) => (keys.length === 1 ? keys.toUpperCase() : keys);
+  const seen = new Set();
+  const listed = [];
+  const add = (keys, action) => {
+    if (seen.has(keys)) return;
+    seen.add(keys);
+    listed.push({ keys: label(keys), action, off: !enabled && [...keys].length === 1 });
+  };
+  for (const element of document.querySelectorAll("[data-keys]")) {
+    if (help?.contains(element) || element.matches(":disabled") || element.closest("[inert]")) continue;
+    if (!element.checkVisibility()) continue;
+    add(element.dataset.keys, element.getAttribute("aria-label")?.trim() || element.textContent.trim());
+  }
+  for (const { keys, label } of store.registered) add(keys, label);
+  return listed;
+})()`;
 
 /** The header's controls that bind a key, each as its data-keys and the text of the kbd elements
  * it shows, joined by a space. */
@@ -509,7 +603,7 @@ const HEADER_KEYS = `[...document.querySelectorAll("header [data-keys]")].map((c
     shown: [...control.querySelectorAll("kbd")].map((kbd) => kbd.textContent).join(" "),
   }))`;
 
-/** A row of the keys help dialog's bindings table, as HELP_ROWS reads it. */
+/** A row of Help's shortcuts list, as HELP_ROWS reads it. */
 type HelpRow = { keys: string; action: string; off: boolean };
 
 /** The href of the section tree's link marked as the section in view, or null. */
@@ -522,8 +616,20 @@ const GLYPHS: Record<string, { name: string; hint: string; icon: string }> = {
   "header .pages-opener[data-keys=p]": { name: "Pages", hint: "P", icon: listUnorderedIcon },
   "header button[commandfor=help][data-keys]": { name: "Help", hint: "?", icon: questionIcon },
   "header button[commandfor=settings][data-keys]": { name: "Settings", hint: "S", icon: gearIcon },
-  "dialog#help button[commandfor=help][command=close]": { name: "Close", hint: "?", icon: xIcon },
+  "dialog#help button[commandfor=help][command=close]": { name: "Close", hint: "Esc", icon: xIcon },
+  "dialog#settings button[commandfor=settings][command=close]": {
+    name: "Close",
+    hint: "Esc",
+    icon: xIcon,
+  },
 };
+
+/** The shell's shortcut dialogs, each by its id, as its name in a message, with its opener in the
+ * header. */
+const DIALOGS = [
+  { id: "help", name: "Help", opener: "header button[commandfor=help]" },
+  { id: "settings", name: "Settings", opener: "header button[commandfor=settings]" },
+];
 
 /** Each glyph button the page has, by its GLYPHS selector, as shown: its aria-label; its svg
  * elements counted; its first svg's markup, a class the marker carried dropped; its hints, the
@@ -565,14 +671,15 @@ const PARSED_ICONS = `${JSON.stringify(Object.values(GLYPHS).map(({ icon }) => i
   })`;
 
 /** Asserts the loaded page's glyph buttons, in a 390px viewport, where the Pages button shows:
- * each header button the shell has, Pages, Help, and Settings, and, with the keys help dialog
- * open, its Close, shows one glyph, the icons module's svg (1em square, currentColor, aria-hidden
- * and focusable="false"), and its key hint in a kbd, both rendered, and no word, named by its
- * aria-label. The Help and Settings buttons and the dialog's Close are every shell's. The page is
- * scrolled to its top first, and the dialog is closed after. */
+ * each header button the shell has, Pages, Help, and Settings, and, with each shortcut dialog open
+ * by its button, its Close, shows one glyph, the icons module's svg (1em square, currentColor,
+ * aria-hidden and focusable="false"), and its key hint in a kbd, Esc for a Close, both rendered,
+ * and no word, named by its aria-label. The Help and Settings buttons and their dialogs' Closes
+ * are every shell's. The page is scrolled to its top before each dialog opens, and each dialog is
+ * closed after. */
 async function assertGlyphs(page: Page, url: string): Promise<void> {
   await narrow(page);
-  // At the top, where the Help button is clicked, as a check before may have scrolled the page.
+  // At the top, where the header's buttons are clicked, as a check before may have scrolled.
   await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
   await page.evaluate(SETTLED);
   const parsed: string[] = await page.evaluate(PARSED_ICONS);
@@ -592,7 +699,6 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
     return { selector, name, svgs: 1, glyph, hints: [hint], words: "", rendered: true };
   };
   const header = Object.keys(GLYPHS).filter((selector) => selector.startsWith("header "));
-  const close = Object.keys(GLYPHS).filter((selector) => selector.startsWith("dialog#help "));
   const shown: Shown[] = await page.evaluate(glyphsShown(header));
   const names = shown.map(({ selector }) => GLYPHS[selector].name);
   assert.ok(
@@ -607,32 +713,91 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
         "no word, named by its aria-label",
     );
   }
-  try {
-    const opens = `${url}: the Help button opens the keys help`;
-    // No dialog is open, the keys help the check before closed among them, and the page is at its
-    // top, so the Help button is in the viewport: a section move the check before left scrolling
-    // smoothly may land after the scroll to the top above, so the top is taken again until it holds.
-    await until(page, `!document.querySelector("dialog[open]")`).catch(() =>
-      assert.fail(`${opens}; a dialog is still open before its click`),
+  for (const dialog of DIALOGS) {
+    const open = `!!document.querySelector("dialog#${dialog.id}")?.matches(":modal")`;
+    const close = Object.keys(GLYPHS).filter((selector) =>
+      selector.startsWith(`dialog#${dialog.id} `),
     );
-    await until(page, `scrollY === 0 || void scrollTo({ top: 0, behavior: "instant" })`).catch(() =>
-      assert.fail(`${opens}; the page doesn't stay at its top before its click`),
-    );
-    await click(page, "header button[commandfor=help]").catch((error: Error) =>
-      assert.fail(`${opens}; ${error.message}`),
-    );
-    await until(page, HELP).catch(() => assert.fail(opens));
-    const closing: Shown[] = await page.evaluate(glyphsShown(close));
-    assert.deepEqual(
-      closing,
-      close.map(expect),
-      `${url}: the keys help's Close shows its glyph and its key hint, no word, named Close`,
-    );
-  } finally {
-    await press(page, "Escape");
-    await until(page, `!${HELP}`);
+    try {
+      const opens = `${url}: the ${dialog.name} button opens ${dialog.name}`;
+      // No dialog is open, the one a check before closed among them, and the page is at its top,
+      // so the button is in the viewport: a section move the check before left scrolling smoothly
+      // may land after the scroll to the top above, so the top is taken again until it holds.
+      await until(page, `!document.querySelector("dialog[open]")`).catch(() =>
+        assert.fail(`${opens}; a dialog is still open before its click`),
+      );
+      await until(page, `scrollY === 0 || void scrollTo({ top: 0, behavior: "instant" })`).catch(
+        () => assert.fail(`${opens}; the page doesn't stay at its top before its click`),
+      );
+      await click(page, dialog.opener).catch((error: Error) =>
+        assert.fail(`${opens}; ${error.message}`),
+      );
+      await until(page, open).catch(() => assert.fail(opens));
+      const closing: Shown[] = await page.evaluate(glyphsShown(close));
+      assert.deepEqual(
+        closing,
+        close.map(expect),
+        `${url}: the Close of ${dialog.name} shows its glyph and its key hint, Esc, no word, named Close`,
+      );
+    } finally {
+      await press(page, "Escape");
+      await until(page, `!${open}`);
+    }
   }
 }
+
+/**
+ * The page's shortcut dialogs, each a dialog a keyed show-modal opener opens, a
+ * button[data-keys][commandfor][command=show-modal], as its id, its opener's key, and what it
+ * lacks of the components' shortcut dialog pattern: its opener's name, an aria-label; its opener's
+ * key, upper-cased, shown in its kbd; its opener's interest hint, the element its interestfor
+ * names, holding that name; the dialog itself; a name from a heading inside it, an h1 to h6 its
+ * aria-labelledby names; and a Close, a glyph button inside it with command=close for it, showing
+ * Esc in a kbd.
+ */
+const SHORTCUT_DIALOGS = `[...document.querySelectorAll('button[data-keys][commandfor][command="show-modal"]')]
+  .map((opener) => {
+    const id = opener.getAttribute("commandfor");
+    const keys = opener.dataset.keys;
+    const lacks = [];
+    const name = opener.getAttribute("aria-label")?.trim() ?? "";
+    if (!name) lacks.push("its opener's name, an aria-label");
+    const shown = [...opener.querySelectorAll("kbd")].map((kbd) => kbd.textContent.trim()).join(" ");
+    if (shown !== keys.toUpperCase()) lacks.push("its opener's key, " + keys.toUpperCase() + " in a kbd");
+    const hint = document.getElementById(opener.getAttribute("interestfor") ?? "");
+    if (!name || hint?.textContent.trim() !== name) {
+      lacks.push("its opener's interest hint, holding its name");
+    }
+    const dialog = document.getElementById(id);
+    if (!(dialog instanceof HTMLDialogElement)) return { id, keys, lacks: [...lacks, "a dialog"] };
+    const named = (dialog.getAttribute("aria-labelledby") ?? "").split(/\\s+/)
+      .map((ref) => document.getElementById(ref))
+      .some((heading) => !!heading && dialog.contains(heading) &&
+        /^h[1-6]$/.test(heading.localName) && heading.textContent.trim() !== "");
+    if (!named) lacks.push("a name from a heading inside it, by aria-labelledby");
+    const closes = [...dialog.querySelectorAll('button.glyph-button[command="close"]')]
+      .filter((close) => close.getAttribute("commandfor") === id &&
+        [...close.querySelectorAll("kbd")].some((kbd) => kbd.textContent.trim() === "Esc"));
+    if (closes.length === 0) lacks.push("a Close, a glyph button for it showing Esc in a kbd");
+    return { id, keys, lacks };
+  })`;
+
+/** Asserts the loaded page has a shortcut dialog, a keyed show-modal opener's, and that each it
+ * has follows the pattern, failing naming each dialog and what it lacks. */
+async function assertShortcutDialogs(page: Page, url: string): Promise<void> {
+  const dialogs: { id: string; keys: string; lacks: string[] }[] =
+    await page.evaluate(SHORTCUT_DIALOGS);
+  assert.ok(dialogs.length > 0, `${url}: a keyed opener opens a shortcut dialog`);
+  const failing = dialogs
+    .filter(({ lacks }) => lacks.length > 0)
+    .map(({ id, keys, lacks }) => `#${id}, opened on ${keys}, lacks ${lacks.join("; ")}`);
+  assert.deepEqual(failing, [], `${url}: the shortcut dialog ${failing.join(", and ")}`);
+}
+
+/** The ids of the dialogs the page's keyed show-modal openers open, each once. */
+const OPENED_DIALOGS = `[...new Set([...document.querySelectorAll(
+  'button[data-keys][commandfor][command="show-modal"]')].map((opener) => opener.getAttribute("commandfor")))]
+  .filter((id) => document.getElementById(id) instanceof HTMLDialogElement)`;
 
 /** WCAG 2.5.8's minimum target size, in CSS px a side. */
 const TARGET = 24;
@@ -660,10 +825,32 @@ const TARGETS = `(() => {
 
 /** Asserts every glyph button the loaded page renders, at 390px, where the Pages button and the
  * section tree's bar show, and at 1600px, where the drawer and the tree are docked, is at least
- * 24 CSS px a side, in the regular and the compact space profiles; the root's own data-space is
- * put back after. */
+ * 24 CSS px a side, in the regular and the compact space profiles; and, with each dialog a keyed
+ * show-modal opener opens shown as a modal in turn, each glyph button it renders too, its Close
+ * among them, then closed. The root's own data-space is put back after. */
 async function assertTargetSize(page: Page, url: string): Promise<void> {
   const space: string | null = await page.evaluate(attribute("data-space"));
+  const dialogs: string[] = await page.evaluate(OPENED_DIALOGS);
+  /** Asserts the size of each glyph button rendered, in the dialog with the id when one is open. */
+  const measure = async (width: number, profile: string, dialog?: string): Promise<void> => {
+    await page.evaluate(SETTLED);
+    const targets: { name: string; width: number; height: number }[] = await page.evaluate(TARGETS);
+    const where = dialog === undefined ? "" : ` with #${dialog} open`;
+    assert.ok(targets.length > 0, `${url}: at ${width}px it renders a glyph button`);
+    if (dialog !== undefined) {
+      assert.ok(
+        targets.some(({ name }) => name === "Close"),
+        `${url}: at ${width}px${where} its Close renders`,
+      );
+    }
+    for (const target of targets) {
+      assert.ok(
+        target.width >= TARGET - 0.5 && target.height >= TARGET - 0.5,
+        `${url}: at ${width}px in the ${profile} space${where} the ${target.name} button is ` +
+          `${target.width}px by ${target.height}px, under ${TARGET}px a side`,
+      );
+    }
+  };
   try {
     for (const [width, viewport] of [
       [390, narrow],
@@ -672,16 +859,15 @@ async function assertTargetSize(page: Page, url: string): Promise<void> {
       await viewport(page);
       for (const profile of SPACES) {
         await page.evaluate(`document.documentElement.setAttribute("data-space", "${profile}")`);
-        await page.evaluate(SETTLED);
-        const targets: { name: string; width: number; height: number }[] =
-          await page.evaluate(TARGETS);
-        assert.ok(targets.length > 0, `${url}: at ${width}px it renders a glyph button`);
-        for (const target of targets) {
-          assert.ok(
-            target.width >= TARGET - 0.5 && target.height >= TARGET - 0.5,
-            `${url}: at ${width}px in the ${profile} space the ${target.name} button is ` +
-              `${target.width}px by ${target.height}px, under ${TARGET}px a side`,
-          );
+        await measure(width, profile);
+        for (const id of dialogs) {
+          const dialog = `document.getElementById(${JSON.stringify(id)})`;
+          await page.evaluate(`${dialog}.showModal()`);
+          try {
+            await measure(width, profile, id);
+          } finally {
+            await page.evaluate(`${dialog}.close()`);
+          }
         }
       }
     }
@@ -771,16 +957,24 @@ async function assertHeaderRow(page: Page, url: string): Promise<void> {
   await assertNoSidewaysScroll(page, url);
 }
 
-/** The localStorage key the foundation's keys.js stores the reader's keys settings under. */
-const KEYS_SETTINGS = "spike-html-apps-foundation.keys";
+/** The settings' character-key switch, its checkbox in sl-settings' shadow root. */
+const SWITCH = `${SETTINGS_ELEMENT}?.shadowRoot?.querySelector("input[type=checkbox][name=enabled]")`;
 
-/** Turns the keys help dialog's character-key switch, through its checkbox, with the dialog open
- * by the Help button, then closes it with Escape; resolves to the dialog's rows after the turn. */
-async function turnCharacterKeys(page: Page): Promise<HelpRow[]> {
-  await click(page, "button[commandfor=help][command=show-modal]");
+/** Turns the character-key switch in the Settings dialog, open by the Settings button, through its
+ * checkbox, then closes the dialog with Escape; opens Help by the Help button, since ? may be off,
+ * and resolves to its rows after the turn, closing it with Escape. */
+async function turnCharacterKeys(page: Page, url: string): Promise<HelpRow[]> {
+  await openSettings(page, url, "button");
+  await page.evaluate(`${SWITCH}.scrollIntoView({ block: "nearest", behavior: "instant" })`);
+  await clickOn(page, SWITCH, "the settings' character-key switch").catch((error: Error) =>
+    assert.fail(`${url}: ${error.message}`),
+  );
+  await closeSettings(page, url);
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  await click(page, "header button[commandfor=help]");
   await until(page, HELP);
-  await until(page, `!!document.querySelector("#help [data-keys-settings]")`);
-  await click(page, `#help [data-keys-settings] input[name=enabled]`);
+  await until(page, `${HELP_ROWS}.length > 0`);
+  await page.evaluate(SETTLED);
   const rows: HelpRow[] = await page.evaluate(HELP_ROWS);
   await press(page, "Escape");
   await until(page, `!${HELP}`);
@@ -788,15 +982,16 @@ async function turnCharacterKeys(page: Page): Promise<HelpRow[]> {
 }
 
 /**
- * Asserts the loaded page's keys help, between the docks: ? opens the help dialog, the shell's
- * dialog#help, which the foundation's keys module fills, listing the page's bindings, each once:
- * P, the Pages button's, where the shell has one, shown as the drawer isn't docked; ?, the Help
- * button's; S, the Settings button's; and, where the page has a section tree, H and L, its previous
- * and next section. Turning its character-key switch off marks each of them off, and L then marks
- * no other section and P opens no drawer; turning it on again, L moves to another section. The
- * reader's keys settings are cleared after, so no other check runs with the keys off. Every
- * control in the header that binds a key shows it in a kbd, upper-cased as the help's rows show
- * it.
+ * Asserts the loaded page's keys help, between the docks: ? opens Help, the shell's dialog#help,
+ * whose sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them
+ * (PAGE_BINDINGS), each once, among them the shell's: P, the Pages button's, where the shell has
+ * one, shown as the drawer isn't docked; ?, the Help button's; S, the Settings button's; and,
+ * where the page has a section tree, H and L, its previous and next section. Escape closes Help.
+ * Turning the character-key switch in the Settings dialog off marks each of them off in Help, and
+ * L then marks no other section and P opens no drawer; turning it on again, L moves to another
+ * section. The reader's keys settings are cleared after, so no other check runs with the keys
+ * off. Every control in the header that binds a key shows it in a kbd, upper-cased as Help's rows
+ * show it.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
   await between(page);
@@ -810,32 +1005,50 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
   );
   try {
     await press(page, "?");
-    await until(page, HELP).catch(() => assert.fail(`${url}: ? opens the keys help dialog`));
-    await until(page, `${HELP_ROWS}.length > 0`);
+    await until(page, HELP).catch(() => assert.fail(`${url}: ? opens Help`));
+    await until(page, `${HELP_ROWS}.length > 0`).catch(() =>
+      assert.fail(`${url}: Help's sl-shortcuts lists the page's bindings`),
+    );
+    // Past the dialog's toggle event, a task after the open, so the list is read as it stays.
+    await page.evaluate(SETTLED);
     const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
     const pages: boolean = await page.evaluate(`${PAGES}.shown`);
     const rows: HelpRow[] = await page.evaluate(HELP_ROWS);
-    const sections = [
-      { keys: "H", action: "Previous section", off: false },
-      { keys: "L", action: "Next section", off: false },
-    ];
+    const bindings: HelpRow[] = await page.evaluate(PAGE_BINDINGS);
     assert.deepEqual(
       rows,
-      [
-        ...(pages ? [{ keys: "P", action: "Pages", off: false }] : []),
-        { keys: "?", action: "Help", off: false },
-        { keys: "S", action: "Settings", off: false },
-        ...(tree ? sections : []),
-      ],
-      `${url}: the keys help lists the page's bindings`,
+      bindings,
+      `${url}: Help lists exactly the page's bindings, as the keys module holds them`,
+    );
+    const shell = [
+      ...(pages ? [{ keys: "P", action: "Pages", off: false }] : []),
+      { keys: "?", action: "Help", off: false },
+      { keys: "S", action: "Settings", off: false },
+      ...(tree
+        ? [
+            { keys: "H", action: "Previous section", off: false },
+            { keys: "L", action: "Next section", off: false },
+          ]
+        : []),
+    ];
+    const missing = shell.filter(
+      (binding) =>
+        !rows.some(({ keys, action }) => keys === binding.keys && action === binding.action),
+    );
+    assert.deepEqual(
+      missing,
+      [],
+      `${url}: the page binds the shell's keys, and Help lists them; ` +
+        missing.map(({ keys, action }) => `${keys} ${action}`).join(", ") +
+        " missing",
     );
     await press(page, "Escape");
-    await until(page, `!${HELP}`);
+    await until(page, `!${HELP}`).catch(() => assert.fail(`${url}: Escape closes Help`));
 
     assert.deepEqual(
-      await turnCharacterKeys(page),
-      rows.map((row) => ({ ...row, off: true })),
-      `${url}: the switch turns every character key off`,
+      await turnCharacterKeys(page, url),
+      rows.map((row) => ({ ...row, off: [...row.keys].length === 1 })),
+      `${url}: the switch in Settings turns every character key off`,
     );
     const marked: string | null = await page.evaluate(MARKED);
     await press(page, "l");
@@ -849,9 +1062,9 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     );
 
     assert.deepEqual(
-      await turnCharacterKeys(page),
+      await turnCharacterKeys(page, url),
       rows,
-      `${url}: the switch turns the character keys on again`,
+      `${url}: the switch in Settings turns the character keys on again`,
     );
     if (tree) {
       await press(page, "l");
@@ -867,77 +1080,83 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
   }
 }
 
-/** The Settings button and S each open the theme menu, which stands in for the Settings dialog
- * until it holds the reader's settings, and which adopts its sheet, the constructed CSSStyleSheet
- * the build made of its CSS module script, onto the document, in its layer; no stylesheet is
- * fetched for it, and its chunk loads on the first open. */
-export const opensThemeMenu: Check = async (page, site, url = site) => {
+/** The settings' shadow root's adopted sheets, each as the names of the layers it declares. */
+const SETTINGS_SHEETS = `[...${SETTINGS_ELEMENT}.shadowRoot.adoptedStyleSheets].map((sheet) =>
+  [...sheet.cssRules].filter((rule) => rule instanceof CSSLayerBlockRule).map((rule) => rule.name))`;
+
+/** Removes the reader's stored theme choice, so no other check runs with a choice a check made. */
+const forgetChoice = (page: Page): Promise<unknown> =>
+  page.evaluate(`localStorage.removeItem(${JSON.stringify(KEY)})`);
+
+/** The Settings button and S each open the Settings dialog, its sl-settings rendered and its color
+ * row focused, and Escape closes it; the settings' shadow root adopts its sheets, the constructed
+ * CSSStyleSheets the build made of their CSS module scripts, the foundation's theme-menu.css in
+ * its layer among them, and no stylesheet is fetched for them. */
+export const opensSettings: Check = async (page, site, url = site) => {
   const take = await record(page);
   await page.goto(url);
-  // The entry ran before first paint: sl-theme-menu is defined, the menu itself not loaded.
-  assert.equal(await page.evaluate(`!!customElements.get("sl-theme-menu")`), true);
-  assert.equal(await page.evaluate("document.adoptedStyleSheets.length"), 0);
-
-  await click(page, "header button[commandfor=settings]");
-  await until(page, MODAL);
-  const sheets = await page.evaluate(`document.adoptedStyleSheets.map((sheet) =>
-    [...sheet.cssRules].map((rule) => rule.name))`);
-  assert.deepEqual(sheets, [["foundation.theme-menu"]], "the menu's sheet is adopted");
-  const { requests } = take();
+  await openSettings(page, url, "button");
+  const layers: string[][] = await page.evaluate(SETTINGS_SHEETS);
   assert.ok(
-    requests.some((url) => /\/assets\/theme-menu-[\w-]+\.js$/.test(url)),
-    "the menu's chunk loaded",
+    layers.some((names) => names.includes("foundation.theme-menu")),
+    `${url}: the settings adopt the theme menu's sheet, in its layer`,
   );
   assert.deepEqual(
-    requests.filter((url) => /theme-menu[\w-]*\.css$/.test(url)),
+    take().requests.filter((request) => /(settings|theme-menu)[\w-]*\.css$/.test(request)),
     [],
-    "no stylesheet is fetched for the menu",
+    `${url}: no stylesheet is fetched for the settings`,
   );
-
-  await press(page, "Escape");
-  await until(page, `!document.querySelector("sl-theme-menu dialog")`);
+  await closeSettings(page, url);
   // The Settings button's data-keys="s", which keys.js binds.
-  await press(page, "s");
-  await until(page, MODAL);
+  await openSettings(page, url, "s");
+  await closeSettings(page, url);
 };
 
-/** Stepping each facet's row, color, space, and type, to the profile after its default sets the
- * facet's attribute on the root; every row offers more than its default, as the full entry
- * registers every built-in profile. */
+/** The settings' theme rows, by their section: each row's radios' values, and its checked one. */
+const ROWS = `Object.fromEntries([...${SETTINGS_ELEMENT}.shadowRoot.querySelectorAll("[data-section]")]
+  .map((row) => [row.dataset.section, {
+    values: [...row.querySelectorAll("input")].map((radio) => radio.value),
+    checked: row.querySelector(":checked").value,
+  }]))`;
+
+/** Stepping each facet's row of the settings, color, space, and type, to the profile after its
+ * default sets the facet's attribute on the root at once, with no Save; every row offers more
+ * than its default, as the full entry registers every built-in profile. The choice is forgotten
+ * after. */
 export const stepsEachFacet: Check = async (page, site, url = site) => {
   await page.goto(url);
-  await press(page, "s");
-  await until(page, MODAL);
+  try {
+    await openSettings(page, url, "s");
 
-  // Each facet's row, by its section, and the root attribute preferences.js sets for it.
-  const facets = [
-    ["color", "data-palette"],
-    ["space", "data-space"],
-    ["type", "data-type"],
-  ];
-  const rows: Record<string, { values: string[]; checked: string }> = await page.evaluate(`
-    Object.fromEntries([...document.querySelectorAll("sl-theme-menu [data-section]")].map(
-      (row) => [row.dataset.section, {
-        values: [...row.querySelectorAll("input")].map((radio) => radio.value),
-        checked: row.querySelector(":checked").value,
-      }]))`);
-  for (const [facet] of facets) {
-    assert.ok(rows[facet].values.length > 1, `the ${facet} row offers ${rows[facet].values}`);
-  }
+    // Each facet's row, by its section, and the root attribute preferences.js sets for it.
+    const facets = [
+      ["color", "data-palette"],
+      ["space", "data-space"],
+      ["type", "data-type"],
+    ];
+    const rows: Record<string, { values: string[]; checked: string }> = await page.evaluate(ROWS);
+    for (const [facet] of facets) {
+      assert.ok(rows[facet].values.length > 1, `the ${facet} row offers ${rows[facet].values}`);
+    }
 
-  // Focus opens on the first row, color; l steps a row to its next radio, j moves down a row.
-  // Each facet's row steps once, past the scheme row, to the radio after its default.
-  for (const [index, [facet, attribute]] of facets.entries()) {
-    if (index > 0) await press(page, "j");
-    if (facet === "space") await press(page, "j");
-    await press(page, "l");
-    const { values, checked } = rows[facet];
-    const chosen = values[(values.indexOf(checked) + 1) % values.length];
-    assert.equal(
-      await page.evaluate(`document.documentElement.getAttribute("${attribute}")`),
-      chosen,
-      `choosing ${chosen} in the ${facet} row sets ${attribute}`,
-    );
+    // Focus opens on the first row, color; l steps a row to its next radio, j moves down a row.
+    // Each facet's row steps once, past the scheme row, to the radio after its default.
+    for (const [index, [facet, attribute]] of facets.entries()) {
+      if (index > 0) await press(page, "j");
+      if (facet === "space") await press(page, "j");
+      await until(page, onRow(facet));
+      await press(page, "l");
+      const { values, checked } = rows[facet];
+      const chosen = values[(values.indexOf(checked) + 1) % values.length];
+      assert.equal(
+        await page.evaluate(`document.documentElement.getAttribute("${attribute}")`),
+        chosen,
+        `choosing ${chosen} in the ${facet} row sets ${attribute}`,
+      );
+    }
+    await closeSettings(page, url);
+  } finally {
+    await forgetChoice(page);
   }
 };
 
@@ -954,14 +1173,28 @@ export const definesEveryElement: Check = async (page, site, url = site) => {
   await assertDefined(page, url);
 };
 
-/** Every request the page makes, the menu's chunk on its first open included, resolves under the
- * base, and none fails or answers an error. */
+/** Every request the page makes, with its Settings and Help dialogs opened, resolves under the
+ * base, and none fails or answers an error; and the foundation's theme-menu.js and keys-help.js,
+ * which the settings and the shortcuts list stand in for, are never requested. */
 export const requestsUnderBase: Check = async (page, site, url = site) => {
   const take = await record(page);
   await page.goto(url);
-  await click(page, "header button[commandfor=settings]");
-  await until(page, MODAL);
-  assertLoaded(url, site, take());
+  await openSettings(page, url, "button");
+  await closeSettings(page, url);
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  await click(page, "header button[commandfor=help]");
+  await until(page, HELP).catch(() => assert.fail(`${url}: the Help button opens Help`));
+  await until(page, `${HELP_ROWS}.length > 0`).catch(() =>
+    assert.fail(`${url}: Help's sl-shortcuts lists the page's bindings`),
+  );
+  await page.evaluate(SETTLED);
+  const log = take();
+  assertLoaded(url, site, log);
+  assert.deepEqual(
+    log.requests.filter((request) => /\/(theme-menu|keys-help)[\w-]*\.js$/.test(request)),
+    [],
+    `${url}: the foundation's theme-menu.js and keys-help.js are never requested`,
+  );
 };
 
 /** In a 1600px viewport, main holds its reading width, centered. */
@@ -985,22 +1218,31 @@ export const startsUnderHeader: Check = async (page, site, url = site) => {
   await assertUnderHeader(page, url);
 };
 
-/** ? opens the keys help dialog, listing the page's bindings, whose character-key switch turns
- * them off and on again. */
+/** ? opens Help, listing exactly the page's bindings, Escape closes it, and the character-key
+ * switch in the Settings dialog turns them off and on again. */
 export const opensKeysHelp: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertKeysHelp(page, url);
 };
 
-/** Each header button, Pages where the shell has one, Help, and Theme, and the keys help's Close,
- * shows its glyph and its key hint, and no word, named by its aria-label. */
+/** Each dialog a keyed show-modal opener opens follows the components' shortcut dialog pattern: a
+ * name from a heading inside it, a Close showing Esc, and an opener that shows its key and has a
+ * name its interest hint shows; it fails naming each dialog and what it lacks. */
+export const followsShortcutDialogs: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertShortcutDialogs(page, url);
+};
+
+/** Each header button, Pages where the shell has one, Help, and Settings, and each shortcut
+ * dialog's Close, shows its glyph and its key hint, and no word, named by its aria-label. */
 export const showsGlyphs: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertGlyphs(page, url);
 };
 
-/** Every glyph button the page renders is at least 24 CSS px a side, at 390px and at 1600px, in
- * the regular and the compact space profiles. */
+/** Every glyph button the page renders, and each shortcut dialog's, its Close among them, with the
+ * dialog open, is at least 24 CSS px a side, at 390px and at 1600px, in the regular and the
+ * compact space profiles. */
 export const hasTargetSize: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertTargetSize(page, url);
@@ -1026,26 +1268,30 @@ export const keepsNavigationWords: Check = async (page, site, url = site) => {
   await assertNavigation(page, url);
 };
 
-/** A choice the menu never saves, stepped and then cancelled, stores nothing, and a reload shows
- * none of it: the site leaves the reader's choice to the menu's Save. */
-export const staysUnsaved: Check = async (page, site, url = site) => {
+/** A change in the settings is stored at once, with no Save: stepping the color row stores the
+ * new palette while the dialog is open, closing it by Escape keeps it, and a reload applies it.
+ * Nothing is stored before, and the choice is forgotten after. */
+export const storesAtOnce: Check = async (page, site, url = site) => {
   await page.goto(url);
-  const stored = `localStorage.getItem(${JSON.stringify(KEY)})`;
-  assert.equal(await page.evaluate(stored), null, "nothing is stored before a choice");
-  await press(page, "s");
-  await until(page, MODAL);
-  await press(page, "l");
-  const chosen = await page.evaluate(`document.documentElement.getAttribute("data-palette")`);
-  await press(page, "Escape");
-  await until(page, `!document.querySelector("sl-theme-menu dialog")`);
-  assert.equal(await page.evaluate(stored), null, "a cancelled choice stores nothing");
-  await page.goto(url);
-  assert.equal(await page.evaluate(stored), null, "nothing is stored after a reload");
-  assert.notEqual(
-    await page.evaluate(`document.documentElement.getAttribute("data-palette")`),
-    chosen,
-    `the cancelled ${chosen} doesn't persist past a reload`,
-  );
+  const stored = `JSON.parse(localStorage.getItem(${JSON.stringify(KEY)}) ?? "null")?.color ?? null`;
+  try {
+    assert.equal(await page.evaluate(stored), null, `${url}: nothing is stored before a change`);
+    await openSettings(page, url, "s");
+    await press(page, "l");
+    const chosen: string | null = await page.evaluate(attribute("data-palette"));
+    assert.ok(chosen, `${url}: stepping the color row applies a palette`);
+    assert.equal(await page.evaluate(stored), chosen, `${url}: the change is stored at once`);
+    await closeSettings(page, url);
+    assert.equal(await page.evaluate(stored), chosen, `${url}: closing the dialog keeps it`);
+    await page.goto(url);
+    assert.equal(
+      await page.evaluate(attribute("data-palette")),
+      chosen,
+      `${url}: the stored ${chosen} applies after a reload`,
+    );
+  } finally {
+    await forgetChoice(page);
+  }
 };
 
 /** The foundation registry's color profiles, in registration order, read from its store at the
@@ -1087,9 +1333,9 @@ const tokens = (palette: string): string => `(() => {
   };
 })()`;
 
-/** A theme menu row's radios' values, and its checked one, by its section. */
+/** A settings theme row's radios' values, and its checked one, by its section. */
 const row = (section: string): string => `(() => {
-  const row = document.querySelector('sl-theme-menu [data-section="${section}"]');
+  const row = ${SETTINGS_ELEMENT}.shadowRoot.querySelector('[data-section="${section}"]');
   return {
     values: [...row.querySelectorAll("input")].map((radio) => radio.value),
     checked: row.querySelector(":checked").value,
@@ -1101,23 +1347,35 @@ const attribute = (name: string): string => `document.documentElement.getAttribu
 
 /**
  * The page's highlighted code, its .shiki blocks, takes each registered palette's syntax theme:
- * for each palette profiles("color") lists, the theme menu's color row, which lists the same, is
- * stepped to it, and its scheme row to light and then to dark; in each, every token carrying the
+ * for each palette profiles("color") lists, the color row of the settings in the Settings dialog,
+ * opened by S, which lists the same, is stepped to it, and its scheme row to light and then to dark; in each, every token carrying the
  * palette's --shiki-<palette> variable renders the color the variable resolves to there, and some
  * token's color differs from the page's text color. It fails naming the palette and the scheme for
  * a registered palette whose code renders plain: no token carries a color for it, as on a build
  * with no syntax theme for it, or a token keeps the page's text color, as where no rule selects the
  * palette's. It runs on url, a page with highlighted code, which a site's test gives, or on site,
- * its index, when the index holds some. The menu is cancelled after, so nothing is stored.
+ * its index, when the index holds some. The dialog is closed after, and the choice, which each
+ * step stored at once, forgotten.
  */
 export const highlightsEachPalette: Check = async (page, site, url = site) => {
   await page.goto(url);
   const palettes: string[] = await page.evaluate(PALETTES);
   assert.ok(palettes.length > 0, `${url}: the registry lists a color profile`);
-  await press(page, "s");
-  await until(page, MODAL);
+  try {
+    await openSettings(page, url, "s");
+    await steps(page, url, palettes);
+    await closeSettings(page, url);
+  } finally {
+    await forgetChoice(page);
+  }
+};
+
+/** Steps the open settings' color row to each palette, and its scheme row to light and dark in
+ * each, asserting the page's code takes the palette's syntax theme there, as highlightsEachPalette
+ * has it. */
+async function steps(page: Page, url: string, palettes: string[]): Promise<void> {
   const color: { values: string[]; checked: string } = await page.evaluate(row("color"));
-  assert.deepEqual(color.values, palettes, "the menu's color row lists the registry's palettes");
+  assert.deepEqual(color.values, palettes, "the settings' color row lists the registry's palettes");
 
   /** Steps the focused row with l until value is checked, once around it at most. */
   const stepTo = async (section: string, value: string): Promise<void> => {
@@ -1167,24 +1425,25 @@ export const highlightsEachPalette: Check = async (page, site, url = site) => {
     }
     await press(page, "k");
   }
-  await press(page, "Escape");
-  await until(page, `!document.querySelector("sl-theme-menu dialog")`);
-};
+}
 
 /** The shell checks, by the name a site's test gives each. */
 export const shell: Record<string, Check> = {
-  "the Settings button and S open the theme menu, its sheet adopted": opensThemeMenu,
-  "stepping each facet sets its attribute on the root": stepsEachFacet,
+  "the Settings button and S open the Settings dialog, its settings' sheets adopted": opensSettings,
+  "stepping each facet in the settings sets its attribute on the root": stepsEachFacet,
   "the page's one module script is render-blocking": blocksRender,
   "every custom element on the page is defined": definesEveryElement,
-  "every request resolves under the base, and none fails": requestsUnderBase,
+  "every request resolves under the base, none fails, and no theme menu or keys help loads":
+    requestsUnderBase,
   "main holds its centered reading width at 1600px": holdsReadingWidth,
   "between the docks main is centered with no section tree, beside a docked one": holdsBetweenDocks,
   "main starts directly under the header at 390px, between the docks, and at 1600px":
     startsUnderHeader,
-  "? opens the keys help, listing the page's bindings, and its switch turns them off":
+  "? opens Help, listing the page's bindings, and the switch in Settings turns them off":
     opensKeysHelp,
-  "each header button and the keys help's Close show their glyph and key hint, named, no word":
+  "each keyed show-modal opener's dialog follows the shortcut dialog pattern":
+    followsShortcutDialogs,
+  "each header button and each dialog's Close show their glyph and key hint, named, no word":
     showsGlyphs,
   "every glyph button is at least 24px a side, in the regular and the compact space": hasTargetSize,
   "the header's buttons share one line at its inline end, on its first line, at 390px and wider":
@@ -1192,7 +1451,7 @@ export const shell: Record<string, Check> = {
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
   "no navigation link breaks inside a word, and each docked column is 16rem or wider":
     keepsNavigationWords,
-  "the theme menu stays unsaved: no stored choice persists": staysUnsaved,
+  "a change in the settings is stored at once and applies after a reload": storesAtOnce,
 };
 
 /** Each copied file's page of the site at root, every tree's, by its path under the base (x.md at
@@ -1304,6 +1563,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await assertBetweenDocks(page, url);
     await assertUnderHeader(page, url);
     await assertKeysHelp(page, url);
+    await assertShortcutDialogs(page, url);
     await assertGlyphs(page, url);
     await assertTargetSize(page, url);
     await assertHeaderRow(page, url);
