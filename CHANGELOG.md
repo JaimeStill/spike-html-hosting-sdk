@@ -6,6 +6,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+### Changed
+
+- `./screenshots.js`'s `description` captures every page whole at 390x844, 1120x700, and
+  1376x860, a phone's width and the layout's two docks, 70rem and 86rem, in place of 1280x800 and
+  390x844, and the index also with Help open, beside its theme menu open, at each: nine states,
+  each named by its width, as `index-help-1120`. `leavesNoCapture` asserts the nine.
+
 ## [0.5.0] - 2026-11-06
 
 Glyphs from the icons layer, spike-html-hosting-icons, filled into every page at build, and the
