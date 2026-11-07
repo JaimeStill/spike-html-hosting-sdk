@@ -18,11 +18,15 @@
 // crawl fail on the index, naming the width and main's gap; at 390px, with a flex column whose auto
 // margin pushes main to the body's end, the check fails as well, and with main pulled up into the
 // header it fails naming the overlap. With the shell's keys help
-// dialog removed, the Theme button's binding removed, the Theme button's kbd removed, as its markup
-// before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the switch says,
-// the keys help check fails, naming the page and the assertion. With the Help button's glyph
-// removed, the Theme button's word shown beside its glyph, or the keys help's Close showing the
-// Help button's glyph, the glyph check fails, naming the page and the button.
+// dialog removed, the Settings button's binding removed, the Settings button's kbd removed, as the
+// Theme button's markup before v0.3.1 had it, or a handler that opens the Pages drawer on P
+// whatever the switch says, the keys help check fails, naming the page and the assertion. With the
+// Help button's glyph removed, the Settings button's word shown beside its glyph, or the keys
+// help's Close showing the Help button's glyph, the glyph check fails, naming the page and the
+// button. With the glyph buttons' padding and border dropped and their text small, the target size
+// check fails, naming the width, the space, and the button; with the header's group wrapping its
+// buttons, or the header wrapping the group under the nav, the header row check fails, naming the
+// width; and with the header too wide for a phone, it fails naming the sideways scroll.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -37,6 +41,8 @@ import {
   definesEveryElement,
   holdsBetweenDocks,
   keepsNavigationWords,
+  hasTargetSize,
+  keepsHeaderRow,
   opensKeysHelp,
   shell,
   showsGlyphs,
@@ -412,10 +418,10 @@ describe("the fixture site with no keys help dialog", () => {
 
 describe("the fixture site with its keys help wrong", () => {
   test("a binding missing from the dialog fails the keys help check", async () => {
-    // The Theme button's T binding removed before keys.js reads the page's bindings.
+    // The Settings button's S binding removed before keys.js reads the page's bindings.
     const page = await browser.open("about:blank");
     await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
-      source: `document.addEventListener("DOMContentLoaded", () => document.querySelector("[commandfor=theme][data-keys]")?.removeAttribute("data-keys"));`,
+      source: `document.addEventListener("DOMContentLoaded", () => document.querySelector("[commandfor=settings][data-keys]")?.removeAttribute("data-keys"));`,
     });
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
@@ -428,10 +434,11 @@ describe("the fixture site with its keys help wrong", () => {
   });
 
   test("a header control that binds a key without showing it fails the keys help check", async () => {
-    // The Theme button's markup before v0.3.1: its label alone, no kbd.
+    // The Settings button as the Theme button's markup before v0.3.1 had it: its label alone, no
+    // kbd.
     const page = await browser.open("about:blank");
     await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
-      source: `document.addEventListener("DOMContentLoaded", () => { const theme = document.querySelector("header [commandfor=theme]"); theme.removeAttribute("aria-label"); theme.textContent = "Theme"; });`,
+      source: `document.addEventListener("DOMContentLoaded", () => { const settings = document.querySelector("header [commandfor=settings]"); settings.removeAttribute("aria-label"); settings.textContent = "Settings"; });`,
     });
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
@@ -483,9 +490,9 @@ describe("the fixture site with its glyphs wrong", () => {
       message: /\/fixture-site\/: the Help button shows its glyph and its key hint/,
     },
     {
-      change: "the Theme button's word shown beside its glyph",
-      script: `document.querySelector("header [commandfor=theme]").prepend("Theme ");`,
-      message: /\/fixture-site\/: the Theme button shows its glyph and its key hint, no word/,
+      change: "the Settings button's word shown beside its glyph",
+      script: `document.querySelector("header [commandfor=settings]").prepend("Settings ");`,
+      message: /\/fixture-site\/: the Settings button shows its glyph and its key hint, no word/,
     },
     {
       change: "the keys help's Close showing the Help button's glyph",
@@ -498,6 +505,65 @@ describe("the fixture site with its glyphs wrong", () => {
       const page = await withChange(script);
       try {
         await assert.rejects(showsGlyphs(page, server.origin), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
+});
+
+describe("the fixture site with its glyph buttons too small", () => {
+  test("a glyph button under 24px a side fails the target size check", async () => {
+    // The glyph buttons' padding and border dropped and their text, so their glyph, small.
+    const page = await withSheet(
+      ".glyph-button { padding: 0 !important; border: 0 !important; font-size: 0.5rem !important; }",
+    );
+    try {
+      await assert.rejects(hasTargetSize(page, server.origin), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: at 390px in the regular space the \w+ button is [\d.]+px by [\d.]+px, under 24px a side/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with its header's row broken", () => {
+  for (const { change, css, message } of [
+    {
+      change: "the group wrapping its buttons",
+      css: ".header-actions { flex-wrap: wrap; inline-size: 2rem; }",
+      message: /\/fixture-site\/: at 390px the header's buttons, [\w, ]+, share one line/,
+    },
+    {
+      change: "the header wrapping the group under the nav",
+      css:
+        "body > header { flex-wrap: wrap; } body > header > sl-site-nav { flex-basis: 100%; } " +
+        ".header-actions { margin-inline-start: auto; }",
+      message: /\/fixture-site\/: at 390px the header's buttons are on the site nav's first line/,
+    },
+    {
+      change: "the group at the header's start",
+      css: "body > header { flex-direction: row-reverse; }",
+      message: /\/fixture-site\/: at 390px the header's buttons end at its inline end/,
+    },
+    {
+      change: "the header too wide for a phone",
+      css: "body > header { min-inline-size: 30rem; }",
+      message: /\/fixture-site\/: \d+px wide in a \d+px viewport, past it/,
+    },
+  ]) {
+    test(`${change} fails the header row check`, async () => {
+      const page = await withSheet(css);
+      try {
+        await assert.rejects(keepsHeaderRow(page, server.origin), (error: Error) => {
           assert.match(error.message, message);
           return true;
         });

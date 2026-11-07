@@ -5,8 +5,9 @@
 //
 // The shell checks run on a page of the site, its index unless the site's test gives another: a
 // Markdown site's index, the page its shell builds, a hand page at the base, or a hand page at any
-// path under it, each checked under the site's base. On that page: the Theme button and T open the
-// theme menu, whose CSS module script the build rewrote, so its sheet is adopted with no stylesheet
+// path under it, each checked under the site's base. On that page: the Settings button and S open
+// the theme menu, which stands in for the Settings dialog until it holds the reader's settings,
+// whose CSS module script the build rewrote, so its sheet is adopted with no stylesheet
 // fetched for it; stepping the color, space, and type rows each to a profile past its default,
 // which the full entry registers, sets that facet's attribute on the root; the page's one module
 // script, its entry, is render-blocking; once it loads, every element on the page whose name holds
@@ -18,12 +19,16 @@
 // one; at 390px, between the docks, and at 1600px, main starts directly under the header, the gap
 // from the header's bottom, or the section tree bar's where it sits between them, never below zero
 // and no more than on a page taller than the viewport, however short the page; ? opens the shell's
-// keys help dialog, which the foundation's keys module fills with the page's bindings, P, ?, T, and
+// keys help dialog, which the foundation's keys module fills with the page's bindings, P, ?, S, and
 // the tree's H and L, and its character-key switch turns them off, so L moves to no section and P
 // opens no drawer, and on again; in a 390px viewport each header button, Pages where the shell has
-// one, Help, and Theme, and the keys help's Close each show one glyph, the icons layer's svg for
+// one, Help, and Settings, and the keys help's Close each show one glyph, the icons layer's svg for
 // list-unordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, both rendered, and
-// no word, each named by its aria-label; nothing scrolls sideways at 390px; at a phone's width, a
+// no word, each named by its aria-label; every rendered glyph button, the page's and its
+// components' in their shadow roots, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at
+// 1600px, in the regular and the compact space profiles; the header's buttons, its header-actions
+// group, share one line at the header's inline end, on the site nav's first line, at the capture
+// widths, 390px, 1120px, and 1376px; nothing scrolls sideways at 390px; at a phone's width, a
 // px below and at each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no
 // navigation link's word breaks across lines and every docked side column is at least 16rem wide;
 // and a choice the menu never saves leaves nothing stored, so a reload shows none of it. shell
@@ -41,22 +46,23 @@
 // script render-blocking, every custom element on it defined, every request under the base and none
 // failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
 // sideways in a 390px one, its navigation laid out as the shell check has it at the same widths,
-// its layout between the docks, its main under the header, and its keys help and glyph buttons as
-// the shell checks have them, and its title its source's front matter name, or, for a source with
-// no name, its first h1's text. Its Pages button is hidden at 1600px, where the site index is
-// docked, and at 390px is shown and opens the Pages drawer as a modal by its click and by P, its
-// aria-expanded true while the drawer is open and false once Escape closes it. Each page's main
-// opens with its page header, whose dl holds a dt and a dd per front matter key, in source order,
-// each key and value as the source holds it, and none for a source with no front matter; no front
-// matter table remains, and no key's line shows as body text. Each page's site index, in its Pages
-// drawer, links every copied file's page, each once, and no other. Every in-site link reaches a
-// built page, and an element with its fragment's id when it has one. The crawl checks a page for
-// every Markdown file content.json records, every tree's: a page no link from the index reaches is
-// crawled from once the links run out, and returned, for the test's diagnostics. A page reached
-// that no record names is a hand page the site also builds, a hand index at the base or a hand page
-// elsewhere: it loads with a 2xx, every request under the base and none failed, its ids are the
-// targets of the fragments linking it, and its links are followed, but the copied pages' checks are
-// left to the shell checks, which a site runs on each hand page by its URL; it is returned too.
+// its layout between the docks, its main under the header, its keys help and glyph buttons, their
+// size, and its header's row as the shell checks have them, and its title its source's front matter
+// name, or, for a source with no name, its first h1's text. Its Pages button is hidden at 1600px,
+// where the site index is docked, and at 390px is shown and opens the Pages drawer as a modal by
+// its click and by P, its aria-expanded true while the drawer is open and false once Escape closes
+// it. Each page's main opens with its page header, whose dl holds a dt and a dd per front matter
+// key, in source order, each key and value as the source holds it, and none for a source with no
+// front matter; no front matter table remains, and no key's line shows as body text. Each page's
+// site index, in its Pages drawer, links every copied file's page, each once, and no other. Every
+// in-site link reaches a built page, and an element with its fragment's id when it has one. The
+// crawl checks a page for every Markdown file content.json records, every tree's: a page no link
+// from the index reaches is crawled from once the links run out, and returned, for the test's
+// diagnostics. A page reached that no record names is a hand page the site also builds, a hand
+// index at the base or a hand page elsewhere: it loads with a 2xx, every request under the base and
+// none failed, its ids are the targets of the fragments linking it, and its links are followed, but
+// the copied pages' checks are left to the shell checks, which a site runs on each hand page by its
+// URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -144,7 +150,8 @@ async function press(page: Page, key: string): Promise<void> {
   await page.cdp("Input.dispatchKeyEvent", { type: "keyUp", ...event });
 }
 
-/** The theme menu's dialog is open, modal. */
+/** The theme menu's dialog is open, modal: the Settings button and S open it, cancelling the
+ * show-modal they send dialog#settings, until that dialog holds the reader's settings. */
 const MODAL = `document.querySelector("sl-theme-menu dialog")?.matches(":modal")`;
 
 /** The localStorage key the foundation's preferences.js stores the reader's choice under. */
@@ -514,7 +521,7 @@ const MARKED = `document.querySelector("sl-section-tree a[aria-current]")?.getAt
 const GLYPHS: Record<string, { name: string; hint: string; icon: string }> = {
   "header .pages-opener[data-keys=p]": { name: "Pages", hint: "P", icon: listUnorderedIcon },
   "header button[commandfor=help][data-keys]": { name: "Help", hint: "?", icon: questionIcon },
-  "header button[commandfor=theme][data-keys]": { name: "Theme", hint: "T", icon: gearIcon },
+  "header button[commandfor=settings][data-keys]": { name: "Settings", hint: "S", icon: gearIcon },
   "dialog#help button[commandfor=help][command=close]": { name: "Close", hint: "?", icon: xIcon },
 };
 
@@ -558,10 +565,10 @@ const PARSED_ICONS = `${JSON.stringify(Object.values(GLYPHS).map(({ icon }) => i
   })`;
 
 /** Asserts the loaded page's glyph buttons, in a 390px viewport, where the Pages button shows:
- * each header button the shell has, Pages, Help, and Theme, and, with the keys help dialog open,
- * its Close, shows one glyph, the icons module's svg (1em square, currentColor, aria-hidden and
- * focusable="false"), and its key hint in a kbd, both rendered, and no word, named by its
- * aria-label. The Help and Theme buttons and the dialog's Close are every shell's. The page is
+ * each header button the shell has, Pages, Help, and Settings, and, with the keys help dialog
+ * open, its Close, shows one glyph, the icons module's svg (1em square, currentColor, aria-hidden
+ * and focusable="false"), and its key hint in a kbd, both rendered, and no word, named by its
+ * aria-label. The Help and Settings buttons and the dialog's Close are every shell's. The page is
  * scrolled to its top first, and the dialog is closed after. */
 async function assertGlyphs(page: Page, url: string): Promise<void> {
   await narrow(page);
@@ -589,8 +596,8 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
   const shown: Shown[] = await page.evaluate(glyphsShown(header));
   const names = shown.map(({ selector }) => GLYPHS[selector].name);
   assert.ok(
-    names.includes("Help") && names.includes("Theme"),
-    `${url}: the header has its Help and Theme buttons`,
+    names.includes("Help") && names.includes("Settings"),
+    `${url}: the header has its Help and Settings buttons`,
   );
   for (const button of shown) {
     assert.deepEqual(
@@ -627,6 +634,143 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
   }
 }
 
+/** WCAG 2.5.8's minimum target size, in CSS px a side. */
+const TARGET = 24;
+
+/** The space profiles the target size is checked in: the default, regular, and compact, whose
+ * tighter --space-* steps make the smallest glyph button. */
+const SPACES = ["regular", "compact"];
+
+/** Each glyph button the loaded page renders, the page's and those in its components' shadow
+ * roots, each as its name, its aria-label or its text, and its box's width and height. */
+const TARGETS = `(() => {
+  const roots = [document];
+  const found = [];
+  for (let i = 0; i < roots.length; i++) {
+    for (const element of roots[i].querySelectorAll("*")) {
+      if (element.shadowRoot) roots.push(element.shadowRoot);
+      if (!element.matches(".glyph-button") || !element.checkVisibility()) continue;
+      const { width, height } = element.getBoundingClientRect();
+      const name = element.getAttribute("aria-label") ?? element.textContent.trim();
+      found.push({ name, width, height });
+    }
+  }
+  return found;
+})()`;
+
+/** Asserts every glyph button the loaded page renders, at 390px, where the Pages button and the
+ * section tree's bar show, and at 1600px, where the drawer and the tree are docked, is at least
+ * 24 CSS px a side, in the regular and the compact space profiles; the root's own data-space is
+ * put back after. */
+async function assertTargetSize(page: Page, url: string): Promise<void> {
+  const space: string | null = await page.evaluate(attribute("data-space"));
+  try {
+    for (const [width, viewport] of [
+      [390, narrow],
+      [1600, wide],
+    ] as const) {
+      await viewport(page);
+      for (const profile of SPACES) {
+        await page.evaluate(`document.documentElement.setAttribute("data-space", "${profile}")`);
+        await page.evaluate(SETTLED);
+        const targets: { name: string; width: number; height: number }[] =
+          await page.evaluate(TARGETS);
+        assert.ok(targets.length > 0, `${url}: at ${width}px it renders a glyph button`);
+        for (const target of targets) {
+          assert.ok(
+            target.width >= TARGET - 0.5 && target.height >= TARGET - 0.5,
+            `${url}: at ${width}px in the ${profile} space the ${target.name} button is ` +
+              `${target.width}px by ${target.height}px, under ${TARGET}px a side`,
+          );
+        }
+      }
+    }
+  } finally {
+    await page.evaluate(
+      space === null
+        ? `document.documentElement.removeAttribute("data-space")`
+        : `document.documentElement.setAttribute("data-space", ${JSON.stringify(space)})`,
+    );
+  }
+}
+
+/** The widths the header's row is checked at, the captures' (screenshots.ts's WIDTHS): a phone's,
+ * and a laptop's on each side of the drawer's dock. */
+const HEADER_WIDTHS = [390, 1120, 1376];
+
+/** The loaded page's header as laid out: whether it holds its header-actions group; each rendered
+ * button of the group, by its aria-label, and its box's top and bottom; the group's inline end and
+ * the header's content box's; the group's top and bottom; and the site nav's first link's top and
+ * bottom, its first line, or null with no nav. */
+const HEADER_ROW = `(() => {
+  const header = document.querySelector("body > header");
+  const group = header?.querySelector(":scope > .header-actions");
+  if (!group) return null;
+  const box = header.getBoundingClientRect();
+  const style = getComputedStyle(header);
+  const g = group.getBoundingClientRect();
+  const first = header.querySelector(":scope > sl-site-nav")?.shadowRoot?.querySelector("a");
+  const line = first?.getBoundingClientRect();
+  return {
+    buttons: [...group.querySelectorAll(":scope > button")]
+      .filter((button) => button.checkVisibility())
+      .map((button) => {
+        const { top, bottom } = button.getBoundingClientRect();
+        return { name: button.getAttribute("aria-label"), top, bottom };
+      }),
+    end: g.right,
+    inline: box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth),
+    top: g.top,
+    bottom: g.bottom,
+    line: line ? { top: line.top, bottom: line.bottom } : null,
+  };
+})()`;
+
+/** Asserts the loaded page's header at each of HEADER_WIDTHS: it holds its header-actions group,
+ * whose rendered buttons share one line, the group at the header's inline end and on the site
+ * nav's first line, however many lines the nav wraps to; and, at 390px, nothing scrolls
+ * sideways. */
+async function assertHeaderRow(page: Page, url: string): Promise<void> {
+  type Row = {
+    buttons: { name: string; top: number; bottom: number }[];
+    end: number;
+    inline: number;
+    top: number;
+    bottom: number;
+    line: { top: number; bottom: number } | null;
+  };
+  for (const width of HEADER_WIDTHS) {
+    await page.cdp("Emulation.setDeviceMetricsOverride", {
+      width,
+      height: 900,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+    await page.evaluate(SETTLED);
+    const row: Row | null = await page.evaluate(HEADER_ROW);
+    assert.ok(row, `${url}: its header holds its header-actions group`);
+    const names = row.buttons.map(({ name }) => name).join(", ");
+    assert.ok(
+      Math.max(...row.buttons.map(({ top }) => top)) <
+        Math.min(...row.buttons.map(({ bottom }) => bottom)),
+      `${url}: at ${width}px the header's buttons, ${names}, share one line`,
+    );
+    assert.ok(
+      Math.abs(row.end - row.inline) <= 0.5,
+      `${url}: at ${width}px the header's buttons end at its inline end, ${row.end}px, ` +
+        `not ${row.inline}px`,
+    );
+    if (row.line) {
+      assert.ok(
+        row.top < row.line.bottom && row.bottom > row.line.top,
+        `${url}: at ${width}px the header's buttons are on the site nav's first line`,
+      );
+    }
+  }
+  await assertNoSidewaysScroll(page, url);
+}
+
 /** The localStorage key the foundation's keys.js stores the reader's keys settings under. */
 const KEYS_SETTINGS = "spike-html-apps-foundation.keys";
 
@@ -647,7 +791,7 @@ async function turnCharacterKeys(page: Page): Promise<HelpRow[]> {
  * Asserts the loaded page's keys help, between the docks: ? opens the help dialog, the shell's
  * dialog#help, which the foundation's keys module fills, listing the page's bindings, each once:
  * P, the Pages button's, where the shell has one, shown as the drawer isn't docked; ?, the Help
- * button's; T, the Theme button's; and, where the page has a section tree, H and L, its previous
+ * button's; S, the Settings button's; and, where the page has a section tree, H and L, its previous
  * and next section. Turning its character-key switch off marks each of them off, and L then marks
  * no other section and P opens no drawer; turning it on again, L moves to another section. The
  * reader's keys settings are cleared after, so no other check runs with the keys off. Every
@@ -680,7 +824,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       [
         ...(pages ? [{ keys: "P", action: "Pages", off: false }] : []),
         { keys: "?", action: "Help", off: false },
-        { keys: "T", action: "Theme", off: false },
+        { keys: "S", action: "Settings", off: false },
         ...(tree ? sections : []),
       ],
       `${url}: the keys help lists the page's bindings`,
@@ -723,9 +867,10 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
   }
 }
 
-/** The Theme button and T each open the theme menu, which adopts its sheet, the constructed
- * CSSStyleSheet the build made of its CSS module script, onto the document, in its layer; no
- * stylesheet is fetched for it, and its chunk loads on the first open. */
+/** The Settings button and S each open the theme menu, which stands in for the Settings dialog
+ * until it holds the reader's settings, and which adopts its sheet, the constructed CSSStyleSheet
+ * the build made of its CSS module script, onto the document, in its layer; no stylesheet is
+ * fetched for it, and its chunk loads on the first open. */
 export const opensThemeMenu: Check = async (page, site, url = site) => {
   const take = await record(page);
   await page.goto(url);
@@ -733,7 +878,7 @@ export const opensThemeMenu: Check = async (page, site, url = site) => {
   assert.equal(await page.evaluate(`!!customElements.get("sl-theme-menu")`), true);
   assert.equal(await page.evaluate("document.adoptedStyleSheets.length"), 0);
 
-  await click(page, "button[commandfor=theme]");
+  await click(page, "header button[commandfor=settings]");
   await until(page, MODAL);
   const sheets = await page.evaluate(`document.adoptedStyleSheets.map((sheet) =>
     [...sheet.cssRules].map((rule) => rule.name))`);
@@ -751,8 +896,8 @@ export const opensThemeMenu: Check = async (page, site, url = site) => {
 
   await press(page, "Escape");
   await until(page, `!document.querySelector("sl-theme-menu dialog")`);
-  // The Theme button's data-keys="t", which keys.js binds.
-  await press(page, "t");
+  // The Settings button's data-keys="s", which keys.js binds.
+  await press(page, "s");
   await until(page, MODAL);
 };
 
@@ -761,7 +906,7 @@ export const opensThemeMenu: Check = async (page, site, url = site) => {
  * registers every built-in profile. */
 export const stepsEachFacet: Check = async (page, site, url = site) => {
   await page.goto(url);
-  await press(page, "t");
+  await press(page, "s");
   await until(page, MODAL);
 
   // Each facet's row, by its section, and the root attribute preferences.js sets for it.
@@ -814,7 +959,7 @@ export const definesEveryElement: Check = async (page, site, url = site) => {
 export const requestsUnderBase: Check = async (page, site, url = site) => {
   const take = await record(page);
   await page.goto(url);
-  await click(page, "button[commandfor=theme]");
+  await click(page, "header button[commandfor=settings]");
   await until(page, MODAL);
   assertLoaded(url, site, take());
 };
@@ -854,6 +999,20 @@ export const showsGlyphs: Check = async (page, site, url = site) => {
   await assertGlyphs(page, url);
 };
 
+/** Every glyph button the page renders is at least 24 CSS px a side, at 390px and at 1600px, in
+ * the regular and the compact space profiles. */
+export const hasTargetSize: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertTargetSize(page, url);
+};
+
+/** At 390px, 1120px, and 1376px, the header's buttons share one line at its inline end, on the
+ * site nav's first line, and at 390px nothing scrolls sideways. */
+export const keepsHeaderRow: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertHeaderRow(page, url);
+};
+
 /** In a 390px viewport, nothing on the page scrolls sideways. */
 export const fitsNarrowWidth: Check = async (page, site, url = site) => {
   await page.goto(url);
@@ -873,7 +1032,7 @@ export const staysUnsaved: Check = async (page, site, url = site) => {
   await page.goto(url);
   const stored = `localStorage.getItem(${JSON.stringify(KEY)})`;
   assert.equal(await page.evaluate(stored), null, "nothing is stored before a choice");
-  await press(page, "t");
+  await press(page, "s");
   await until(page, MODAL);
   await press(page, "l");
   const chosen = await page.evaluate(`document.documentElement.getAttribute("data-palette")`);
@@ -955,7 +1114,7 @@ export const highlightsEachPalette: Check = async (page, site, url = site) => {
   await page.goto(url);
   const palettes: string[] = await page.evaluate(PALETTES);
   assert.ok(palettes.length > 0, `${url}: the registry lists a color profile`);
-  await press(page, "t");
+  await press(page, "s");
   await until(page, MODAL);
   const color: { values: string[]; checked: string } = await page.evaluate(row("color"));
   assert.deepEqual(color.values, palettes, "the menu's color row lists the registry's palettes");
@@ -1014,7 +1173,7 @@ export const highlightsEachPalette: Check = async (page, site, url = site) => {
 
 /** The shell checks, by the name a site's test gives each. */
 export const shell: Record<string, Check> = {
-  "the Theme button and T open the theme menu, its sheet adopted": opensThemeMenu,
+  "the Settings button and S open the theme menu, its sheet adopted": opensThemeMenu,
   "stepping each facet sets its attribute on the root": stepsEachFacet,
   "the page's one module script is render-blocking": blocksRender,
   "every custom element on the page is defined": definesEveryElement,
@@ -1027,6 +1186,9 @@ export const shell: Record<string, Check> = {
     opensKeysHelp,
   "each header button and the keys help's Close show their glyph and key hint, named, no word":
     showsGlyphs,
+  "every glyph button is at least 24px a side, in the regular and the compact space": hasTargetSize,
+  "the header's buttons share one line at its inline end, on its first line, at 390px and wider":
+    keepsHeaderRow,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
   "no navigation link breaks inside a word, and each docked column is 16rem or wider":
     keepsNavigationWords,
@@ -1143,6 +1305,8 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await assertUnderHeader(page, url);
     await assertKeysHelp(page, url);
     await assertGlyphs(page, url);
+    await assertTargetSize(page, url);
+    await assertHeaderRow(page, url);
     await wide(page);
     const name = data?.name;
     assert.equal(shown.title, typeof name === "string" ? name : shown.h1, `${url}'s title`);

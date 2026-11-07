@@ -5,7 +5,9 @@
  * layers, which the page entry declares first, so it wins over them. Every length is a --space-*
  * token, so the reader's Space profile changes it, but main's reading width, in ch, the side
  * columns' 16rem minimum, the two widths the layout changes at, a callout's rule, the
- * foundation's --line-m, and its icon, 1em, the size of its title's text.
+ * foundation's --line-m, and its icon, 1em, the size of its title's text. Only the Pages
+ * button's display sits outside the layer, after the components' glyph-button.css, which the page
+ * links before this sheet.
  *
  * The renderer (markdown-pages.ts) writes the section tree's div, when the page has one, then
  * main, then the site index in the Pages drawer, an sl-drawer. Each side column docks only where it
@@ -28,8 +30,9 @@
  * each table scrolls sideways in its region, so no page is wider than a 390px viewport. The marks
  * the components set on the light-DOM links, below a shadow sheet's reach, are painted here: the
  * section in view and the page on screen in a heavier weight. The shell's header holds the site
- * nav, then the Pages, Help, and Theme buttons, in a row, each button, and the keys help's Close,
- * its glyph and its key hint in a row of their own. A GitHub alert, as the renderer writes it
+ * nav, wrapping its links, and one group of glyph buttons at its inline end, Pages, Help, and
+ * Settings, on its first line at every width; the components' glyph-button.css lays out each
+ * button. A GitHub alert, as the renderer writes it
  * through marked-alert, is a callout: a rule at its start and its title, the kind's octicon and its
  * name, in its kind's color, the foundation's palette color GitHub gives it: note blue, tip green,
  * important purple, warning yellow, and caution red.
@@ -45,39 +48,27 @@
     padding-block: var(--space-s);
   }
 
-  /* The shell's header: the site nav at the start, the Pages, Help, and Theme buttons at the end,
-     in one row, wrapping when narrow. */
+  /* The shell's header: the site nav at the start, taking the rest of the row and wrapping its own
+     links, and the header-actions group at the end, never wrapping, so the group stays on the
+     header's first line at every width; the first baseline holds the group to the nav's first
+     line however many lines the nav wraps to. */
   body > header {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    align-items: baseline;
     gap: var(--space-s);
   }
 
   body > header > sl-site-nav {
-    margin-inline-end: auto;
+    flex: 1;
   }
 
-  /* Each of the shell's glyph buttons, the header's and the keys help's Close, is its glyph, a
-     block in the reset, and its key hint in a row, centered on the text's line, as the section
-     tree's buttons are. */
-  body > header > button,
-  dialog#help button[command="close"] {
-    display: inline-flex;
+  /* The header's buttons, Pages, Help, and Settings, one group in a row. Each is a glyph button,
+     which the components' glyph-button.css lays out. */
+  .header-actions {
+    display: flex;
+    flex: none;
     align-items: center;
     gap: var(--space-2xs);
-  }
-
-  /* The Pages button, shown only where the site index is the drawer and once the drawer is
-     defined, so with no script, or on a page with no drawer, it is never shown. */
-  .pages-opener {
-    display: none;
-  }
-
-  @media (width < 86rem) {
-    body:has(sl-drawer:defined) .pages-opener {
-      display: inline-flex;
-    }
   }
 
   /* Body text breaks a word too long for the column; the components' navigation never does. */
@@ -234,5 +225,19 @@
     inline-size: 1em;
     block-size: 1em;
     fill: currentColor;
+  }
+}
+
+/* The Pages button, shown only where the site index is the drawer and once the drawer is defined,
+   so with no script, or on a page with no drawer, it is never shown. Unlayered, after the
+   components' glyph-button.css, whose unlayered display: inline-flex would otherwise win over any
+   rule in the site layer. */
+.pages-opener {
+  display: none;
+}
+
+@media (width < 86rem) {
+  body:has(sl-drawer:defined) .pages-opener {
+    display: inline-flex;
   }
 }

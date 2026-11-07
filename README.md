@@ -215,7 +215,8 @@ every request still held under the base `site` names.
 
 The shell checks, each named in `shell`, assert these:
 
-- The Theme button and T open the theme menu, and its sheet is adopted.
+- The Settings button and S open the theme menu, and its sheet is adopted. Until the Settings
+  dialog holds the reader's settings, the shell's script opens the menu in its place.
 - Stepping each facet sets it on the root.
 - The page's one module script is render-blocking.
 - Every custom element on the page is defined, so a module the shell fails to load fails the check,
@@ -227,13 +228,18 @@ The shell checks, each named in `shell`, assert these:
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into the header, or into the section tree's bar between them, and no further below
   it than on a page taller than the viewport.
-- ? opens the shell's keys help dialog, which lists the page's bindings, P, ?, T, and the tree's H
+- ? opens the shell's keys help dialog, which lists the page's bindings, P, ?, S, and the tree's H
   and L. Its character-key switch turns them off, so L and P do nothing, and on again. Every header
   control that binds a key shows it in a `kbd`.
-- At 390px, each header button, Pages where the shell has one, Help, and Theme, and, with the keys
-  help open, its Close, shows one glyph, the icons layer's `list-unordered-16`, `question-16`,
-  `gear-16`, and `x-16`, its markup the icons module's own, and its key hint in a `kbd`, both
-  rendered, and no word, named by its `aria-label`: Pages, Help, Theme, and Close.
+- At 390px, each header button, Pages where the shell has one, Help, and Settings, and, with the
+  keys help open, its Close, shows one glyph, the icons layer's `list-unordered-16`,
+  `question-16`, `gear-16`, and `x-16`, its markup the icons module's own, and its key hint in a
+  `kbd`, both rendered, and no word, named by its `aria-label`: Pages, Help, Settings, and Close.
+- Every glyph button the page renders, its own and those in the components' shadow roots, is at
+  least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
+  space.
+- At 390px, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one line
+  at the header's inline end, on the site nav's first line, and at 390px nothing scrolls sideways.
 - Nothing scrolls sideways at 390px.
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
   word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
@@ -246,19 +252,20 @@ counted, the copied pages no link from the index reaches, and the hand pages it 
 file's page it reaches loads with a 2xx, its one module script render-blocking, every custom element
 on it defined, every request under the base and none failed, main at its centered reading width at
 1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
-under the header, and its keys help and its glyph buttons as the shell checks have them, and its
-title its source's front matter name or first h1. Its main opens with its page header, whose dt and
-dd pairs are the source's front matter keys and values, in order, with no front matter table left;
-its site index, in its Pages drawer, links every copied page the build writes, each once, and no
-hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by P,
-its `aria-expanded` following the drawer open and closed; and every in-site link reaches a built
-page, and its fragment's element. Since each page's index links every other, the crawl reaches every
-page from the index. It checks a page for every Markdown file `content.json` records, every tree's,
-crawling from one no link reaches once the links run out. A page it reaches that no record names is
-a hand page the site builds, as a root-style site's index is: it loads with a 2xx, every request
-under the base and none failed, its ids the targets of the fragments linking it, and its links
-followed, but the copied pages' checks are left to the shell checks, which the site runs on it by
-its URL; `Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
+under the header, its keys help, its glyph buttons and their size, and its header's row as the shell
+checks have them, and its title its source's front matter name or first h1. Its main opens with its
+page header, whose dt and dd pairs are the source's front matter keys and values, in order, with no
+front matter table left; its site index, in its Pages drawer, links every copied page the build
+writes, each once, and no hand page; its Pages button is hidden at 1600px and at 390px opens the
+drawer by its click and by P, its `aria-expanded` following the drawer open and closed; and every
+in-site link reaches a built page, and its fragment's element. Since each page's index links every
+other, the crawl reaches every page from the index. It checks a page for every Markdown file
+`content.json` records, every tree's, crawling from one no link reaches once the links run out. A
+page it reaches that no record names is a hand page the site builds, as a root-style site's index
+is: it loads with a 2xx, every request under the base and none failed, its ids the targets of the
+fragments linking it, and its links followed, but the copied pages' checks are left to the shell
+checks, which the site runs on it by its URL; `Crawled.hand` lists each, by its path under the base,
+in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -482,15 +489,18 @@ beside main's 80ch, measured in the foundation's default type and regular space 
 
 Main's track may shrink, main breaks long words while the components' navigation never breaks
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
-shell's header is a wrapping row of the site nav, then the Pages, Help, and Theme buttons, each
-button, and the keys help's Close, its glyph and its key hint in a row, centered on the line.
+shell's header is the site nav, taking the rest of the row and wrapping its own links, and one
+group of buttons at its inline end, `header-actions`, Pages, Help, and Settings, which never wraps
+and stays on the nav's first line at every width. Each button, and the keys help's Close, is a
+glyph button, laid out by the components' `glyph-button.css`, which the shell links between the
+foundation's entry and `site.css`.
 
 The shell wires the components in: it loads their five modules, `site-nav.js`, `site-index.js`,
 `page-header.js`, `section-tree.js`, and `drawer.js`, render-blocking like the foundation's, from
 `github:JaimeStill/spike-html-hosting-components#v0.4.0`; places `sl-site-nav`, which takes no
 content, at its header's start, with no `src`, so it lists the components' built `SITES`; and adds
-the Pages button beside the Theme button, as the components' README gives it. keys.js clicks the
-button on P, as it does Theme on T; `site.css` shows it only below 86rem, the drawer's dock, and
+the Pages button first in the header's group, as the components' README gives it. keys.js clicks the
+button on P, as it does Settings on S; `site.css` shows it only below 86rem, the drawer's dock, and
 only once the drawer is defined, so with no script it stays hidden and the index renders as the
 page's own; and the page's script opens the drawer on its click and keeps its `aria-expanded` in
 step with the drawer's `open` and `close` events. The drawer, open, is a modal: Escape or its Close
@@ -498,22 +508,30 @@ button closes it.
 
 A site's shell carries the keys help dialog, as the foundation's keys module gives it: a
 `dialog#help` holding a `[data-keys-list]`, which keys.js fills as it opens with every binding the
-page has, the Pages button's P, the Help button's ?, the Theme button's T, and the section tree's
-H and L, and with the reader's settings, among them the switch that turns the character keys off
-(WCAG 2.1.4). The Help button, between Pages and Theme, opens it by the invoker command
+page has, the Pages button's P, the Help button's ?, the Settings button's S, and the section
+tree's H and L, and with the reader's settings, among them the switch that turns the character keys
+off (WCAG 2.1.4). The Help button, between Pages and Settings, opens it by the invoker command
 `show-modal`, and keys.js clicks it on ?; ? or Escape closes it. The dialog names each binding by
 its element's `aria-label`, else by its text less each `kbd`. The SDK's template and fixture
 shells carry it; a site whose shell lacks it adds it.
 
-The Pages, Help, and Theme buttons, and the dialog's Close, each show a glyph and their key hint,
-a `kbd` alone, `aria-hidden`, and no word: each is named by its `aria-label`, Pages, Help, Theme,
-and Close, which the dialog lists. Each glyph is a marker that `markdownPages` fills at build from
-the icons layer, as the components' README gives the shell: Octicons' `list-unordered-16` for
-Pages, `question-16` for Help, `gear-16` for Theme, and `x-16` for Close. A site pins the
+The Settings button, under S, sends `show-modal` to `dialog#settings`; until that dialog holds the
+reader's settings, the shell's script cancels the command and opens the theme menu in its place.
+
+The Pages, Help, and Settings buttons, and the dialog's Close, each of the class `glyph-button`,
+show a glyph and their key hint, a `kbd` alone, `aria-hidden`, and no word: each is named by its
+`aria-label`, Pages, Help, Settings, and Close, which the dialog lists, and shows that name in its
+interest hint, a `glyph-hint` popover its `interestfor` names. Each glyph is a marker that
+`markdownPages` fills at build from the icons layer, as the components' README gives the shell:
+Octicons' `list-unordered-16` for Pages, `question-16` for Help, `gear-16` for Settings, and
+`x-16` for Close. A site pins the
 icons layer, which the components and the SDK both peer, at `v0.1.0`; a marker the build can't
 fill fails it.
 
 ```html
+<link rel="stylesheet" href="@jaimestill/spike-html-apps-foundation/page-full.css" />
+<link rel="stylesheet" href="@jaimestill/spike-html-hosting-components/glyph-button.css" />
+<link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
@@ -527,40 +545,83 @@ fill fails it.
   drawer.addEventListener("open", expanded);
   drawer.addEventListener("close", expanded);
 </script>
+<script type="module" blocking="render">
+  const menu = document.querySelector("sl-theme-menu#theme");
+  document.querySelector("dialog#settings").addEventListener("command", (event) => {
+    event.preventDefault();
+    menu.show();
+  });
+</script>
 …
 <header>
   <sl-site-nav></sl-site-nav>
-  <button
-    type="button"
-    class="pages-opener"
-    aria-controls="pages"
-    aria-haspopup="dialog"
-    aria-expanded="false"
-    aria-label="Pages"
-    data-keys="p"
-  >
-    <svg data-icon="octicon/list-unordered-16"></svg>
-    <span aria-hidden="true"><kbd>P</kbd></span>
-  </button>
-  <button type="button" commandfor="help" command="show-modal" aria-label="Help" data-keys="?">
-    <svg data-icon="octicon/question-16"></svg>
-    <span aria-hidden="true"><kbd>?</kbd></span>
-  </button>
-  <button type="button" commandfor="theme" command="--open" aria-label="Theme" data-keys="t">
-    <svg data-icon="octicon/gear-16"></svg>
-    <span aria-hidden="true"><kbd>T</kbd></span>
-  </button>
+  <div class="header-actions">
+    <button
+      type="button"
+      class="glyph-button pages-opener"
+      aria-controls="pages"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-label="Pages"
+      data-keys="p"
+      interestfor="pages-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/list-unordered-16"></svg>
+      <span aria-hidden="true"><kbd>P</kbd></span>
+    </button>
+    <div id="pages-hint" class="glyph-hint" popover="hint" aria-hidden="true">Pages</div>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="help"
+      command="show-modal"
+      aria-label="Help"
+      data-keys="?"
+      interestfor="help-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/question-16"></svg>
+      <span aria-hidden="true"><kbd>?</kbd></span>
+    </button>
+    <div id="help-hint" class="glyph-hint" popover="hint" aria-hidden="true">Help</div>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="settings"
+      command="show-modal"
+      aria-label="Settings"
+      data-keys="s"
+      interestfor="settings-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/gear-16"></svg>
+      <span aria-hidden="true"><kbd>S</kbd></span>
+    </button>
+    <div id="settings-hint" class="glyph-hint" popover="hint" aria-hidden="true">Settings</div>
+  </div>
 </header>
 <main></main>
 <sl-theme-menu id="theme"></sl-theme-menu>
+<dialog id="settings" aria-label="Settings"></dialog>
 <dialog id="help" aria-labelledby="help-title">
   <h2 id="help-title">Keyboard shortcuts</h2>
   <div data-keys-list></div>
   <footer>
-    <button type="button" commandfor="help" command="close" aria-label="Close" data-keys="?">
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="help"
+      command="close"
+      aria-label="Close"
+      data-keys="?"
+      interestfor="help-close-hint"
+      aria-description=""
+    >
       <svg data-icon="octicon/x-16"></svg>
       <span aria-hidden="true"><kbd>?</kbd></span>
     </button>
+    <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
   </footer>
 </dialog>
 ```
@@ -712,10 +773,12 @@ exports alone:
   exists, so the site holds its copy.
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`, the
   shell, with the foundation's full page entry, its preferences and keys modules, the components'
-  five modules, `sl-site-nav`, the Pages button on P, the Help button on ?, and the Theme button on
-  T in the header, each showing its glyph and its key hint, named by its `aria-label`, the keys help
-  dialog, its Close showing its glyph, the script that opens the Pages drawer, and the SDK's
-  stylesheet; the sample copied tree, `content/` and `content.json`.
+  five modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
+  the Help button on ?, and the Settings button on S, each a glyph button showing its glyph and its
+  key hint, named by its `aria-label` and its interest hint, the keys help dialog, its Close showing
+  its glyph, the scripts that open the Pages drawer and, until `dialog#settings` holds the reader's
+  settings, the theme menu, and the components' `glyph-button.css` and the SDK's stylesheet; the
+  sample copied tree, `content/` and `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.

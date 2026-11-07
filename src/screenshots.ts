@@ -5,7 +5,7 @@
 // describes each page captured whole, in tiles, at 390px, 1120px, and 1376px, a phone's width and
 // the layout's two docks, and the index also with Help open, opened by the Help button's click and
 // ready once the keys module has filled its dialog, and with its theme menu open, opened by the
-// Theme button's click and ready once the menu's dialog is open, each at the three widths. A page's
+// Settings button's click and ready once the menu's dialog is open, each at the three widths. A page's
 // name is its built path without .html, a directory's index its directory: index.html is --page
 // index, a/index.html --page a, and a/b.html --page a/b; a state's name, which names its files,
 // holds its width and turns the name's slashes to dashes. A page's path is its absolute
@@ -73,11 +73,11 @@ const openHelp: Step = async (page) => {
 };
 
 /**
- * Opens the theme menu: the Theme button's command="--open", as a click sends it to
- * <sl-theme-menu>.
+ * Opens the theme menu: the Settings button's click, whose show-modal the shell's script turns into
+ * the menu's open until dialog#settings holds the reader's settings.
  */
 const openThemeMenu: Step = async (page) => {
-  await page.evaluate(`document.querySelector("button[commandfor=theme]").click()`);
+  await page.evaluate(`document.querySelector("header button[commandfor=settings]").click()`);
   await until(page, `document.querySelector("sl-theme-menu dialog")?.open`);
 };
 

@@ -6,7 +6,36 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+### Added
+
+- `./browser.js`'s `hasTargetSize`, a shell check, which the crawl runs on every copied page too:
+  every glyph button the page renders, its own and those in the components' shadow roots, is at
+  least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
+  space. A smaller one fails it, naming the page, the width, the space, and the button.
+- `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 1120px,
+  and 1376px the header's `header-actions` group holds its rendered buttons on one line, at the
+  header's inline end and on the site nav's first line, and at 390px nothing scrolls sideways.
+
 ### Changed
+
+- The template's header is the site nav and one group of buttons at its inline end,
+  `<div class="header-actions">`: Pages under P, Help under ?, and Settings under S, Octicons'
+  `gear-16`, in place of Theme under T. Each, and the keys help's Close, is a glyph button of the
+  class `glyph-button`, with an empty `aria-description` and an interest hint, a `glyph-hint`
+  popover holding its name, as spike-html-hosting-components' README gives the header. The
+  Settings button sends `show-modal` to `dialog#settings`; until that dialog holds the reader's
+  settings, the shell's script cancels the command and opens the theme menu in its place. The
+  shell links the components' `glyph-button.css` between the foundation's entry and `site.css`.
+  A site takes the template's header again, or the shell checks fail on it.
+- `site.css` lays the header out as the nav, taking the rest of the row and wrapping its own
+  links, and the `header-actions` group, which never wraps and stays on the nav's first line at
+  every width. It drops its own row for the shell's buttons, which `glyph-button.css` lays out,
+  and its Pages button rules sit outside its layer, after `glyph-button.css`, whose unlayered
+  `display` would otherwise win.
+- The shell checks and the crawl expect Settings under S where they expected Theme under T: the
+  theme menu checks open the menu by the Settings button and S, the keys help lists S Settings,
+  and the glyph check names the Settings button. The screenshots' theme menu state opens the menu
+  by the Settings button's click.
 
 - `./screenshots.js`'s `description` captures every page whole at 390x844, 1120x700, and
   1376x860, a phone's width and the layout's two docks, 70rem and 86rem, in place of 1280x800 and
