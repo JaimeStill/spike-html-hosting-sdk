@@ -5,7 +5,7 @@ It holds what a GitHub Pages site consumes by tag: the template a site starts fr
 builds and tests with, the currency bin it runs, and the reusable workflows it calls.
 
 Each release is a `vX.Y.Z` tag, cut by the release workflow when a version lands on main, whose
-tree is the package as `pnpm pack` makes it, its build included. The first is v0.1.0.
+tree is the package as `pnpm pack` makes it, its build included.
 
 ## A new site
 
@@ -13,20 +13,21 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.1.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.1.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
 Pages base is `/<repo>/`, pins the SDK and calls the reusable workflows at the tag it ran from,
 marks each file with the release it came from, and writes `pnpm-lock.yaml` with
 `pnpm install --lockfile-only`, which reads the network. It never runs `git init`. Then, in the
-site, `mise run install` and `mise run check`.
+site, `git init`, since the check's actionlint finds the workflows from the repository's root,
+then `mise run install` and `mise run check`.
 
 The new site's `content/` holds a sample copied tree, this README at a commit of this
 repository, recorded in `content.json`; replace both with the tree the site publishes, each
@@ -35,14 +36,23 @@ any file the pages link that the site doesn't copy.
 
 ## Install
 
-A site made by hand installs the package from its tag, beside its peers, each pinned exactly:
+A site made by hand installs the package from its tag, beside its peers and the components its
+shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.1.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
+  github:JaimeStill/spike-html-hosting-components#v0.5.0 \
+  github:JaimeStill/spike-html-hosting-icons#v0.1.0 \
   vite eslint
 ```
+
+spike-html-hosting-components is no peer of the package, whose modules import none of it: the
+pages' markup is written for its elements, and the shell loads them, as the pages below describe.
+The components peer the icons layer, spike-html-hosting-icons, as the SDK does, so a site pins it
+beside them: it isn't on the npm registry, so a site that leaves it out fails its install, or,
+with `autoInstallPeers` off, its build.
 
 ## The package
 
@@ -52,24 +62,26 @@ site reads as they are, each through package.json's `exports`:
 | Export | What it is |
 | --- | --- |
 | `./css-module-scripts.js` | `cssModuleScripts()`, the Vite plugin that rewrites each CSS module script the foundation's modules hold to a constructed `CSSStyleSheet` |
-| `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking |
-| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders a copied Markdown tree into pages, and its renderer |
+| `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking, each page running only its own scripts |
+| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders one copied Markdown tree, or several, into pages, its fenced code highlighted and its GitHub alerts callouts, and fills every page's glyph markers, `<svg data-icon="<set>/<name>"></svg>`, with the icons layer's svgs, with `Options` and `TreeOptions`, a tree's source; its renderer, `render()`; the markup it writes, `frontMatterMeta`, the front matter as head meta, `pager`, a page's links to its neighbours, with `pagerLabels`, the two pagers' names, and, for the components, `sectionTree` and `siteIndex`, with `frontMatterText`, a front matter value's text; `indexOrder`, the site index's order, which the pager steps through; and `docks`, the widths the layout docks the side columns from |
+| `./syntax.js` | `SyntaxTheme`, a palette's syntax theme; `builtinSyntax`, one for each of the foundation's palettes; `checkSyntax(theme)`, the syntax theme check; and `createSyntax(themes, langs)`, the highlighter the plugin makes |
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
-| `./content.js` | `checkContent(root)`, the content check, and `blob(bytes)`, git's blob hash |
+| `./content.js` | `checkContent(root)`, the content check; `Content`, content.json's record, one `Tree` or `{ trees: Tree[] }`; `treeDir(repository)`, a tree's directory; `copiedFiles(root)`, every copied file's path under `content/`; and `blob(bytes)`, git's blob hash |
 | `./served.js` | `served(root)`, Vite's preview of a site's build under its `/<repo>/` base; `base(root)`, that base from package.json's name; and `command(root, name)`, an installed command's path |
-| `./browser.js` | the browser checks, each a `Check`, `(page, site) => Promise<void>`: `shell`, the shell checks by name, each exported too, and `crawl(page, site, root)`, the Markdown crawl |
-| `./screenshots.js` | `description({ root, pages })`, the capture file's description; `contentPages(root)`, a Markdown site's pages from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
+| `./browser.js` | the browser checks, each a `Check`, `(page, site, url?) => Promise<void>`: `shell`, the shell checks by name, each exported too, among them `fitsNarrowWidth`, `definesEveryElement`, `keepsNavigationWords`, `holdsBetweenDocks`, `startsUnderHeader`, `opensKeysHelp`, and `showsGlyphs`; `highlightsEachPalette`, the palette check; and `crawl(page, site, root)`, the Markdown crawl, resolving to its `Crawled` |
+| `./screenshots.js` | `description({ root, pages })`, the capture file's description, and `WIDTHS`, the widths it captures at; `contentPages(root)`, a Markdown site's copied pages, every tree's, from content.json; and `capture`, `leavesNoCapture`, and `keepsCaptures`, the capture run the browser tier makes once |
 | `./tsconfig.json` | the tsconfig base a site's tsconfig.json and tsconfig.test.json extend |
 | `./prettier.json` | the Prettier configuration |
 | `./site.css` | the site stylesheet, its `site` layer |
 
-Its peers are vite, eslint, and, at their `github:` tags, spike-html-apps-foundation and
-spike-html-apps-tooling, which a site installs; its own dependencies are exact pins, among them
-vite-plugin-standard-css-modules, which `cssModuleScripts()` configures, and rolldown, whose
-`rolldown/utils` the plugin parses with and doesn't declare. A site declares neither: the plugin
-finds rolldown through pnpm's default hoist, `node_modules/.pnpm/node_modules`, so a site that
-turns the hoist off declares rolldown itself, at the version Vite resolves. Beside the build the
-package carries its template, its bins, and its reusable workflows:
+Its peers are vite, eslint, and, at their `github:` tags, spike-html-apps-foundation,
+spike-html-apps-tooling, and spike-html-hosting-icons, the icons layer, which a site installs; its
+own dependencies are exact pins, among them vite-plugin-standard-css-modules, which
+`cssModuleScripts()` configures, and rolldown, whose `rolldown/utils` the plugin parses with and
+doesn't declare. A site declares neither: the plugin finds rolldown through pnpm's default hoist,
+`node_modules/.pnpm/node_modules`, so a site that turns the hoist off declares rolldown itself, at
+the version Vite resolves. Beside the build the package carries its template, its bins, and its
+reusable workflows:
 
 | File | What it is |
 | --- | --- |
@@ -104,12 +116,34 @@ export default defineConfig({
 });
 ```
 
-`cssModuleScripts` parses the foundation's modules under `node_modules/@jaimestill/` and makes
-each sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone
-doesn't support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one
-empty `<main></main>`, with each Markdown file under `dir`, and fails the build on a relative
-link it can't place; `external` lists files the source holds that aren't copied.
-`renderBlocking` fails the build on a page with no entry script, or more than one.
+`cssModuleScripts` parses the foundation's modules under `node_modules/@jaimestill/` and makes each
+sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone doesn't
+support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one empty
+`<main></main>`, with each Markdown file under `dir`, and fails the build on a relative link it
+can't place; `external` lists files the source holds that aren't copied. It writes each page's front
+matter meta, section tree, and site index, as the pages below describe, and highlights each fenced
+block at build, as the syntax themes below describe. `renderBlocking` builds every module a page's
+entry loads statically into one chunk, `index`, so each page keeps one entry tag however rolldown
+would split the modules every page shares, and fails the build on a page with no entry script, or
+more than one; a module loaded only by a dynamic import, as the theme menu is, keeps a chunk of its
+own. Since one chunk holds every page's modules, it keeps rolldown's `output.strictExecutionOrder`:
+each module's body is wrapped and runs only where a page's entry imports it, so each page runs only
+its own scripts, and a hand page beside the rendered pages never runs the shell's drawer wiring. A
+page loads three JS files, its entry, the shared `index` chunk, and rolldown's runtime, the last two
+statically from the entry, so they block render as its one render-blocking tag does.
+
+`markdownPages` also fills every glyph marker, an empty `<svg data-icon="<set>/<name>"></svg>`,
+in every page the build writes, the rendered pages' shell and a site's hand pages alike, with that
+icon's `svg` from spike-html-hosting-icons, resolved from the site's root, so a site wires nothing
+beyond the plugin. The page gains the icon's markup and no script. A `class` on the marker carries
+onto the `svg`, and any other attribute is dropped; a name that isn't `<set>/<name>`, or that the
+icons layer doesn't resolve, fails the build, naming the page and the icon, and an `svg` holding
+`data-icon` that isn't a marker, self-closed, unquoted, or not empty, fails it, naming the page and
+its tag. A comment's text is neither filled nor checked:
+
+```html
+<svg data-icon="octicon/question-16"></svg>
+```
 
 A site's `eslint.config.js` spreads the configuration, which lints the site's code under the
 config's directory and runs the leftover check, no CSS module script left in the build, over
@@ -173,15 +207,105 @@ for (const [name, check] of Object.entries(shell)) {
 }
 ```
 
-The shell checks are the theme menu opened by the Theme button and by T, with its sheet adopted;
-each facet stepped and set on the root; the one render-blocking module script; every request
-under the base, and none failed; main's centered reading width at 1600px; and the menu left
-unsaved. A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves
-to the pages and links it reached and the pages no link reaches.
+A check runs on the site's index, `site`, unless its third argument, `url`, a URL under `site`,
+names another page:
+`` check(page, server.origin, `${server.origin}briefs/orientation.html`) `` runs it on that page,
+every request still held under the base `site` names.
+
+The shell checks, each named in `shell`, assert these:
+
+- The Settings button and S open the Settings dialog, whose `sl-settings` renders with its
+  sheets adopted, the foundation's `theme-menu.css` among them, and no stylesheet fetched; Escape
+  closes it.
+- Stepping each facet in the settings sets it on the root, with no Save.
+- The page's one module script is render-blocking.
+- Every custom element on the page is defined, so a module the shell fails to load fails the check,
+  which names its element's tag.
+- Every request, with Settings and Help opened, resolves under the base, and none fails; the
+  foundation's `theme-menu.js` and `keys-help.js`, which `sl-settings` and `sl-shortcuts` stand in
+  for, are never requested.
+- Main holds its centered reading width at 1600px.
+- At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
+  beside it on a page with one.
+- A page's section tree is in its Contents drawer, `sl-drawer#contents` labeled "Contents" and
+  docked from 70rem, the tree with no `dock` of its own; a page with no tree has no such drawer. At
+  70rem and at 1600px the drawer is docked, the tree a column beside main, where J marks and moves
+  to the first section and K back to the page's top, and the header's Contents button is hidden.
+  At 390px and a pixel under 70rem the drawer is closed and the tree hidden; the Contents button,
+  shown, opens it as a modal by its click and by C, its `aria-expanded` true while it is open and
+  false once Escape closes it; opened by its `show()`, it closes as a link in it is followed, and
+  the link's section is marked. A page with no tree shows no Contents button.
+- At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
+  page: never into it, and no further below it than on a page taller than the viewport.
+- A pixel under 70rem, below both docks, ? opens Help, its Close focused, whose `sl-shortcuts`
+  lists exactly the page's bindings, as the foundation's keys module holds them, the shell's P, C
+  where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
+  page has a pager, H and L once each, named by the top pager's links' text, `Previous <title>`
+  and `Next <title>`, and neither where it has none; Escape closes it. The character-key
+  switch in Settings turns them off, so J, P, C, H, and L do nothing, and on again. Every header
+  control that binds a key shows it in a `kbd`.
+- Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
+  components' shortcut dialog pattern: it is named by a heading inside it through
+  `aria-labelledby`, and has a Close, a glyph button with `command="close"` for it showing
+  `<kbd>Esc</kbd>`, the heading and the Close in its header row, a `header.dialog-header`, never a
+  trailing Close; its opener shows its key in a `kbd`, has a name, its `aria-label`, and an
+  interest hint holding that name. It fails naming each dialog and what it lacks.
+- At 390px, each header button, Pages and Contents where the shell has them, Help, and Settings,
+  and, with each shortcut dialog open, its Close, shows one glyph, the icons layer's
+  `list-unordered-16`, `list-ordered-16`, `question-16`, `gear-16`, and `x-16`, its markup the
+  icons module's own, and its key hint in a `kbd`, Esc for a Close, both rendered, and no word,
+  named by its `aria-label`: Pages, Contents, Help, Settings, and Close.
+- Every glyph button the page renders, its own and those in the components' shadow roots, is at
+  least 24 CSS px a side (WCAG 2.5.8), at each capture width, 390px, 1120px, and 1376px, in every
+  space and every type profile the foundation's registry lists, each space with each type, the
+  Contents button at 390px on a page with a Contents drawer, and with each shortcut dialog open,
+  its own, its Close among them.
+- At 390px, 40rem, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one
+  line. At 390px, below 40rem, the site nav keeps its links on one line and the group is on its own
+  row below it, its inline start within a pixel of the nav's; from 40rem the group is on the site
+  nav's first line, at the header's inline end.
+- Nothing scrolls sideways at 390px.
+- At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
+  word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
+  column is at least 16rem wide.
+- A change in the settings is stored at once, kept as the dialog closes, and applied after a
+  reload.
+
+A check that changes the reader's stored theme or keys settings removes them after, so the checks
+run in any order.
+
+A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which resolves to a
+`Crawled`, `{ pages, links, unreachable, hand }`: the pages it reached and the in-site links it
+counted, the copied pages no link from the index reaches, and the hand pages it reached. Each copied
+file's page it reaches loads with a 2xx, its one module script render-blocking, every custom element
+on it defined, every request under the base and none failed, main at its centered reading width at
+1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
+under the header, its section tree in its Contents drawer, its Help and the switch in Settings, its
+shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks have
+them, and its title its source's front matter name or first h1. Its head holds a `<meta name="<key>"
+content="<value>">` per front matter key, in order, the value as `frontMatterText` gives it, with no
+page header, front matter table, or visible list of its keys left, and no `key: value` line in its
+text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
+no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
+P, its `aria-expanded` following the drawer open and closed; its two pagers, at main's top and foot,
+each named, link the pages before and after it in its site index's order, none past either end, each
+link its arrow, its word, the page's title, its key hint, and its binding, H or L; at 390px each
+link only its arrow and word, its title and key hint not visible, its name still `<word> <title>`;
+and each link followed, and H and L pressed at 390px, lands on its page; and every in-site link
+reaches a built page, and its fragment's element. Since each page's index links every other, the
+crawl reaches every page from the index. It checks a page for every Markdown file `content.json`
+records, every tree's, crawling from one no link reaches once the links run out. A page it reaches
+that no record names is a hand page the site builds, as a root-style site's index is: it loads with
+a 2xx, every request under the base and none failed, it has no pager and binds neither H nor L, its
+ids the targets of the fragments linking it, and its links followed, but the copied pages' checks
+are left to the shell checks, which the site runs on it by its URL; `Crawled.hand` lists each, by
+its path under the base, in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
-absolute URL path under the base, and its name its built path without `.html`:
+absolute URL path under the base, and its name its built path without `.html`. It captures each
+page whole at `WIDTHS`, 390x844, 1120x700, and 1376x860, in light and dark, and the index also
+with Help open and with Settings open at each width:
 
 ```ts
 import { contentPages, description } from "@jaimestill/spike-html-hosting-sdk/screenshots.js";
@@ -212,6 +336,490 @@ typescript-eslint's peer range accepts, and exits 1; with everything current it 
 and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
 repository's highest plain `vX.Y.Z` tag.
+
+### Several copied trees
+
+A site may copy several trees into one, each from its own repository at its own commit.
+`content.json` records them as `{ trees: [...] }`, each tree a record as a single-source
+`content.json` is one, its `files` keyed by their paths in its source:
+
+```json
+{
+  "trees": [
+    {
+      "repository": ".github",
+      "url": "https://github.com/JaimeStill/.github",
+      "commit": "<full commit>",
+      "files": { "profile/README.md": "<blob hash>" }
+    },
+    {
+      "repository": "org",
+      "url": "https://github.com/JaimeStill/org",
+      "commit": "<full commit>",
+      "files": { "briefs/orientation.md": "<blob hash>" }
+    }
+  ]
+}
+```
+
+Each tree's files sit under `content/` in its directory, `treeDir(repository)`: the repository's
+name with a leading dot dropped, so `.github`'s are under `content/github/`, a directory the base
+never hides, and `org`'s under `content/org/`. A file's path under `content/` is its page's path
+under the base, so `content/github/profile/README.md`, recorded as `profile/README.md`, builds to
+`github/profile/`, and `content/org/briefs/orientation.md` to `org/briefs/orientation.html`.
+`checkContent` holds each tree to its record, naming the tree in what it finds, and fails on a file
+under `content/` no tree records and on two trees that share a directory. A single-source record,
+as the template's, is still valid: its one tree sits at `content/`'s root, and its messages are
+what they were.
+
+`markdownPages` takes the trees in `trees`, each a `TreeOptions`, `{ repository, ref, external }`,
+in place of one tree's source, each tree's directory `treeDir` of its repository URL's last
+segment, as `content.json` places it:
+
+```ts
+markdownPages({
+  dir: "content",
+  trees: content.trees.map(({ url, commit }) => ({ repository: url, ref: commit })),
+});
+```
+
+The trees are one site: one site index lists every tree's pages, and each page's links are placed
+against its own tree's source, its `external` that tree's, so a relative link that leaves its tree
+fails the build. `contentPages(root)`, `copiedFiles(root)`, and the crawl read every tree's pages.
+
+### A root-style site
+
+A site whose index is a page written by hand, as an org's root site is, beside the rendered pages
+of its copied trees, names another file as the shell its rendered pages fill, with `shell`, and
+lists its hand pages as build inputs, absolute paths in an array: Vite builds `index.html` only
+when no input is given, and the plugin gives its pages, with which a site's own inputs
+concatenate. The build fails on a hand input at a copied file's page, which the two would each
+write. As the SDK's trees fixture, `test/fixtures/trees/vite.config.ts`, has it:
+
+```ts
+export default defineConfig({
+  base: base(root),
+  appType: "mpa",
+  plugins: [
+    cssModuleScripts(),
+    markdownPages({
+      dir: "content",
+      trees: content.trees.map(({ url, commit, repository }) => ({
+        repository: url,
+        ref: commit,
+        external: repository === "org" ? ["LICENSE"] : [],
+      })),
+      shell: "page.html",
+    }),
+    renderBlocking(),
+  ],
+  build: {
+    rolldownOptions: { input: [`${root}index.html`, `${root}briefs/orientation.html`] },
+  },
+});
+```
+
+A hand page loads what it uses, `renderBlocking` keeping each page to its own scripts; the
+fixture's index carries the shell's header and its Help and Settings dialogs, but no Pages button
+or drawer, since it has no site index. The site's browser tier runs the shell checks on each hand
+page by its URL, and on a rendered page, and the crawl tolerates the hand pages it reaches:
+
+```ts
+for (const path of ["", "briefs/orientation.html", "org/briefs/orientation.html"]) {
+  for (const [name, check] of Object.entries(shell)) {
+    test(`${name} on ${path || "the index"}`, async () => {
+      const page = await browser.open("about:blank");
+      await check(page, server.origin, `${server.origin}${path}`).finally(() => page.close());
+    });
+  }
+}
+```
+
+### The pages
+
+`markdownPages` writes each page's front matter into its head, and its navigation as the light-DOM
+markup of spike-html-hosting-components' elements, so with no script the page renders it as its
+own, and each element, once its module defines it, styles and marks it. The front matter's meta
+follows the title; main holds the body between its two pagers; then come the section tree in the
+Contents drawer and the site index in the Pages drawer:
+
+```html
+<title>A page</title>
+<meta name="name" content="A page" />
+<meta name="tags" content="one, two" />
+…
+<main>
+<nav class="pager" aria-label="Previous and next page"><a class="pager-prev" href="./" rel="prev" data-keys="h"><svg data-icon="octicon/arrow-left-16"></svg><span class="pager-text"><span class="pager-word">Previous</span> <span class="pager-title">The site</span></span><span class="pager-key" aria-hidden="true"><kbd>H</kbd></span></a><a class="pager-next" …>…</a></nav>
+<h1 id="a-page">A page</h1>
+…
+<nav class="pager" aria-label="Previous and next page, end of page">…</nav>
+</main>
+<sl-drawer id="contents" label="Contents" dock="70rem"><sl-section-tree><ul><li><a href="#usage">Usage</a><ul><li><a href="#options">Options</a></li></ul></li></ul></sl-section-tree></sl-drawer>
+<sl-drawer class="site-index" label="Pages" id="pages" dock="86rem"><sl-site-index><ul><li><a href="./">The site</a></li><li><a href="guide/">Guide</a><ul>…</ul></li></ul></sl-site-index></sl-drawer>
+```
+
+- The front matter is a `meta` per key, named by the key as the source writes it, in source
+  order, its `content` the value, both escaped; a sequence's value is its items joined by ", ", a
+  mapping's its `key: value` pairs, as `frontMatterText` gives them. Nothing of it shows on the
+  page. A page with no front matter has no such meta. A key naming a meta the shell already
+  writes, as `viewport`, in any case, would give the page two, so it fails the build, naming the
+  file and the key.
+- `sl-section-tree` slots a list of the page's h2s, each linking the id its heading carries,
+  percent-encoded, with its h3s in a nested list; an h3 before any h2 stands at the top level, and
+  a label is the heading's plain text. It sits in `sl-drawer`, labeled "Contents", its id
+  `contents`, which the header's Contents button controls. A page with no h2 or h3 has no tree
+  and no Contents drawer. Both drawers come after main, so a keyboard reaches the body first.
+- `sl-site-index` slots a list of every copied page the build writes, nested by directory: the
+  root's index page first, then each page by its title, and each directory by its index page's link,
+  or a span of its name when it has none, over a nested list of its pages and directories, by name.
+  Each link is relative to the page, as its body's are, so it resolves under any base. It sits in
+  `sl-drawer`, labeled "Pages", its id `pages`, which the shell's Pages button controls.
+- Each pager is a `nav`, the top one named "Previous and next page" and the bottom one "Previous
+  and next page, end of page", so a landmark list tells them apart. It links the pages before and
+  after the page in the site index's order, the order its links read top to bottom, which
+  `indexOrder` gives both: the first page has no Previous, the last no Next, and nothing wraps; the
+  only page has no pager. Each link shows its arrow, `arrow-left-16` or `arrow-right-16`, filled at
+  build, on its outer side, its word, the page's title, and its key hint, and binds H or L by
+  `data-keys`, so keys.js clicks it. It has no `aria-label`: its name is the text it shows,
+  `Previous <title>` or `Next <title>`, the arrow and the hint `aria-hidden`, so the name holds
+  the visible label (WCAG 2.5.3, Label in Name), and Help lists it by that text. Both pagers bind
+  the same keys: keys.js fires and lists the first in document order, the top one's, once. A hand
+  page has no pager. `site.css` draws it as a quiet row of plain links, Previous at the inline
+  start and Next at the inline end, each title in the secondary text color wrapping in its half of
+  the row. Below 40rem it is compact, each link only its arrow and word, "← Previous" and
+  "Next →": the title is visually hidden but stays in the link's name, which still starts with the
+  word it shows, and the key hint, `.pager-key`, is not rendered.
+
+Each drawer's `dock` is the layout's, `docks` exported: `docks.tree`, 70rem, and `docks.index`,
+86rem. The renderer writes no `aria-current`: the components mark the section in view and the page
+on screen at runtime; the section tree paints its own mark, and `site.css` paints the page's in a
+heavier weight. `render()` returns the page's `headings`, its h2s and h3s, beside its front
+matter, title, and HTML.
+
+Each body table is wrapped in a named, focusable region, which scrolls the table sideways in a
+viewport narrower than it, as a highlighted code block's pre does:
+
+```html
+<div class="table-region" role="region" aria-label="Table: Name, Value" tabindex="0">
+<table>…</table>
+</div>
+```
+
+Its name is "Table: " and its header cells' text, joined by ", ", or "Table" when they are empty,
+since a GFM table has no caption.
+
+A GitHub alert, a blockquote opening `[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, or
+`[!CAUTION]`, renders as marked-alert 2.1.2 renders it, as GitHub does: a div of its kind, its
+first line a title of the kind's octicon and its kind as visible text, and a link inside it placed
+as any other. Each octicon is the icons layer's, through marked-alert's `variants`: `info-16` for a
+note, `light-bulb-16` for a tip, `report-16` for important, `alert-16` for a warning, and `stop-16`
+for caution, each `aria-hidden` and `focusable="false"`:
+
+```html
+<div class="markdown-alert markdown-alert-important">
+<p class="markdown-alert-title"><svg … aria-hidden="true" focusable="false">…</svg>Important</p>
+<p>…</p>
+</div>
+```
+
+`site.css` draws it as a callout from the foundation's tokens: a `--line-m` rule at its start and
+its title, the octicon sized to the text, in its kind's palette color as GitHub maps the kinds,
+note `--blue`, tip `--green`, important `--purple`, warning `--yellow`, and caution `--red`; its
+body keeps the page's text color.
+
+`site.css` lays a page out at the two docks, each where its columns fit at their 16rem minimum
+beside main's 80ch, measured in the foundation's default type and regular space with a scrollbar
+(about 69.3rem and 85.3rem), so no side column is cramped and no navigation link's word breaks:
+
+- 86rem and wider, three columns, `minmax(16rem, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the
+  header across them, the Pages drawer docked in the start column, a framed column headed Pages,
+  main's reading width in the middle, centered with or without a tree, and the Contents drawer
+  docked in the end column, a framed column headed Contents; each drawer stays in view as the page
+  scrolls, its body scrolling under its heading when taller than the viewport.
+- 70rem to 86rem, on a page with no section tree, `minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr)`:
+  main centered between equal columns. On a page with one, `body:has(> #contents)`, only the end
+  column is held to 16rem, `minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the Contents
+  drawer docked in the end column and main as near centered as fits. Either way the Pages drawer is
+  a modal dialog the Pages button opens.
+- Narrower than 70rem, one column: both drawers are closed modals, taking no space in the page.
+
+Following a link in either drawer closes it, by the shell's script, so the link's navigation and
+its scroll land on the page the drawer covered; the drawer leaves that to the page.
+
+Main's track may shrink, main breaks long words while the components' navigation never breaks
+inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
+shell's header is the site nav and one group of buttons, `header-actions`, Pages, Contents, Help,
+and Settings, which never wraps. From 40rem it is one row, the nav taking the rest of the row and
+wrapping its own links, the group on the nav's first line at its inline end; below 40rem it is
+two, the nav on a row of its own, its links on one line, and the group on the next row, at its
+inline start, aligned with the nav. Each button, and each shortcut dialog's Close, is a glyph
+button, laid out by the components' `glyph-button.css`, which the shell links between the
+foundation's entry and `site.css`.
+
+The shell wires the components in: it loads their six modules, `site-nav.js`, `site-index.js`,
+`section-tree.js`, `drawer.js`, `shortcuts.js`, and `settings.js`, render-blocking like the
+foundation's, from `github:JaimeStill/spike-html-hosting-components`, at a release that holds
+`sl-shortcuts` and `sl-settings`; places `sl-site-nav`, which takes no content, at its header's
+start, with no `src`, so it lists the components' built `SITES`; and adds the Pages and Contents
+buttons first in the header's group, as the components' README gives them. keys.js clicks Pages on
+P and Contents on C, as it does Settings on S; `site.css` shows each only below its drawer's dock,
+86rem for Pages and 70rem for Contents, and only once its drawer is defined, so with no script, or
+on a page with no such drawer, as a page with no section tree has no Contents drawer, it stays
+hidden and the navigation renders as the page's own; and the page's script opens each drawer on its
+button's click, keeps the button's `aria-expanded` in step with the drawer's `open` and `close`
+events, and closes each drawer as a link in it is followed. A drawer, open, is a modal: Escape, its
+Close button, or a followed link closes it.
+
+A site's shell carries two shortcut dialogs, following the components' README's shortcut dialog
+pattern. A key and its opener, a glyph button in the header with `commandfor` and
+`command="show-modal"`, open a native modal dialog. The dialog opens with its header row, a
+`header.dialog-header` holding its heading, which names the dialog through `aria-labelledby`, and,
+at the row's inline end, its Close, a glyph button with `command="close"` showing `<kbd>Esc</kbd>`.
+The content its operation needs follows the row, and Escape also closes the dialog.
+
+- Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds `sl-shortcuts`
+  alone, so its Close is the first control in it and takes focus as it opens. It lists every
+  binding the page has outside the dialog, each named by its element's `aria-label` or its
+  registered label: the Pages button's P, the Contents button's C, the Help button's ?, the
+  Settings button's S, the section tree's J and K, and the pager's H and L.
+- Settings, under S, opens `dialog#settings`, headed "Settings", which holds `sl-settings`: the
+  theme, a row each for color, scheme, space, and type beside a preview, and the keyboard, with
+  the switch that turns the character keys off (WCAG 2.1.4). Each change applies and is stored at
+  once; there is no Save and no Cancel.
+
+Neither dialog loads the foundation's `theme-menu.js` or `keys-help.js`. `site.css` lays out each
+header row, the heading at its inline start and the Close at its inline end, aligned on their
+centers, with `--space-m` under it, more than the `--space-s` between the content's sections. It
+gives Settings the foundation theme menu's width, the viewport less `--space-s` on each side, up
+to 56rem, and Help its content's width, `fit-content`, up to the same cap. The SDK's template and
+fixture shells carry both dialogs; a site whose shell lacks them adds them.
+
+The Pages, Contents, Help, and Settings buttons and each dialog's Close are of the class
+`glyph-button`. Each shows a glyph and its key hint, a `kbd` alone, `aria-hidden`, and no word; is
+named by its `aria-label`, Pages, Contents, Help, Settings, or Close, which Help lists; and shows
+that name in its interest hint, a `glyph-hint` popover its `interestfor` names. Each glyph is a
+marker that `markdownPages` fills at build from the icons layer, as the components' README gives
+the shell: Octicons' `list-unordered-16` for Pages, `list-ordered-16` for Contents, `question-16`
+for Help, `gear-16` for Settings, and `x-16` for Close. A site pins the icons layer, which the
+components and the SDK both peer, at `v0.1.0`; a marker the build can't fill fails the build.
+
+```html
+<link rel="stylesheet" href="@jaimestill/spike-html-apps-foundation/page-full.css" />
+<link rel="stylesheet" href="@jaimestill/spike-html-hosting-components/glyph-button.css" />
+<link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
+<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
+<script type="module" blocking="render">
+  for (const id of ["pages", "contents"]) {
+    const drawer = document.getElementById(id);
+    if (!drawer) continue;
+    drawer.addEventListener("click", (event) => {
+      if (event.target instanceof Element && event.target.closest("a[href]")) drawer.close();
+    });
+    const opener = document.querySelector(`[aria-controls="${id}"]`);
+    if (!opener) continue;
+    opener.addEventListener("click", () => drawer.show());
+    const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
+    drawer.addEventListener("open", expanded);
+    drawer.addEventListener("close", expanded);
+  }
+</script>
+…
+<header>
+  <sl-site-nav></sl-site-nav>
+  <div class="header-actions">
+    <button
+      type="button"
+      class="glyph-button pages-opener"
+      aria-controls="pages"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-label="Pages"
+      data-keys="p"
+      interestfor="pages-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/list-unordered-16"></svg>
+      <span aria-hidden="true"><kbd>P</kbd></span>
+    </button>
+    <div id="pages-hint" class="glyph-hint" popover="hint" aria-hidden="true">Pages</div>
+    <button
+      type="button"
+      class="glyph-button contents-opener"
+      aria-controls="contents"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-label="Contents"
+      data-keys="c"
+      interestfor="contents-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/list-ordered-16"></svg>
+      <span aria-hidden="true"><kbd>C</kbd></span>
+    </button>
+    <div id="contents-hint" class="glyph-hint" popover="hint" aria-hidden="true">Contents</div>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="help"
+      command="show-modal"
+      aria-label="Help"
+      data-keys="?"
+      interestfor="help-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/question-16"></svg>
+      <span aria-hidden="true"><kbd>?</kbd></span>
+    </button>
+    <div id="help-hint" class="glyph-hint" popover="hint" aria-hidden="true">Help</div>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="settings"
+      command="show-modal"
+      aria-label="Settings"
+      data-keys="s"
+      interestfor="settings-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/gear-16"></svg>
+      <span aria-hidden="true"><kbd>S</kbd></span>
+    </button>
+    <div id="settings-hint" class="glyph-hint" popover="hint" aria-hidden="true">Settings</div>
+  </div>
+</header>
+<main></main>
+<dialog id="help" aria-labelledby="help-title">
+  <header class="dialog-header">
+    <h2 id="help-title">Keyboard shortcuts</h2>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="help"
+      command="close"
+      aria-label="Close"
+      interestfor="help-close-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/x-16"></svg>
+      <span aria-hidden="true"><kbd>Esc</kbd></span>
+    </button>
+    <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+  </header>
+  <sl-shortcuts></sl-shortcuts>
+</dialog>
+<dialog id="settings" aria-labelledby="settings-title">
+  <header class="dialog-header">
+    <h2 id="settings-title">Settings</h2>
+    <button
+      type="button"
+      class="glyph-button"
+      commandfor="settings"
+      command="close"
+      aria-label="Close"
+      interestfor="settings-close-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/x-16"></svg>
+      <span aria-hidden="true"><kbd>Esc</kbd></span>
+    </button>
+    <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+  </header>
+  <sl-settings></sl-settings>
+</dialog>
+```
+
+`cssModuleScripts` parses every module under `node_modules/@jaimestill/`, the components' among
+them, so their sheets build to constructed `CSSStyleSheet`s as the foundation's do.
+
+### Syntax themes
+
+`markdownPages` highlights each fenced block at build with Shiki, under every syntax theme at once,
+so a page's code takes the colors of the palette and scheme the reader chooses, true to the editor
+theme the palette comes from. A syntax theme names a palette of the foundation's Color profile and
+the theme its code takes in light and in dark, each the name of a theme Shiki bundles or a theme
+object, as a VS Code color theme writes one:
+
+```ts
+interface SyntaxTheme {
+  palette: string;
+  light: BundledTheme | ThemeRegistrationAny;
+  dark: BundledTheme | ThemeRegistrationAny;
+}
+```
+
+`builtinSyntax`, the plugin's default, maps each of the foundation's palettes to its source:
+
+| Palette | Light | Dark |
+| --- | --- | --- |
+| flexoki | Flexoki Light | Flexoki Dark |
+| primer | `github-light-default` | `github-dark-dimmed` |
+| catppuccin | `catppuccin-latte` | `catppuccin-mocha` |
+| everforest | `everforest-light` | `everforest-dark` |
+
+The last three are Shiki's bundled themes. Shiki doesn't bundle Flexoki, so its pair is Flexoki's
+own VS Code themes, copied byte for byte from kepano/flexoki at 24ab91d with its license, which the
+package carries under `dist/syntax/flexoki/`. Its green follows the foundation's departure from
+Flexoki's, rotated to hue 142°: the pair takes green-600, `#66800B`, as `#408739` and green-400,
+`#879A39`, as `#61a25a`, the foundation's `--green`, as it loads the copy; every other color is
+Flexoki's own.
+
+A site that registers a palette of its own, as spike-html-apps-noctis registers noctis (its sheet
+after the foundation's page entry, its module after the foundation's registration and before
+`preferences.js`), appends a syntax theme for it:
+
+```ts
+import { builtinSyntax } from "@jaimestill/spike-html-hosting-sdk/syntax.js";
+import type { SyntaxTheme } from "@jaimestill/spike-html-hosting-sdk/syntax.js";
+
+const noctis: SyntaxTheme = {
+  palette: "noctis",
+  light: theme("themes/hibernus.json"),
+  dark: theme("themes/obscuro.json"),
+};
+
+markdownPages({ dir: "content", repository, ref, syntax: [...builtinSyntax, noctis] });
+```
+
+Light and dark merge into one theme whose every color is `light-dark()` of the two, so the pair
+must agree rule for rule. `checkSyntax(theme)` resolves to what keeps a syntax theme from merging,
+one line each naming its palette, and to none when it merges: a palette name that isn't
+lowercase letters, digits, and `-`; a bundled name Shiki doesn't have; a theme with no editor
+foreground; and rules that differ in number, in order of scope, in font style, or in being colored
+in one scheme only. The build refuses a syntax theme that fails it, or a palette two of them name,
+listing each failure. A site's unit tier can hold its own to it:
+
+```ts
+import { checkSyntax } from "@jaimestill/spike-html-hosting-sdk/syntax.js";
+
+test("the Noctis pair merges", async () => {
+  assert.deepEqual(await checkSyntax(noctis), []);
+});
+```
+
+Code falls back to plain, in the page's text color, where there is nothing to highlight it with:
+a fence with no language label, or one Shiki bundles no grammar for, and an indented block, render
+as marked renders them; and a palette with no syntax theme matches no rule, so its code is plain.
+`syntax: []` highlights nothing and emits no stylesheet.
+
+`highlightsEachPalette`, a `Check` outside `shell`, holds a page's highlighted code to its syntax
+themes: it opens Settings by S and steps its settings to each palette the registry lists, in light
+and then in dark. In each it checks that every token renders its palette's color and some token
+differs from the page's text color, and it fails on a palette whose code renders plain, naming the
+palette and the scheme. It
+runs on a page with highlighted code, which the site's test gives, as the template's runs it on
+its index:
+
+```ts
+test("each palette's code takes its syntax theme, in light and in dark", async () => {
+  const page = await browser.open("about:blank");
+  await highlightsEachPalette(page, server.origin).finally(() => page.close());
+});
+```
 
 ### The reusable workflows
 
@@ -266,18 +874,28 @@ resolves it through `exports` and bundles it into the page's sheet:
 `template/` is a Markdown-copy site, the one the scaffold copies, which consumes the SDK by its
 exports alone:
 
-- `package.json`, its name the repository's, the SDK at its tag and the peers at their pins, with
-  typescript, prettier, and `@types/node`; `mise.toml`, the toolchain and the tasks:
-  install, check and its steps, screenshots, and currency, the SDK's bin;
-  `scripts/preflight.sh`, which runs before node_modules exists, so the site holds its copy.
-- `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`,
-  the shell, with the foundation's full page entry, its preferences and keys modules, the Theme
-  button on T, and the SDK's stylesheet; the sample copied tree, `content/` and `content.json`.
+- `package.json`, its name the repository's, the SDK at its tag, the peers, the components at
+  `v0.5.0`, and the icons layer at `v0.1.0`, each at its pin, with typescript, prettier, and
+  `@types/node`; `mise.toml`, the toolchain and the tasks: install, check and its steps,
+  screenshots, and currency, the SDK's bin; `scripts/preflight.sh`, which runs before node_modules
+  exists, so the site holds its copy.
+- `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`, the
+  shell, with the foundation's full page entry, its preferences and keys modules, the components'
+  six modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
+  the Contents button on C, the Help button on ?, and the Settings button on S, each a glyph button
+  showing its glyph and its key hint, named by its `aria-label` and its interest hint, the Help and
+  Settings shortcut dialogs, holding `sl-shortcuts` and `sl-settings`, each opening with its
+  header row, its heading and its Close showing its glyph and Esc, the script that opens the Pages
+  and Contents drawers and closes each drawer at a followed link, and the components'
+  `glyph-button.css` and the SDK's stylesheet; the sample copied tree, `content/` and
+  `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.
-- The tests: the content check; the shell checks and the crawl; and the capture run, on
-  `scripts/screenshots.config.ts`'s description of the pages from `content.json`.
+- `pnpm-workspace.yaml`, the site's pnpm settings, no workspace packages: `minimumReleaseAge: 0`,
+  pnpm's wait of a day before it installs a release turned off, as the SDK's own is.
+- The tests: the content check; the shell checks, the palette check, and the crawl; and the
+  capture run, on `scripts/screenshots.config.ts`'s description of the pages from `content.json`.
 - `.github/workflows/pages.yml` and `ci.yml`, which call the reusable workflows at the tag.
 - `LICENSE` and a `README.md` stub.
 
@@ -300,7 +918,10 @@ entry names any change a site's own files need, such as a template file to take 
   check; the build to `dist/`; the unit tier; the pack check, which installs a pack of the build
   into a scratch site, resolves each export from it, and runs the bin a pnpm install links; the
   browser tier, which builds the fixture site, `test/fixtures/site/`, and runs the shell checks,
-  the crawl, and the capture on it in the pinned chrome-headless-shell; and the scaffold test,
-  which scaffolds a site into a scratch directory, installs it offline on the working tree, and
-  runs the site's own check. It reads no network.
+  the crawl, and the capture on it in the pinned chrome-headless-shell; the Noctis fixture,
+  `test/fixtures/noctis/`, on which the palette check passes with its syntax theme and fails
+  without it; and the trees fixture, `test/fixtures/trees/`, a root-style site of two trees, on
+  whose hand pages and a rendered page the shell checks run, and which it crawls; and the scaffold
+  test, which scaffolds a site into a scratch directory, installs it offline on the working tree,
+  and runs the site's own check. It reads no network.
 - `mise run currency`: report every pin behind its latest, with the SDK's own bin.
