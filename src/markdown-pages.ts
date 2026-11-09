@@ -11,29 +11,27 @@
 // trees are one site: one site index lists every page of every tree, and each page's links are
 // placed against its own tree's source.
 //
-// A file's page is its path with .md turned to .html, except a README.md, which is its
-// directory's index.html, so a single tree's root README.md is the site's index. A file's
-// leading YAML front matter, when it has one, is parsed and never rendered as body text: the page
-// carries it in its head, a <meta name="<key>" content="<value>"> for each key, in source order,
-// after its title, each key and value escaped, the value as frontMatterText gives it, so nothing
-// of it shows on the page. A key keeps its name: one naming a meta the shell already writes, as
-// its viewport, would give the page two, so it fails the build, naming the file and the key. The
-// page's title is the front matter's name, or, with no name, the text of the file's first h1; a
-// file with neither fails the build, naming it. Headings carry GitHub's ids
-// (marked-gfm-heading-id), so a fragment written against the source on GitHub resolves here. A
-// relative link to a file copied in the linking file's tree is rewritten to that file's page,
-// relative to the linking page, its fragment kept;
+// A file's page is its path with .md turned to .html, except a README.md, which is its directory's
+// index.html, so a single tree's root README.md is the site's index. A file's leading YAML front
+// matter, when it has one, is parsed and never rendered as body text: the page carries it in its
+// head, a <meta name="<key>" content="<value>"> for each key, in source order, after its title,
+// each key and value escaped, the value as frontMatterText gives it, so nothing of it shows on the
+// page. A key keeps its name: one naming a meta the shell already writes, as its viewport, would
+// give the page two, so it fails the build, naming the file and the key. The page's title is the
+// front matter's name, or, with no name, the text of the file's first h1; a file with neither fails
+// the build, naming it. Headings carry GitHub's ids (marked-gfm-heading-id), so a fragment written
+// against the source on GitHub resolves here. A relative link to a file copied in the linking
+// file's tree is rewritten to that file's page, relative to the linking page, its fragment kept;
 // one to a file listed as external, present in the source but not copied, to the file's blob on
 // GitHub at the tree's pinned commit; any other relative link, one leaving its tree among them,
-// fails the build, naming the page and the link, so no link is left to break. A fragment alone,
-// or a URL with a scheme, passes through. A GitHub alert, a blockquote opening [!NOTE], [!TIP],
+// fails the build, naming the page and the link, so no link is left to break. A fragment alone, or
+// a URL with a scheme, passes through. A GitHub alert, a blockquote opening [!NOTE], [!TIP],
 // [!IMPORTANT], [!WARNING], or [!CAUTION], renders as marked-alert renders it, as GitHub does: a
 // div.markdown-alert.markdown-alert-<kind>, its first line a p.markdown-alert-title of the kind's
-// octicon and its kind as visible text, "Important", which site.css draws as a callout. Each
-// kind's octicon is the icons layer's (icons.ts), in place of marked-alert's own, through its
-// variants: info-16 for a note, light-bulb-16 for a tip, report-16 for important, alert-16 for a
-// warning, and stop-16 for caution, each an svg 1em square in currentColor, aria-hidden and
-// focusable="false".
+// octicon and its kind as visible text, "Important", which site.css draws as a callout. Each kind's
+// octicon is the icons layer's (icons.ts), in place of marked-alert's own, through its variants:
+// info-16 for a note, light-bulb-16 for a tip, report-16 for important, alert-16 for a warning, and
+// stop-16 for caution, each an svg 1em square in currentColor, aria-hidden and focusable="false".
 //
 // Each page's navigation is written as the light-DOM markup the components slot, so with no script
 // it renders as the page's own, after main, in two drawers, each an sl-drawer: the section tree,

@@ -19,27 +19,26 @@
 // min-height leaves room under them, and with v0.3.0's grid, whose rows stretch into it, the
 // under-header check and the crawl fail on the index, naming the width and main's gap; at 390px,
 // with a flex column whose auto margin pushes main to the body's end, the check fails as well, and
-// with main pulled up into the
-// header it fails naming the overlap. With the shell's Help dialog removed, the Settings button's
-// binding removed, a row of Help's list removed, the Settings button's kbd removed, as the Theme
-// button's markup before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the
-// switch in Settings says, the keys help check fails, naming the page and the assertion. With a
-// shortcut dialog's heading name, its Close's Esc, its opener's kbd, or its opener's hint wrong,
-// or its Close moved to a trailing footer or its heading out of its header row, the shortcut
-// dialog check fails, naming the dialog and what it lacks; with Help holding a
-// [data-keys-list], which loads the foundation's keys-help.js, the request check fails. With the
-// Help button's glyph removed, the Settings button's word shown beside its glyph, or Help's Close
-// showing the Help button's glyph, the glyph check fails, naming the page and the button. With the glyph buttons' padding and border dropped and their text small, the target size
+// with main pulled up into the header it fails naming the overlap. With the shell's Help dialog
+// removed, the Settings button's binding removed, a row of Help's list removed, the Settings
+// button's kbd removed, as the Theme button's markup before v0.3.1 had it, or a handler that opens
+// the Pages drawer on P whatever the switch in Settings says, the keys help check fails, naming the
+// page and the assertion. With a shortcut dialog's heading name, its Close's Esc, its opener's kbd,
+// or its opener's hint wrong, or its Close moved to a trailing footer or its heading out of its
+// header row, the shortcut dialog check fails, naming the dialog and what it lacks; with Help
+// holding a [data-keys-list], which loads the foundation's keys-help.js, the request check fails.
+// With the Help button's glyph removed, the Settings button's word shown beside its glyph, or
+// Help's Close showing the Help button's glyph, the glyph check fails, naming the page and the
+// button. With the glyph buttons' padding and border dropped and their text small, the target size
 // check fails, naming the width, the space, and the button; with the header's group wrapping its
-// buttons, laid over the nav's row below 40rem, wrapped under the nav from 40rem, at the
-// header's inline end below 40rem or before the nav from 40rem, or the nav wrapping its links
-// below 40rem, the header row check fails, naming
-// the width; and with the header too wide for a phone, it fails naming the sideways scroll. With the
-// bottom pager removed, a pager's links swapped, a pager link that follows nowhere, every L
-// binding removed, or, below 40rem, a pager's title shown or out of its name or its key hint
-// shown, the crawl fails, naming the page; with the top pager's L dropped, so keys lists
-// the bottom one's, or a handler that follows the previous link on H whatever the switch in
-// Settings says, the keys help check fails on a paged page, naming it.
+// buttons, laid over the nav's row below 40rem, wrapped under the nav from 40rem, at the header's
+// inline end below 40rem or before the nav from 40rem, or the nav wrapping its links below 40rem,
+// the header row check fails, naming the width; and with the header too wide for a phone, it fails
+// naming the sideways scroll. With the bottom pager removed, a pager's links swapped, a pager link
+// that follows nowhere, every L binding removed, or, below 40rem, a pager's title shown or out of
+// its name or its key hint shown, the crawl fails, naming the page; with the top pager's L dropped,
+// so keys lists the bottom one's, or a handler that follows the previous link on H whatever the
+// switch in Settings says, the keys help check fails on a paged page, naming it.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -449,10 +448,7 @@ describe("the fixture site with main pushed down or up at 390px", () => {
 describe("the fixture site with no Help dialog", () => {
   test("the keys help check fails, naming the page", async () => {
     // The shell's dialog#help removed before any of the page's scripts run.
-    const page = await browser.open("about:blank");
-    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
-      source: `document.addEventListener("DOMContentLoaded", () => document.querySelector("dialog#help")?.remove());`,
-    });
+    const page = await withChange(`document.querySelector("dialog#help")?.remove();`);
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
         assert.match(error.message, /\/fixture-site\/: \? opens Help/);
@@ -467,10 +463,9 @@ describe("the fixture site with no Help dialog", () => {
 describe("the fixture site with its keys help wrong", () => {
   test("a shell binding missing fails the keys help check", async () => {
     // The Settings button's S binding removed before keys.js reads the page's bindings.
-    const page = await browser.open("about:blank");
-    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
-      source: `document.addEventListener("DOMContentLoaded", () => document.querySelector("[commandfor=settings][data-keys]")?.removeAttribute("data-keys"));`,
-    });
+    const page = await withChange(
+      `document.querySelector("[commandfor=settings][data-keys]")?.removeAttribute("data-keys");`,
+    );
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
         assert.match(
@@ -510,10 +505,10 @@ describe("the fixture site with its keys help wrong", () => {
   test("a header control that binds a key without showing it fails the keys help check", async () => {
     // The Settings button as the Theme button's markup before v0.3.1 had it: its label alone, no
     // kbd.
-    const page = await browser.open("about:blank");
-    await page.cdp("Page.addScriptToEvaluateOnNewDocument", {
-      source: `document.addEventListener("DOMContentLoaded", () => { const settings = document.querySelector("header [commandfor=settings]"); settings.removeAttribute("aria-label"); settings.textContent = "Settings"; });`,
-    });
+    const page =
+      await withChange(`const settings = document.querySelector("header [commandfor=settings]");
+      settings.removeAttribute("aria-label");
+      settings.textContent = "Settings";`);
     try {
       await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
         assert.match(

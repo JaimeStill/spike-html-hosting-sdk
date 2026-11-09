@@ -6,18 +6,17 @@
 // the layout's two docks, and the index also with Help open, opened by the Help button's click and
 // ready once its sl-shortcuts has rendered its rows, and with Settings open, opened by the Settings
 // button's click and ready once its sl-settings has rendered its rows, each at the three widths. A
-// page's
-// name is its built path without .html, a directory's index its directory: index.html is --page
-// index, a/index.html --page a, and a/b.html --page a/b; a state's name, which names its files,
-// holds its width and turns the name's slashes to dashes. A page's path is its absolute
-// URL path under the base, /<repository>/ for the index, /<repository>/a/ and
-// /<repository>/a/b.html for the others, which is its caption too, and which the bin's messages
-// name. The profile's facets, palette, space, and type, at flexoki, regular, and mono; --all's
-// profiles, every palette at the defaults, then compact and sans at flexoki; the profiles each
-// page registers, from the foundation's registry, every built-in one, as the shell loads the full
-// entry. The site is served as its browser tier serves it, by served(), so a capture makes the
-// requests the deployed site makes. contentPages lists a Markdown site's copied pages, every
-// tree's, from its content.json; a site with hand pages lists those beside them.
+// page's name is its built path without .html, a directory's index its directory: index.html is
+// --page index, a/index.html --page a, and a/b.html --page a/b; a state's name, which names its
+// files, holds its width and turns the name's slashes to dashes. A page's path is its absolute URL
+// path under the base, /<repository>/ for the index, /<repository>/a/ and /<repository>/a/b.html
+// for the others, which is its caption too, and which the bin's messages name. The profile's
+// facets, palette, space, and type, at flexoki, regular, and mono; --all's profiles, every palette
+// at the defaults, then compact and sans at flexoki; the profiles each page registers, from the
+// foundation's registry, every built-in one, as the shell loads the full entry. The site is served
+// as its browser tier serves it, by served(), so a capture makes the requests the deployed site
+// makes. contentPages lists a Markdown site's copied pages, every tree's, from its content.json; a
+// site with hand pages lists those beside them.
 //
 // capture runs the bin on a capture file as mise run screenshots does: the index alone, light
 // alone, to the terminal, with TMPDIR a scratch directory of its own and node's compile cache,

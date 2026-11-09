@@ -9,50 +9,49 @@
 // the Settings dialog, a shortcut dialog holding the components' sl-settings, whose shadow root
 // adopts the sheets the build rewrote from its CSS module scripts, the foundation's theme-menu.css
 // among them, with no stylesheet fetched for them, and Escape closes it; stepping the color, space,
-// and type rows of the settings each to a profile past its default, which the full entry
-// registers, sets that facet's attribute on the root at once, and a change is stored at once, kept
-// as the dialog closes, and applied after a reload, with no Save; the page's one module script,
-// its entry, is render-blocking; once it loads, every element on the page whose name holds a
-// hyphen, a custom element's, is defined, so a shell that fails to load a component's module
-// fails naming its tag, where the capture run's wait for each element's definition would hang;
-// every request the page makes, with Settings and Help opened, resolves under the base, none
-// fails, and the foundation's theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts
-// stand in for, are never requested; in a 1600px viewport the site's layout holds main to a
-// reading width, centered; at 1200px, between the layout's docks, main is centered on a page with
-// no section tree, and the tree is docked beside it on a page with one; a page's section tree is in
-// its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
-// and K move through its sections, marking each, and the header's Contents button is hidden, and
-// below the dock, at 390px and a px under it, a closed drawer, which the Contents button, shown
-// there, opens by its click and by C, its aria-expanded in step, and whose show() opens it and in
-// which following a link closes it and marks the link's section, and a page with no tree has no
-// Contents drawer and shows no Contents button; at
-// 390px, between the docks, and at 1600px, main starts directly under the header, the gap from
-// the header's bottom never below zero and no more than on a page taller than the viewport,
-// however short the page; below both docks, ? opens Help, its Close focused, whose sl-shortcuts
-// lists exactly the page's bindings as the foundation's keys module holds them, the shell's P, C
-// where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
-// page has a pager, its H and L, each once, named as its previous and next page, and neither on a
-// page with none, Escape closes it, and the character-key switch in Settings turns them off, so J
-// moves to no section, P and C open no drawer, and H and L move to no page, and on again; every
-// dialog a keyed show-modal opener opens follows the components' shortcut dialog pattern, named by
-// a heading inside it, closed by a Close glyph button showing Esc, the heading and the Close in
-// its header row, a header.dialog-header, its opener showing its key and named, with an interest
-// hint showing the name; in a 390px viewport each header button, Pages and Contents where the
-// shell has them, Help, and Settings, and each shortcut dialog's Close each show one glyph, the
-// icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16, and x-16, and
-// the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by its
-// aria-label; every rendered glyph button, the page's and its components' in their shadow roots,
-// the Contents button at 390px on a page with a Contents drawer, and with each shortcut dialog
-// open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular
-// and the compact space profiles; the header's buttons, its header-actions group, share one line
-// at the capture widths, 390px, 1120px, and 1376px, and at 40rem: at 390px, below 40rem, the site
-// nav keeps its links on one line and the group is on its own row below it, at the nav's inline
-// start, and from 40rem the group is on the site nav's first line, at the header's inline end;
-// nothing scrolls sideways at 390px; and at a phone's width, a px below and at
-// each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word
-// breaks across lines and every docked side column is at least 16rem wide. A check that changes
-// the reader's stored theme or keys settings removes them after. shell lists them by name, for a
-// site to make a test of each.
+// and type rows of the settings each to a profile past its default, which the full entry registers,
+// sets that facet's attribute on the root at once, and a change is stored at once, kept as the
+// dialog closes, and applied after a reload, with no Save; the page's one module script, its entry,
+// is render-blocking; once it loads, every element on the page whose name holds a hyphen, a custom
+// element's, is defined, so a shell that fails to load a component's module fails naming its tag,
+// where the capture run's wait for each element's definition would hang; every request the page
+// makes, with Settings and Help opened, resolves under the base, none fails, and the foundation's
+// theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts stand in for, are never
+// requested; in a 1600px viewport the site's layout holds main to a reading width, centered; at
+// 1200px, between the layout's docks, main is centered on a page with no section tree, and the tree
+// is docked beside it on a page with one; a page's section tree is in its Contents drawer, docked
+// as a column beside main from the tree's dock and at 1600px, where J and K move through its
+// sections, marking each, and the header's Contents button is hidden, and below the dock, at 390px
+// and a px under it, a closed drawer, which the Contents button, shown there, opens by its click
+// and by C, its aria-expanded in step, and whose show() opens it and in which following a link
+// closes it and marks the link's section, and a page with no tree has no Contents drawer and shows
+// no Contents button; at 390px, between the docks, and at 1600px, main starts directly under the
+// header, the gap from the header's bottom never below zero and no more than on a page taller than
+// the viewport, however short the page; below both docks, ? opens Help, its Close focused, whose
+// sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them, the
+// shell's P, C where the page has a Contents drawer, ?, S, and the tree's J and K among them, and,
+// where the page has a pager, its H and L, each once, named as its previous and next page, and
+// neither on a page with none, Escape closes it, and the character-key switch in Settings turns
+// them off, so J moves to no section, P and C open no drawer, and H and L move to no page, and on
+// again; every dialog a keyed show-modal opener opens follows the components' shortcut dialog
+// pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the heading
+// and the Close in its header row, a header.dialog-header, its opener showing its key and named,
+// with an interest hint showing the name; in a 390px viewport each header button, Pages and
+// Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
+// one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
+// and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
+// its aria-label; every rendered glyph button, the page's and its components' in their shadow
+// roots, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
+// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the
+// regular and the compact space profiles; the header's buttons, its header-actions group, share one
+// line at the capture widths, 390px, 1120px, and 1376px, and at 40rem: at 390px, below 40rem, the
+// site nav keeps its links on one line and the group is on its own row below it, at the nav's
+// inline start, and from 40rem the group is on the site nav's first line, at the header's inline
+// end; nothing scrolls sideways at 390px; and at a phone's width, a px below and at each of the
+// layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word breaks
+// across lines and every docked side column is at least 16rem wide. A check that changes the
+// reader's stored theme or keys settings removes them after. shell lists them by name, for a site
+// to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
@@ -66,32 +65,31 @@
 // script render-blocking, every custom element on it defined, every request under the base and none
 // failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
 // sideways in a 390px one, its navigation laid out as the shell check has it at the same widths,
-// its layout between the docks, its section tree in its Contents drawer, its main under the
-// header, its Help and the switch in Settings,
-// its shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks
-// have them, and its title its source's front matter name, or, for a source with no name, its
-// first h1's text. Its Pages button is hidden at 1600px,
-// where the site index is docked, and at 390px is shown and opens the Pages drawer as a modal by
-// its click and by P, its aria-expanded true while the drawer is open and false once Escape closes
-// it. Each page has a pager at main's top and at its foot, each a nav named apart, linking the
-// pages before and after it in its site index's order, none past either end, each link showing its
-// arrow glyph, filled, its word, the page's title, and its key hint, binding H or L, and named by
-// its visible text, "Previous <title>" or "Next <title>", as the browser computes it; at 390px each
-// link shows only its arrow and word, its title and key hint not visible but the title still in its
-// name, the two links on one row at the pager's inline start and end; each link, followed, lands on
-// its page, and H and L, pressed at 390px, on the previous and the next. Each page's head holds a
-// meta per front matter key, named by the key, in source order, its content the value as
-// frontMatterText gives it, and none for a source with no front matter; no page header, no front
-// matter table, and no visible list of its keys remains, and no key's "key: value" line is the
-// page's text. Each page's site index, in its Pages drawer, links every copied file's page, each
-// once, and no other. Every in-site link reaches a built page, and an element with its fragment's
-// id when it has one. The crawl checks a page for every Markdown file content.json records, every
-// tree's: a page no link from the index reaches is crawled from once the links run out, and
-// returned, for the test's diagnostics. A page reached that no record names is a hand page the site
-// also builds, a hand index at the base or a hand page elsewhere: it loads with a 2xx, every
-// request under the base and none failed, it has no pager and binds neither H nor L, its ids are
-// the targets of the fragments linking it, and its links are followed, but the copied pages' checks
-// are left to the shell checks, which a site runs on each hand page by its URL; it is returned too.
+// its layout between the docks, its section tree in its Contents drawer, its main under the header,
+// its Help and the switch in Settings, its shortcut dialogs, its glyph buttons and their size, and
+// its header's row as the shell checks have them, and its title its source's front matter name, or,
+// for a source with no name, its first h1's text. Its Pages button is hidden at 1600px, where the
+// site index is docked, and at 390px is shown and opens the Pages drawer as a modal by its click
+// and by P, its aria-expanded true while the drawer is open and false once Escape closes it. Each
+// page has a pager at main's top and at its foot, each a nav named apart, linking the pages before
+// and after it in its site index's order, none past either end, each link showing its arrow glyph,
+// filled, its word, the page's title, and its key hint, binding H or L, and named by its visible
+// text, "Previous <title>" or "Next <title>", as the browser computes it; at 390px each link shows
+// only its arrow and word, its title and key hint not visible but the title still in its name, the
+// two links on one row at the pager's inline start and end; each link, followed, lands on its page,
+// and H and L, pressed at 390px, on the previous and the next. Each page's head holds a meta per
+// front matter key, named by the key, in source order, its content the value as frontMatterText
+// gives it, and none for a source with no front matter; no page header, no front matter table, and
+// no visible list of its keys remains, and no key's "key: value" line is the page's text. Each
+// page's site index, in its Pages drawer, links every copied file's page, each once, and no other.
+// Every in-site link reaches a built page, and an element with its fragment's id when it has one.
+// The crawl checks a page for every Markdown file content.json records, every tree's: a page no
+// link from the index reaches is crawled from once the links run out, and returned, for the test's
+// diagnostics. A page reached that no record names is a hand page the site also builds, a hand
+// index at the base or a hand page elsewhere: it loads with a 2xx, every request under the base and
+// none failed, it has no pager and binds neither H nor L, its ids are the targets of the fragments
+// linking it, and its links are followed, but the copied pages' checks are left to the shell
+// checks, which a site runs on each hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -570,8 +568,7 @@ const CONTENTS_MODAL = `!!document.getElementById("contents")?.shadowRoot?.query
 /** The section tree's last link, which the check follows in the open drawer. */
 const LAST_LINK = `[...document.querySelectorAll('sl-section-tree a[href^="#"]')].at(-1)`;
 
-/** Sets a viewport width wide, 900px tall, scrolled to the page's top, the section tree's held
- * stop released by the scroll. */
+/** Sets a viewport width wide, 900px tall, scrolled to the page's top and settled. */
 async function atWidth(page: Page, width: number): Promise<void> {
   await page.cdp("Emulation.setDeviceMetricsOverride", {
     width,
@@ -839,8 +836,8 @@ type HelpRow = { keys: string; action: string; off: boolean };
 
 /** The rows Help lists for the loaded page's pager, as HELP_ROWS reads them: H for the top pager's
  * previous link and L for its next, where it has them, each its word and its title, as the pager
- * shows them, the link's name; none with no pager. The bottom pager binds the same keys, which keys lists
- * once, under the first in document order. */
+ * shows them, the link's name; none with no pager. The bottom pager binds the same keys, which
+ * keys lists once, under the first in document order. */
 const PAGER_ROWS = `[...document.querySelectorAll("main > nav.pager:first-child a[data-keys]")]
   .map((a) => ({
     keys: a.dataset.keys.toUpperCase(),
@@ -1089,9 +1086,9 @@ const TARGETS = `(() => {
 
 /** Asserts every glyph button the loaded page renders, at 390px, where the Pages button shows, and
  * the Contents button on a page with a Contents drawer, and at 1600px, where both drawers are
- * docked, is at least 24 CSS px a side, in the regular and the compact space profiles; and, with each dialog a keyed show-modal opener opens shown as a modal
- * in turn, each glyph button it renders too, its Close among them, then closed. The root's own
- * data-space is put back after. */
+ * docked, is at least 24 CSS px a side, in the regular and the compact space profiles; and, with
+ * each dialog a keyed show-modal opener opens shown as a modal in turn, each glyph button it
+ * renders too, its Close among them, then closed. The root's own data-space is put back after. */
 async function assertTargetSize(page: Page, url: string): Promise<void> {
   const space: string | null = await page.evaluate(attribute("data-space"));
   const dialogs: string[] = await page.evaluate(OPENED_DIALOGS);
@@ -1218,14 +1215,7 @@ async function assertHeaderRow(page: Page, url: string): Promise<void> {
     nav: { top: number; bottom: number; end: number; start: number; lines: number } | null;
   };
   for (const width of HEADER_WIDTHS) {
-    await page.cdp("Emulation.setDeviceMetricsOverride", {
-      width,
-      height: 900,
-      deviceScaleFactor: 1,
-      mobile: false,
-    });
-    await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
-    await page.evaluate(SETTLED);
+    await atWidth(page, width);
     const row: Row | null = await page.evaluate(HEADER_ROW);
     assert.ok(row, `${url}: its header holds its header-actions group`);
     const names = row.buttons.map(({ name }) => name).join(", ");
@@ -1313,14 +1303,7 @@ const KEYS_WIDTH = px(docks.tree) - 1;
  * kbd, upper-cased as Help's rows show it.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
-  await page.cdp("Emulation.setDeviceMetricsOverride", {
-    width: KEYS_WIDTH,
-    height: 900,
-    deviceScaleFactor: 1,
-    mobile: false,
-  });
-  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
-  await page.evaluate(SETTLED);
+  await atWidth(page, KEYS_WIDTH);
   const controls: { keys: string; shown: string }[] = await page.evaluate(HEADER_KEYS);
   assert.deepEqual(
     controls.map(({ keys }) => ({ keys, shown: keys.toUpperCase() })),
@@ -1597,8 +1580,8 @@ export const followsShortcutDialogs: Check = async (page, site, url = site) => {
 };
 
 /** Each header button, Pages and Contents where the shell has them, Help, and Settings, and each
- * shortcut
- * dialog's Close, shows its glyph and its key hint, and no word, named by its aria-label. */
+ * shortcut dialog's Close, shows its glyph and its key hint, and no word, named by its
+ * aria-label. */
 export const showsGlyphs: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertGlyphs(page, url);
@@ -1712,16 +1695,16 @@ const row = (section: string): string => `(() => {
 const attribute = (name: string): string => `document.documentElement.getAttribute("${name}")`;
 
 /**
- * The page's highlighted code, its .shiki blocks, takes each registered palette's syntax theme:
- * for each palette profiles("color") lists, the color row of the settings in the Settings dialog,
- * opened by S, which lists the same, is stepped to it, and its scheme row to light and then to dark; in each, every token carrying the
- * palette's --shiki-<palette> variable renders the color the variable resolves to there, and some
- * token's color differs from the page's text color. It fails naming the palette and the scheme for
- * a registered palette whose code renders plain: no token carries a color for it, as on a build
- * with no syntax theme for it, or a token keeps the page's text color, as where no rule selects the
- * palette's. It runs on url, a page with highlighted code, which a site's test gives, or on site,
- * its index, when the index holds some. The dialog is closed after, and the choice, which each
- * step stored at once, forgotten.
+ * The page's highlighted code, its .shiki blocks, takes each registered palette's syntax theme: for
+ * each palette profiles("color") lists, the color row of the settings in the Settings dialog,
+ * opened by S, which lists the same, is stepped to it, and its scheme row to light and then to
+ * dark; in each, every token carrying the palette's --shiki-<palette> variable renders the color
+ * the variable resolves to there, and some token's color differs from the page's text color. It
+ * fails naming the palette and the scheme for a registered palette whose code renders plain: no
+ * token carries a color for it, as on a build with no syntax theme for it, or a token keeps the
+ * page's text color, as where no rule selects the palette's. It runs on url, a page with
+ * highlighted code, which a site's test gives, or on site, its index, when the index holds some.
+ * The dialog is closed after, and the choice, which each step stored at once, forgotten.
  */
 export const highlightsEachPalette: Check = async (page, site, url = site) => {
   await page.goto(url);
@@ -1828,8 +1811,8 @@ type Linked = { href: string; title: string };
 
 /** The loaded page's pagers, each nav.pager: where it is, main's first element child, its last, or
  * elsewhere; its name; each link's rel, href, resolved, name, data-keys, word, title, the key
- * hints in its aria-hidden kbd elements, and its svg's markup; and each link's height; with the icons the
- * arrows are filled from, as the page's parser serializes them, to compare. */
+ * hints in its aria-hidden kbd elements, and its svg's markup; and each link's height; with the
+ * icons the arrows are filled from, as the page's parser serializes them, to compare. */
 const PAGERS = `(() => {
   const main = document.querySelector("main");
   const parse = (svg) => {
