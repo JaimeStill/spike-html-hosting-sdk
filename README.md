@@ -43,7 +43,7 @@ shell loads, each pinned exactly:
 pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.5.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
-  github:JaimeStill/spike-html-hosting-components#v0.4.0 \
+  github:JaimeStill/spike-html-hosting-components#v0.5.0 \
   github:JaimeStill/spike-html-hosting-icons#v0.1.0 \
   vite eslint
 ```
@@ -875,7 +875,7 @@ resolves it through `exports` and bundles it into the page's sheet:
 exports alone:
 
 - `package.json`, its name the repository's, the SDK at its tag, the peers, the components at
-  `v0.4.0`, and the icons layer at `v0.1.0`, each at its pin, with typescript, prettier, and
+  `v0.5.0`, and the icons layer at `v0.1.0`, each at its pin, with typescript, prettier, and
   `@types/node`; `mise.toml`, the toolchain and the tasks: install, check and its steps,
   screenshots, and currency, the SDK's bin; `scripts/preflight.sh`, which runs before node_modules
   exists, so the site holds its copy.

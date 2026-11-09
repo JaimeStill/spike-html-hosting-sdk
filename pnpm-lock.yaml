@@ -52,8 +52,8 @@ importers:
         specifier: github:JaimeStill/spike-html-apps-tooling#v0.3.0
         version: https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072
       '@jaimestill/spike-html-hosting-components':
-        specifier: github:JaimeStill/spike-html-hosting-components#v0.4.0
-        version: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/a0216bd466627173b1c746f5fe4ec02015acf0f0(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)(@jaimestill/spike-html-hosting-icons@https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5)
+        specifier: github:JaimeStill/spike-html-hosting-components#v0.5.0
+        version: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/d278954abd337880d64f68bd9dae24b80f259864(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)(@jaimestill/spike-html-hosting-icons@https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5)
       '@jaimestill/spike-html-hosting-icons':
         specifier: github:JaimeStill/spike-html-hosting-icons#v0.1.0
         version: https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5
@@ -155,9 +155,9 @@ packages:
     version: 0.3.0
     hasBin: true
 
-  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/a0216bd466627173b1c746f5fe4ec02015acf0f0':
-    resolution: {gitHosted: true, integrity: sha512-usOFCy7u2NED/toehYNBQ2AZxxBESssIJb9zAsGgN1ck16U6LLBVF0LVkQjtguBPBcOYiIiSaj4dwWunAhgKhQ==, tarball: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/a0216bd466627173b1c746f5fe4ec02015acf0f0}
-    version: 0.4.0
+  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/d278954abd337880d64f68bd9dae24b80f259864':
+    resolution: {gitHosted: true, integrity: sha512-KyDEtOPqh28TnHFJ/JslyfFIJTRksO3j2dJDeOckovFs6dIF9FrHlDsMMgUbn2Gk27WOBprHloOFZeRXV5bFhA==, tarball: https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/d278954abd337880d64f68bd9dae24b80f259864}
+    version: 0.5.0
     peerDependencies:
       '@jaimestill/spike-html-apps-foundation': ^0.3.0
       '@jaimestill/spike-html-hosting-icons': ^0.1.0
@@ -1059,7 +1059,7 @@ snapshots:
 
   '@jaimestill/spike-html-apps-tooling@https://codeload.github.com/JaimeStill/spike-html-apps-tooling/tar.gz/d1687ef64e24bb5853987f5c5a314bbbfc814072': {}
 
-  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/a0216bd466627173b1c746f5fe4ec02015acf0f0(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)(@jaimestill/spike-html-hosting-icons@https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5)':
+  '@jaimestill/spike-html-hosting-components@https://codeload.github.com/JaimeStill/spike-html-hosting-components/tar.gz/d278954abd337880d64f68bd9dae24b80f259864(@jaimestill/spike-html-apps-foundation@https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55)(@jaimestill/spike-html-hosting-icons@https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5)':
     dependencies:
       '@jaimestill/spike-html-apps-foundation': https://codeload.github.com/JaimeStill/spike-html-apps-foundation/tar.gz/ff723d1597cab408fe81d7e35ab52bfa33cd9c55
       '@jaimestill/spike-html-hosting-icons': https://codeload.github.com/JaimeStill/spike-html-hosting-icons/tar.gz/6af4f400236f02e55a48e2a2e3c4623ed8f9b0e5

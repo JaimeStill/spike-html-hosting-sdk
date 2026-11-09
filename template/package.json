@@ -6,7 +6,7 @@
   "devDependencies": {
     "@jaimestill/spike-html-apps-foundation": "github:JaimeStill/spike-html-apps-foundation#v0.3.0",
     "@jaimestill/spike-html-apps-tooling": "github:JaimeStill/spike-html-apps-tooling#v0.3.0",
-    "@jaimestill/spike-html-hosting-components": "github:JaimeStill/spike-html-hosting-components#v0.4.0",
+    "@jaimestill/spike-html-hosting-components": "github:JaimeStill/spike-html-hosting-components#v0.5.0",
     "@jaimestill/spike-html-hosting-icons": "github:JaimeStill/spike-html-hosting-icons#v0.1.0",
     "@jaimestill/spike-html-hosting-sdk": "github:JaimeStill/spike-html-hosting-sdk#v{{version}}",
     "@types/node": "26.6.6",
