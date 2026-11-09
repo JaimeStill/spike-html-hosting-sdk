@@ -77,15 +77,15 @@ fail on it. Breaking, for a site and its readers:
   with `pagerLabels` and `indexOrder`, the site index's order: a `nav` named "Previous and next
   page", and "Previous and next page, end of page" at the foot, linking the pages before and after
   it in that order, with no wrap. Each link shows its arrow glyph, its word, the page's title, and
-  its key hint, binds H or L, and is named by its visible text, "Previous <title>" or "Next
-  <title>", its arrow and key hint aria-hidden; Help lists H and L once each. A hand page has
-  none. `site.css` draws it as a quiet row of plain links, titles wrapping; below 40rem each link
+  its key hint, binds H or L, and is named by its visible text, `Previous <title>` or
+  `Next <title>`, its arrow and key hint aria-hidden; Help lists H and L once each. A hand page
+  has none. `site.css` draws it as a quiet row of plain links, titles wrapping; below 40rem each link
   shows only its arrow and word, "← Previous" and "Next →", its title visually hidden but still in
   its name, and its key hint, `.pager-key`, not rendered.
 - The crawl checks each copied page's head meta, in order, with no page header, no visible list of
   the keys, and no `key: value` line in its text; and its pagers against its site index, following
   each link and pressing H and L, each landing on its page; at 390px each link shows only its
-  arrow and word, its name still "<word> <title>", the two links on one row at the pager's inline
+  arrow and word, its name still `<word> <title>`, the two links on one row at the pager's inline
   start and end. A hand page has no pager and binds neither key.
 
 ### Changed

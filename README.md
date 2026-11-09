@@ -240,8 +240,8 @@ The shell checks, each named in `shell`, assert these:
 - A pixel under 70rem, below both docks, ? opens Help, its Close focused, whose `sl-shortcuts`
   lists exactly the page's bindings, as the foundation's keys module holds them, the shell's P, C
   where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
-  page has a pager, H and L once each, named by the top pager's links' text, "Previous <title>"
-  and "Next <title>", and neither where it has none; Escape closes it. The character-key
+  page has a pager, H and L once each, named by the top pager's links' text, `Previous <title>`
+  and `Next <title>`, and neither where it has none; Escape closes it. The character-key
   switch in Settings turns them off, so J, P, C, H, and L do nothing, and on again. Every header
   control that binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
@@ -290,7 +290,7 @@ no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer
 P, its `aria-expanded` following the drawer open and closed; its two pagers, at main's top and foot,
 each named, link the pages before and after it in its site index's order, none past either end, each
 link its arrow, its word, the page's title, its key hint, and its binding, H or L; at 390px each
-link only its arrow and word, its title and key hint not visible, its name still "<word> <title>";
+link only its arrow and word, its title and key hint not visible, its name still `<word> <title>`;
 and each link followed, and H and L pressed at 390px, lands on its page; and every in-site link
 reaches a built page, and its fragment's element. Since each page's index links every other, the
 crawl reaches every page from the index. It checks a page for every Markdown file `content.json`
@@ -481,7 +481,7 @@ Contents drawer and the site index in the Pages drawer:
   only page has no pager. Each link shows its arrow, `arrow-left-16` or `arrow-right-16`, filled at
   build, on its outer side, its word, the page's title, and its key hint, and binds H or L by
   `data-keys`, so keys.js clicks it. It has no `aria-label`: its name is the text it shows,
-  "Previous <title>" or "Next <title>", the arrow and the hint `aria-hidden`, so the name holds
+  `Previous <title>` or `Next <title>`, the arrow and the hint `aria-hidden`, so the name holds
   the visible label (WCAG 2.5.3, Label in Name), and Help lists it by that text. Both pagers bind
   the same keys: keys.js fires and lists the first in document order, the top one's, once. A hand
   page has no pager. `site.css` draws it as a quiet row of plain links, Previous at the inline
