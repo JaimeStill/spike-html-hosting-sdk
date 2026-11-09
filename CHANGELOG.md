@@ -27,6 +27,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   it.
 - `./browser.js`'s `storesAtOnce`, in place of `staysUnsaved`: a step of the settings' color row
   is stored at once, kept as the dialog closes, and applied after a reload.
+- `./browser.js`'s `placesSectionTree`, a shell check, which the crawl runs too: a page's section
+  tree is in its Contents drawer, `sl-drawer#contents` docked from 70rem. At 70rem and 1600px the
+  tree is a docked column beside main, where J marks and moves to the first section, K back to
+  the top, and H and L move to no section; at 390px and a pixel under 70rem the drawer is closed,
+  and once open, a followed link in it closes it and marks its section. A page with no tree has
+  no Contents drawer.
+- `./markdown-pages.js`'s `frontMatterMeta`, a page's front matter as head meta.
 
 ### Changed
 
@@ -74,6 +81,32 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   button's click and ready once `sl-settings` renders, named as `index-settings-1120`; Help open
   is ready once `sl-shortcuts` renders its rows. `leavesNoCapture` asserts the nine by those
   names.
+- A page's front matter is head metadata: `markdownPages` writes a
+  `<meta name="<key>" content="<value>">` per key after the title, in source order, the value as
+  `frontMatterText` gives it, both escaped, and nothing of it shows on the page. A key naming a
+  meta the shell already writes, as `viewport`, in any case, fails the build, naming the file and
+  the key. The crawl expects the meta, in order, and no page header, no visible list of the keys,
+  and no `key: value` line in the page's text.
+- The section tree is in the Contents drawer: `markdownPages` writes it, with no `dock` of its
+  own, in `<sl-drawer id="contents" label="Contents" dock="70rem">` after main, before the Pages
+  drawer, in place of the `div.section-tree` before main. `site.css` docks the drawer in the end
+  column from 70rem, held in view as the Pages drawer is, and below 70rem it is a closed modal, in
+  place of the sticky bar; `body:has(> #contents)` holds the end column to 16rem between the
+  docks. The Pages button shows once `#pages` is defined, not any drawer.
+- The shell's script closes each drawer, Pages and Contents, as a link in it is followed, and
+  wires each drawer's opener in the header by its `aria-controls`, as the components' README
+  gives it.
+- The section tree's keys are J and K, the components' own: `opensKeysHelp` expects J "Next
+  section" and K "Previous section", no H or L naming a section, and J doing nothing with the
+  character keys off. `holdsBetweenDocks`, `startsUnderHeader`, and `keepsNavigationWords` read
+  the tree in its Contents drawer: no bar sits between the header and main, and each docked
+  drawer, named by its id, is at least 16rem wide.
+
+### Removed
+
+- `./markdown-pages.js`'s `pageHeader` and the page header, `sl-page-header` and its `dl`, which
+  spike-html-hosting-components no longer has; the shell no longer loads `page-header.js`, and
+  loads the components' six modules.
 
 ## [0.5.0] - 2026-11-06
 

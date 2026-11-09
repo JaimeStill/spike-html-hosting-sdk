@@ -4,21 +4,22 @@
      entry and its registrations, every built-in profile, so the settings offer each, its
      preferences module, and its keys module, render-blocking, as the build makes every module
      script one entry; then the components' glyph-button.css and the SDK's site.css, each by its
-     package's name, in that order after the entry. The components' seven elements, each module
+     package's name, in that order after the entry. The components' six elements, each module
      defining its element, render-blocking too: the site nav, at the header's start, and the site
-     index, the page header, the section tree, and the drawer that holds the site index, which the
-     SDK's markdownPages writes into each page with their light-DOM content, and the shortcuts list
-     and the settings, which the two shortcut dialogs hold. The header is the site nav and one
-     group of buttons at its inline end, header-actions: Pages, Help, and Settings, in that order,
-     which site.css keeps on the header's first line at every width. The Pages button opens that
-     drawer, labeled Pages, keys.js clicking it on P; site.css shows it only below the drawer's
-     dock, once the drawer is defined, and the page's script wires its click to the drawer's
-     show() and keeps its aria-expanded in step with the drawer's open and close events, as
+     index, the section tree, and the drawers that hold them, Pages and Contents, which the SDK's
+     markdownPages writes into each page with their light-DOM content, and the shortcuts list and
+     the settings, which the two shortcut dialogs hold. Following a link in either drawer closes
+     it, by the page's script, so the link lands on the page the drawer covered. The header is the
+     site nav and one group of buttons at its inline end, header-actions: Pages, Help, and
+     Settings, in that order, which site.css keeps on the header's first line at every width. The
+     Pages button opens the Pages drawer, keys.js clicking it on P; site.css shows it only below the
+     drawer's dock, once the drawer is defined, and the page's script wires its click to the
+     drawer's show() and keeps its aria-expanded in step with the drawer's open and close events, as
      spike-html-hosting-components' README gives the opener. Help and Settings are the openers of
      the components' shortcut dialogs, each sending show-modal to its dialog by the invoker
      command, keys.js clicking it on its key: Help, on ?, opens dialog#help, headed "Keyboard
      shortcuts", whose sl-shortcuts lists every binding the page has outside it, the section
-     tree's H and L among them; Settings, on S, opens dialog#settings, headed "Settings", whose
+     tree's J and K among them; Settings, on S, opens dialog#settings, headed "Settings", whose
      sl-settings applies and stores the theme and the keyboard settings at once, the switch that
      turns the character keys off (WCAG 2.1.4) among them. Each dialog is named by its heading
      through aria-labelledby and closed by its Close or by Escape. Each header button, and each
@@ -39,6 +40,8 @@
      Adapted from spike-html-hosting-components (e3e60a8): README.md, sl-drawer's header, its
      header-actions group, the Settings opener, each glyph button's class and interest hint, and
      the shortcut dialogs, Help's and Settings', each with its heading, its content, and its Close.
+     Adapted from spike-html-hosting-components (c5bcf30): README.md, sl-drawer's script, each
+     drawer closed as a link in it is followed.
      Adapted from spike-html-apps-foundation (18e0c55): demo/keys.html, its Help button.
      From spike-html-hosting-sdk (v{{version}}): template/index.html. -->
 <html lang="en">
@@ -54,20 +57,29 @@
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
-    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
     <script type="module" blocking="render">
-      // The Pages button opens the Pages drawer, which holds the site index, and says through
-      // aria-expanded whether it is open.
-      const drawer = document.querySelector("sl-drawer#pages");
-      const opener = document.querySelector(".pages-opener");
-      opener.addEventListener("click", () => drawer.show());
-      const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
-      drawer.addEventListener("open", expanded);
-      drawer.addEventListener("close", expanded);
+      // Each drawer the page has, Pages, which holds the site index, and Contents, which holds
+      // the section tree, closes as a link in it is followed, so the link's navigation and its
+      // scroll land on the page the drawer covered; the drawer leaves that to the page. Each
+      // drawer's button in the header, which names it by aria-controls, opens it and says
+      // through aria-expanded whether it is open.
+      for (const id of ["pages", "contents"]) {
+        const drawer = document.getElementById(id);
+        if (!drawer) continue;
+        drawer.addEventListener("click", (event) => {
+          if (event.target instanceof Element && event.target.closest("a[href]")) drawer.close();
+        });
+        const opener = document.querySelector(`[aria-controls="${id}"]`);
+        if (!opener) continue;
+        opener.addEventListener("click", () => drawer.show());
+        const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
+        drawer.addEventListener("open", expanded);
+        drawer.addEventListener("close", expanded);
+      }
     </script>
   </head>
   <body>

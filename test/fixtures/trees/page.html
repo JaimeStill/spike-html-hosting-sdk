@@ -4,9 +4,9 @@
      the page's body, while its index.html is a hand page of its own, as a site whose index is
      written by hand keeps it. Its markup is the fixture site's shell's, index.html there: the
      foundation's full page entry, registrations, preferences, and keys modules, the components'
-     glyph-button.css, the SDK's site.css, the components' seven elements, the Pages button and its
-     script, and the Help and Settings buttons and their shortcut dialogs, each button's glyph a
-     marker the build fills from the icons layer.
+     glyph-button.css, the SDK's site.css, the components' six elements, the Pages button and the
+     drawers' script, and the Help and Settings buttons and their shortcut dialogs, each button's
+     glyph a marker the build fills from the icons layer.
      From test/fixtures/site/index.html: its markup, its title the fixture's. -->
 <html lang="en">
   <head>
@@ -21,20 +21,29 @@
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
-    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
     <script type="module" blocking="render">
-      // The Pages button opens the Pages drawer, which holds the site index, and says through
-      // aria-expanded whether it is open.
-      const drawer = document.querySelector("sl-drawer#pages");
-      const opener = document.querySelector(".pages-opener");
-      opener.addEventListener("click", () => drawer.show());
-      const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
-      drawer.addEventListener("open", expanded);
-      drawer.addEventListener("close", expanded);
+      // Each drawer the page has, Pages, which holds the site index, and Contents, which holds
+      // the section tree, closes as a link in it is followed, so the link's navigation and its
+      // scroll land on the page the drawer covered; the drawer leaves that to the page. Each
+      // drawer's button in the header, which names it by aria-controls, opens it and says
+      // through aria-expanded whether it is open.
+      for (const id of ["pages", "contents"]) {
+        const drawer = document.getElementById(id);
+        if (!drawer) continue;
+        drawer.addEventListener("click", (event) => {
+          if (event.target instanceof Element && event.target.closest("a[href]")) drawer.close();
+        });
+        const opener = document.querySelector(`[aria-controls="${id}"]`);
+        if (!opener) continue;
+        opener.addEventListener("click", () => drawer.show());
+        const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
+        drawer.addEventListener("open", expanded);
+        drawer.addEventListener("close", expanded);
+      }
     </script>
   </head>
   <body>

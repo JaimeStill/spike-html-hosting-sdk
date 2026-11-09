@@ -63,7 +63,7 @@ site reads as they are, each through package.json's `exports`:
 | --- | --- |
 | `./css-module-scripts.js` | `cssModuleScripts()`, the Vite plugin that rewrites each CSS module script the foundation's modules hold to a constructed `CSSStyleSheet` |
 | `./render-blocking.js` | `renderBlocking()`, the Vite plugin that keeps each page's entry script render-blocking, each page running only its own scripts |
-| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders one copied Markdown tree, or several, into pages, its fenced code highlighted and its GitHub alerts callouts, and fills every page's glyph markers, `<svg data-icon="<set>/<name>"></svg>`, with the icons layer's svgs, with `Options` and `TreeOptions`, a tree's source; its renderer, `render()`; the markup it writes for the components, `pageHeader`, `sectionTree`, and `siteIndex`, with `frontMatterText`, a front matter value's text; and `docks`, the widths the layout docks the side columns from |
+| `./markdown-pages.js` | `markdownPages(options)`, the Vite plugin that renders one copied Markdown tree, or several, into pages, its fenced code highlighted and its GitHub alerts callouts, and fills every page's glyph markers, `<svg data-icon="<set>/<name>"></svg>`, with the icons layer's svgs, with `Options` and `TreeOptions`, a tree's source; its renderer, `render()`; the markup it writes, `frontMatterMeta`, the front matter as head meta, and, for the components, `sectionTree` and `siteIndex`, with `frontMatterText`, a front matter value's text; and `docks`, the widths the layout docks the side columns from |
 | `./syntax.js` | `SyntaxTheme`, a palette's syntax theme; `builtinSyntax`, one for each of the foundation's palettes; `checkSyntax(theme)`, the syntax theme check; and `createSyntax(themes, langs)`, the highlighter the plugin makes |
 | `./eslint.js` | `config`, a site's ESLint configuration with the leftover check, and `build`, the globs it reads as the build |
 | `./content.js` | `checkContent(root)`, the content check; `Content`, content.json's record, one `Tree` or `{ trees: Tree[] }`; `treeDir(repository)`, a tree's directory; `copiedFiles(root)`, every copied file's path under `content/`; and `blob(bytes)`, git's blob hash |
@@ -116,22 +116,21 @@ export default defineConfig({
 });
 ```
 
-`cssModuleScripts` parses the foundation's modules under `node_modules/@jaimestill/` and makes
-each sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone
-doesn't support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one
-empty `<main></main>`, with each Markdown file under `dir`, and fails the build on a relative
-link it can't place; `external` lists files the source holds that aren't copied. It writes each
-page's header, section tree, and site index, as the pages below describe, and highlights each
-fenced block at build, as the syntax themes below describe. `renderBlocking` builds every module
-a page's entry loads statically into one chunk, `index`, so each page keeps one entry tag however
-rolldown would split the modules every page shares, and fails the build on a page with no entry
-script, or more than one; a module loaded only by a dynamic import, as the theme menu is, keeps a
-chunk of its own. Since one chunk holds every page's modules, it keeps rolldown's
-`output.strictExecutionOrder`: each module's body is wrapped and runs only where a page's entry
-imports it, so each page runs only its own scripts, and a hand page beside the rendered pages never
-runs the shell's Pages drawer wiring. A page loads three JS files, its entry, the shared `index`
-chunk, and rolldown's runtime, the last two statically from the entry, so they block render as its
-one render-blocking tag does.
+`cssModuleScripts` parses the foundation's modules under `node_modules/@jaimestill/` and makes each
+sheet they import with `{ type: "css" }` one constructed `CSSStyleSheet`, which Vite alone doesn't
+support. `markdownPages` fills the site's `index.html` shell, one `<title>` and one empty
+`<main></main>`, with each Markdown file under `dir`, and fails the build on a relative link it
+can't place; `external` lists files the source holds that aren't copied. It writes each page's front
+matter meta, section tree, and site index, as the pages below describe, and highlights each fenced
+block at build, as the syntax themes below describe. `renderBlocking` builds every module a page's
+entry loads statically into one chunk, `index`, so each page keeps one entry tag however rolldown
+would split the modules every page shares, and fails the build on a page with no entry script, or
+more than one; a module loaded only by a dynamic import, as the theme menu is, keeps a chunk of its
+own. Since one chunk holds every page's modules, it keeps rolldown's `output.strictExecutionOrder`:
+each module's body is wrapped and runs only where a page's entry imports it, so each page runs only
+its own scripts, and a hand page beside the rendered pages never runs the shell's drawer wiring. A
+page loads three JS files, its entry, the shared `index` chunk, and rolldown's runtime, the last two
+statically from the entry, so they block render as its one render-blocking tag does.
 
 `markdownPages` also fills every glyph marker, an empty `<svg data-icon="<set>/<name>"></svg>`,
 in every page the build writes, the rendered pages' shell and a site's hand pages alike, with that
@@ -228,13 +227,18 @@ The shell checks, each named in `shell`, assert these:
 - Main holds its centered reading width at 1600px.
 - At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
   beside it on a page with one.
+- A page's section tree is in its Contents drawer, `sl-drawer#contents` labeled "Contents" and
+  docked from 70rem, the tree with no `dock` of its own; a page with no tree has no such drawer. At
+  70rem and at 1600px the drawer is docked, the tree a column beside main, where J marks and moves
+  to the first section, K back to the page's top, and H and L move to no section. At 390px and a
+  pixel under 70rem the drawer is closed and the tree hidden; opened by its `show()`, a modal, it
+  closes as a link in it is followed, and the link's section is marked.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
-  page: never into the header, or into the section tree's bar between them, and no further below
-  it than on a page taller than the viewport.
+  page: never into it, and no further below it than on a page taller than the viewport.
 - ? opens Help, whose `sl-shortcuts` lists exactly the page's bindings, as the foundation's keys
-  module holds them, the shell's P, ?, S, and the tree's H and L among them, and Escape closes it.
-  The character-key switch in Settings turns them off, so L and P do nothing, and on again. Every
-  header control that binds a key shows it in a `kbd`.
+  module holds them, the shell's P, ?, S, and the tree's J and K among them, none of H or L naming
+  a section, and Escape closes it. The character-key switch in Settings turns them off, so J and P
+  do nothing, and on again. Every header control that binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
   components' shortcut dialog pattern: it is named by a heading inside it through
   `aria-labelledby`, and has a Close, a glyph button with `command="close"` for it showing
@@ -266,20 +270,21 @@ counted, the copied pages no link from the index reaches, and the hand pages it 
 file's page it reaches loads with a 2xx, its one module script render-blocking, every custom element
 on it defined, every request under the base and none failed, main at its centered reading width at
 1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
-under the header, its Help and the switch in Settings, its shortcut dialogs, its glyph buttons and
-their size, and its header's row as the shell checks have them, and its title its source's front
-matter name or first h1. Its main opens with its page header, whose dt and dd pairs are the source's
-front matter keys and values, in order, with no front matter table left; its site index, in its
-Pages drawer, links every copied page the build writes, each once, and no hand page; its Pages
-button is hidden at 1600px and at 390px opens the drawer by its click and by P, its `aria-expanded`
-following the drawer open and closed; and every in-site link reaches a built page, and its
-fragment's element. Since each page's index links every other, the crawl reaches every page from the
-index. It checks a page for every Markdown file `content.json` records, every tree's, crawling from
-one no link reaches once the links run out. A page it reaches that no record names is a hand page
-the site builds, as a root-style site's index is: it loads with a 2xx, every request under the base
-and none failed, its ids the targets of the fragments linking it, and its links followed, but the
-copied pages' checks are left to the shell checks, which the site runs on it by its URL;
-`Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
+under the header, its section tree in its Contents drawer, its Help and the switch in Settings, its
+shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks have
+them, and its title its source's front matter name or first h1. Its head holds a `<meta name="<key>"
+content="<value>">` per front matter key, in order, the value as `frontMatterText` gives it, with no
+page header, front matter table, or visible list of its keys left, and no `key: value` line in its
+text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
+no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
+P, its `aria-expanded` following the drawer open and closed; and every in-site link reaches a built
+page, and its fragment's element. Since each page's index links every other, the crawl reaches every
+page from the index. It checks a page for every Markdown file `content.json` records, every tree's,
+crawling from one no link reaches once the links run out. A page it reaches that no record names is
+a hand page the site builds, as a root-style site's index is: it loads with a 2xx, every request
+under the base and none failed, its ids the targets of the fragments linking it, and its links
+followed, but the copied pages' checks are left to the shell checks, which the site runs on it by
+its URL; `Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -415,41 +420,46 @@ for (const path of ["", "briefs/orientation.html", "org/briefs/orientation.html"
 
 ### The pages
 
-`markdownPages` writes each page's data as the light-DOM markup of spike-html-hosting-components
-v0.4.0's elements, so with no script the page renders it as its own, and each element, once its
-module defines it, styles and marks it. The section tree, in a div, comes before main, then main,
-opened by the page header, then the site index in the Pages drawer:
+`markdownPages` writes each page's front matter into its head, and its navigation as the light-DOM
+markup of spike-html-hosting-components' elements, so with no script the page renders it as its
+own, and each element, once its module defines it, styles and marks it. The front matter's meta
+follows the title; main holds the body alone; then come the section tree in the Contents drawer
+and the site index in the Pages drawer:
 
 ```html
-<div class="section-tree">
-<sl-section-tree dock="70rem"><ul><li><a href="#usage">Usage</a><ul><li><a href="#options">Options</a></li></ul></li></ul></sl-section-tree>
-</div>
+<title>A page</title>
+<meta name="name" content="A page" />
+<meta name="tags" content="one, two" />
+…
 <main>
-<sl-page-header><dl><dt>name</dt><dd>A page</dd><dt>tags</dt><dd>one, two</dd></dl></sl-page-header>
 <h1 id="a-page">A page</h1>
 …
 </main>
+<sl-drawer id="contents" label="Contents" dock="70rem"><sl-section-tree><ul><li><a href="#usage">Usage</a><ul><li><a href="#options">Options</a></li></ul></li></ul></sl-section-tree></sl-drawer>
 <sl-drawer class="site-index" label="Pages" id="pages" dock="86rem"><sl-site-index><ul><li><a href="./">The site</a></li><li><a href="guide/">Guide</a><ul>…</ul></li></ul></sl-site-index></sl-drawer>
 ```
 
-- `sl-page-header` slots one dl, a dt for each front matter key and a dd for its value, in
-  source order, escaped; a sequence's dd is its items joined by ", ", a mapping's its
-  `key: value` pairs, as `frontMatterText` gives them. A page with no front matter has an empty
-  `sl-page-header`, which takes no space.
+- The front matter is a `meta` per key, named by the key as the source writes it, in source
+  order, its `content` the value, both escaped; a sequence's value is its items joined by ", ", a
+  mapping's its `key: value` pairs, as `frontMatterText` gives them. Nothing of it shows on the
+  page. A page with no front matter has no such meta. A key naming a meta the shell already
+  writes, as `viewport`, in any case, would give the page two, so it fails the build, naming the
+  file and the key.
 - `sl-section-tree` slots a list of the page's h2s, each linking the id its heading carries,
   percent-encoded, with its h3s in a nested list; an h3 before any h2 stands at the top level, and
-  a label is the heading's plain text. A page with neither has no tree and no `div.section-tree`.
-  It comes before main so that, as the bar in a narrow viewport, it sticks to the top of the
-  viewport from the page's own flow, and so a keyboard reaches it in the order the page shows it.
+  a label is the heading's plain text. It sits in `sl-drawer`, labeled "Contents", its id
+  `contents`, which the header's Contents button controls. A page with neither has no tree and no
+  Contents drawer. Both drawers come after main, so a keyboard reaches the body first.
 - `sl-site-index` slots a list of every copied page the build writes, nested by directory: the
   root's index page first, then each page by its title, and each directory by its index page's link,
   or a span of its name when it has none, over a nested list of its pages and directories, by name.
   Each link is relative to the page, as its body's are, so it resolves under any base. It sits in
   `sl-drawer`, labeled "Pages", its id `pages`, which the shell's Pages button controls.
 
-Each element's `dock` is the layout's, `docks` exported: `docks.tree`, 70rem, and `docks.index`,
+Each drawer's `dock` is the layout's, `docks` exported: `docks.tree`, 70rem, and `docks.index`,
 86rem. The renderer writes no `aria-current`: the components mark the section in view and the page
-on screen at runtime, and `site.css` paints those marks in a heavier weight. `render()` returns
+on screen at runtime; the section tree paints its own mark, and `site.css` paints the page's in a
+heavier weight. `render()` returns
 the page's `headings`, its h2s and h3s, beside its front matter, title, and HTML.
 
 Each body table is wrapped in a named, focusable region, which scrolls the table sideways in a
@@ -489,17 +499,18 @@ beside main's 80ch, measured in the foundation's default type and regular space 
 
 - 86rem and wider, three columns, `minmax(16rem, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the
   header across them, the Pages drawer docked in the start column, a framed column headed Pages,
-  main's reading width in the middle, centered with or without a tree, and the section tree in the
-  end column; the tree and the index each stay in view as the page scrolls, and scroll themselves
-  when taller than the viewport.
+  main's reading width in the middle, centered with or without a tree, and the Contents drawer
+  docked in the end column, a framed column headed Contents; each drawer stays in view as the page
+  scrolls, its body scrolling under its heading when taller than the viewport.
 - 70rem to 86rem, on a page with no section tree, `minmax(0, 1fr) minmax(0, 80ch) minmax(0, 1fr)`:
-  main centered between equal columns. On a page with one, `body:has(> .section-tree)`, only the
-  end column is held to 16rem, `minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the section
-  tree docked in the end column and main as near centered as fits. Either way the site index is in
-  the Pages drawer, a modal dialog the Pages button opens.
-- Narrower than 70rem, one column: the section tree is a bar stuck to the top of the viewport,
-  holding its reading progress and its Previous and Next buttons, its wrapper
-  `display: contents` so the bar sticks within the whole page; the site index stays in the drawer.
+  main centered between equal columns. On a page with one, `body:has(> #contents)`, only the end
+  column is held to 16rem, `minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr)`: the Contents
+  drawer docked in the end column and main as near centered as fits. Either way the Pages drawer is
+  a modal dialog the Pages button opens.
+- Narrower than 70rem, one column: both drawers are closed modals, taking no space in the page.
+
+Following a link in either drawer closes it, by the shell's script, so the link's navigation and
+its scroll land on the page the drawer covered; the drawer leaves that to the page.
 
 Main's track may shrink, main breaks long words while the components' navigation never breaks
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
@@ -509,17 +520,17 @@ and stays on the nav's first line at every width. Each button, and each shortcut
 a glyph button, laid out by the components' `glyph-button.css`, which the shell links between the
 foundation's entry and `site.css`.
 
-The shell wires the components in: it loads their seven modules, `site-nav.js`, `site-index.js`,
-`page-header.js`, `section-tree.js`, `drawer.js`, `shortcuts.js`, and `settings.js`,
-render-blocking like the foundation's, from `github:JaimeStill/spike-html-hosting-components`, at
-a release that holds `sl-shortcuts` and `sl-settings`; places `sl-site-nav`, which takes no
-content, at its header's start, with no `src`, so it lists the components' built `SITES`; and adds
-the Pages button first in the header's group, as the components' README gives it. keys.js clicks the
-button on P, as it does Settings on S; `site.css` shows it only below 86rem, the drawer's dock, and
-only once the drawer is defined, so with no script it stays hidden and the index renders as the
-page's own; and the page's script opens the drawer on its click and keeps its `aria-expanded` in
-step with the drawer's `open` and `close` events. The drawer, open, is a modal: Escape or its Close
-button closes it.
+The shell wires the components in: it loads their six modules, `site-nav.js`, `site-index.js`,
+`section-tree.js`, `drawer.js`, `shortcuts.js`, and `settings.js`, render-blocking like the
+foundation's, from `github:JaimeStill/spike-html-hosting-components`, at a release that holds
+`sl-shortcuts` and `sl-settings`; places `sl-site-nav`, which takes no content, at its header's
+start, with no `src`, so it lists the components' built `SITES`; and adds the Pages button first in
+the header's group, as the components' README gives it. keys.js clicks the button on P, as it does
+Settings on S; `site.css` shows it only below 86rem, the drawer's dock, and only once the Pages
+drawer is defined, so with no script it stays hidden and the index renders as the page's own; and
+the page's script opens the drawer on its click, keeps its `aria-expanded` in step with the drawer's
+`open` and `close` events, and closes each drawer, Pages and Contents, as a link in it is followed.
+The drawer, open, is a modal: Escape, its Close button, or a followed link closes it.
 
 A site's shell carries two shortcut dialogs, as the components' README gives the pattern: a key
 and its opener, a glyph button in the header with `commandfor` and `command="show-modal"`, open a
@@ -527,7 +538,7 @@ native modal dialog named by its heading through `aria-labelledby`, holding what
 needs, and closed by its Close, a glyph button with `command="close"` showing `<kbd>Esc</kbd>`, or
 by Escape. Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds
 `sl-shortcuts` alone: it lists every binding the page has outside the dialog, the Pages button's
-P, the Help button's ?, the Settings button's S, and the section tree's H and L, each named by its
+P, the Help button's ?, the Settings button's S, and the section tree's J and K, each named by its
 element's `aria-label` or its registered label. Settings, under S, opens `dialog#settings`, headed
 "Settings", which holds `sl-settings`: the theme, a row each for color, scheme, space, and type
 beside a preview, and the keyboard, among it the switch that turns the character keys off (WCAG
@@ -552,18 +563,24 @@ fill fails it.
 <link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-index.js"></script>
-<script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/page-header.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
 <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
 <script type="module" blocking="render">
-  const drawer = document.querySelector("sl-drawer#pages");
-  const opener = document.querySelector(".pages-opener");
-  opener.addEventListener("click", () => drawer.show());
-  const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
-  drawer.addEventListener("open", expanded);
-  drawer.addEventListener("close", expanded);
+  for (const id of ["pages", "contents"]) {
+    const drawer = document.getElementById(id);
+    if (!drawer) continue;
+    drawer.addEventListener("click", (event) => {
+      if (event.target instanceof Element && event.target.closest("a[href]")) drawer.close();
+    });
+    const opener = document.querySelector(`[aria-controls="${id}"]`);
+    if (!opener) continue;
+    opener.addEventListener("click", () => drawer.show());
+    const expanded = () => opener.setAttribute("aria-expanded", String(drawer.open));
+    drawer.addEventListener("open", expanded);
+    drawer.addEventListener("close", expanded);
+  }
 </script>
 …
 <header>
@@ -803,13 +820,13 @@ exports alone:
   exists, so the site holds its copy.
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`, the
   shell, with the foundation's full page entry, its preferences and keys modules, the components'
-  seven modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
+  six modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
   the Help button on ?, and the Settings button on S, each a glyph button showing its glyph and its
   key hint, named by its `aria-label` and its interest hint, the Help and Settings shortcut
   dialogs, holding `sl-shortcuts` and `sl-settings`, each Close showing its glyph and Esc, the
-  script that opens the Pages drawer, and the components' `glyph-button.css` and the SDK's
-  stylesheet; the
-  sample copied tree, `content/` and `content.json`.
+  script that opens the Pages drawer and closes each drawer at a followed link, and the components'
+  `glyph-button.css` and the SDK's stylesheet; the sample copied tree, `content/` and
+  `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and
   `.prettierignore` on the SDK's configurations; `gitignore`, which the scaffold restores as
   `.gitignore`, since a pack never carries one.

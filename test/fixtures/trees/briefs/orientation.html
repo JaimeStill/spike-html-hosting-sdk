@@ -1,7 +1,8 @@
 <!doctype html>
 <!-- The trees fixture's hand page at a path under the base other than its own, briefs/, as the
-     root's hand orientation page is: written as HTML, with the section tree over its own headings,
-     which the shell checks hold under the base by its URL. Its header is the index's; it links the
+     root's hand orientation page is: written as HTML, with the section tree over its own headings
+     in its Contents drawer, which its script closes as a link in it is followed, all of which the
+     shell checks hold under the base by its URL. Its header is the index's; it links the
      orientation brief's rendered page, and the rendered page's alert is written here as the
      renderer writes one, so site.css draws it the same. -->
 <html lang="en">
@@ -17,8 +18,17 @@
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
+    <script type="module" blocking="render">
+      // The Contents drawer closes as a link in it is followed, as the rendered pages' shell has
+      // each drawer close.
+      const contents = document.getElementById("contents");
+      contents.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest("a[href]")) contents.close();
+      });
+    </script>
   </head>
   <body>
     <header>
@@ -54,14 +64,6 @@
         <div id="settings-hint" class="glyph-hint" popover="hint" aria-hidden="true">Settings</div>
       </div>
     </header>
-    <div class="section-tree">
-      <sl-section-tree dock="70rem">
-        <ul>
-          <li><a href="#the-org">The org</a></li>
-          <li><a href="#the-briefs">The briefs</a></li>
-        </ul>
-      </sl-section-tree>
-    </div>
     <main>
       <h1>Orientation, by hand</h1>
       <div class="markdown-alert markdown-alert-important">
@@ -73,6 +75,14 @@
       <h2 id="the-briefs">The briefs</h2>
       <p>A brief by hand adds what Markdown can't hold.</p>
     </main>
+    <sl-drawer id="contents" label="Contents" dock="70rem">
+      <sl-section-tree>
+        <ul>
+          <li><a href="#the-org">The org</a></li>
+          <li><a href="#the-briefs">The briefs</a></li>
+        </ul>
+      </sl-section-tree>
+    </sl-drawer>
     <dialog id="help" aria-labelledby="help-title">
       <h2 id="help-title">Keyboard shortcuts</h2>
       <sl-shortcuts></sl-shortcuts>

@@ -6,6 +6,6 @@ tags:
   - two
 ---
 
-Its body, after its page header.
+Its body; its front matter is the page's head meta.
 
 [Back to the index](README.md)

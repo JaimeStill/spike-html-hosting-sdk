@@ -8,15 +8,18 @@
 // the site index's words in a narrow column, or holds the docked drawer's column under 16rem, the
 // navigation check fails, naming the width and the word or the column. A px below and at each of
 // the layout's docks, on the guide's page, which has both side columns, site.css lays each out as
-// its component's dock attribute has it: a docked tree beside main at its end and a bar above it
-// otherwise, a docked drawer beside main at its start with the Pages button hidden, and the button
-// shown otherwise. With a sheet that holds the end column to 16rem on a page with no section tree,
-// the between-docks check fails on the index, naming main's off-center margins, and with the
-// guide's tree moved to the start column it fails naming the tree. The index and the orphan page
-// are shorter than the viewport at 390px, 1200px, and 1600px, so the body's min-height leaves room
-// under them, and with v0.3.0's grid, whose rows stretch into it, the under-header check and the
-// crawl fail on the index, naming the width and main's gap; at 390px, with a flex column whose auto
-// margin pushes main to the body's end, the check fails as well, and with main pulled up into the
+// its drawer's dock attribute has it: the Contents drawer docked beside main at its end, its tree
+// shown, and closed otherwise, the tree hidden; the Pages drawer docked beside main at its start
+// with the Pages button hidden, and the button shown otherwise. With a sheet that holds the end
+// column to 16rem on a page with no section tree, the between-docks check fails on the index,
+// naming main's off-center margins, and with the guide's Contents drawer moved to the start column
+// it fails naming the tree. With the Contents drawer's close() closing nothing, the section tree
+// check fails on the guide, naming the width and the drawer a followed link left open. The index
+// and the orphan page are shorter than the viewport at 390px, 1200px, and 1600px, so the body's
+// min-height leaves room under them, and with v0.3.0's grid, whose rows stretch into it, the
+// under-header check and the crawl fail on the index, naming the width and main's gap; at 390px,
+// with a flex column whose auto margin pushes main to the body's end, the check fails as well, and
+// with main pulled up into the
 // header it fails naming the overlap. With the shell's Help dialog removed, the Settings button's
 // binding removed, a row of Help's list removed, the Settings button's kbd removed, as the Theme
 // button's markup before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the
@@ -47,6 +50,7 @@ import {
   hasTargetSize,
   keepsHeaderRow,
   opensKeysHelp,
+  placesSectionTree,
   requestsUnderBase,
   shell,
   showsGlyphs,
@@ -194,7 +198,7 @@ describe("the fixture site with its navigation cramped", () => {
       await assert.rejects(keepsNavigationWords(page, server.origin), (error: Error) => {
         assert.match(
           error.message,
-          /\/fixture-site\/: at 1376px the docked sl-drawer is [\d.]+px wide, under 16rem/,
+          /\/fixture-site\/: at 1376px the docked sl-drawer#pages is [\d.]+px wide, under 16rem/,
         );
         return true;
       });
@@ -222,20 +226,20 @@ describe("the fixture site's layout at its docks", () => {
         await page.goto(`${server.origin}guide/`);
         await page.evaluate(SETTLED);
         const layout: {
-          tree: { docked: boolean; beside: boolean; above: boolean };
+          tree: { docked: boolean; beside: boolean; shown: boolean };
           drawer: { docked: boolean; beside: boolean };
           opener: boolean;
         } = await page.evaluate(`(() => {
           const main = document.querySelector("main").getBoundingClientRect();
-          const tree = document.querySelector("sl-section-tree");
+          const tree = document.querySelector("sl-drawer#contents > sl-section-tree");
           const drawer = document.querySelector("sl-drawer#pages");
           const t = tree.getBoundingClientRect();
           const d = drawer.getBoundingClientRect();
           return {
             tree: {
-              docked: tree.matches(":state(docked)"),
-              beside: t.left >= main.right,
-              above: t.bottom <= main.top,
+              docked: tree.parentElement.matches(":state(docked)"),
+              beside: t.width > 0 && t.left >= main.right,
+              shown: tree.checkVisibility(),
             },
             drawer: {
               docked: drawer.matches(":state(docked)"),
@@ -244,11 +248,15 @@ describe("the fixture site's layout at its docks", () => {
             opener: getComputedStyle(document.querySelector(".pages-opener")).display !== "none",
           };
         })()`);
-        assert.equal(layout.tree.docked, width >= px(docks.tree), "the tree docks from its dock");
-        assert.ok(
-          layout.tree.docked ? layout.tree.beside : layout.tree.above,
-          `the tree is ${layout.tree.docked ? "beside main, at its end" : "a bar above main"}`,
+        assert.equal(
+          layout.tree.docked,
+          width >= px(docks.tree),
+          "the Contents drawer docks from its dock",
         );
+        assert.equal(layout.tree.shown, layout.tree.docked, "the tree shows only docked");
+        if (layout.tree.docked) {
+          assert.ok(layout.tree.beside, "the docked tree is beside main, at its end");
+        }
         assert.equal(
           layout.drawer.docked,
           width >= px(docks.index),
@@ -289,15 +297,34 @@ describe("the fixture site with its index off-center between the docks", () => {
   });
 
   test("the section tree out of its end column fails the between-docks check", async () => {
-    // The guide's docked tree moved to the start column, before main.
+    // The guide's docked Contents drawer moved to the start column, before main.
     const page = await withSheet(
-      "@media (width >= 70rem) { body > .section-tree { grid-column: 1 !important; } }",
+      "@media (width >= 70rem) { body > #contents { grid-column: 1 !important; } }",
     );
     try {
       await assert.rejects(holdsBetweenDocks(page, `${server.origin}guide/`), (error: Error) => {
         assert.match(
           error.message,
           /\/fixture-site\/guide\/: at 1200px the section tree is docked beside main/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with its Contents drawer left open", () => {
+  test("a drawer a followed link leaves open fails the section tree check", async () => {
+    // The guide's Contents drawer, whose close() the shell's script calls at a link's click,
+    // closing nothing.
+    const page = await withChange(`document.getElementById("contents").close = () => {};`);
+    try {
+      await assert.rejects(placesSectionTree(page, `${server.origin}guide/`), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/guide\/: at 390px following a link in the Contents drawer closes it/,
         );
         return true;
       });

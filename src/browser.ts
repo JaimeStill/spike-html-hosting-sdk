@@ -19,16 +19,20 @@
 // fails, and the foundation's theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts
 // stand in for, are never requested; in a 1600px viewport the site's layout holds main to a
 // reading width, centered; at 1200px, between the layout's docks, main is centered on a page with
-// no section tree, and the tree is docked beside it on a page with one; at 390px, between the
-// docks, and at 1600px, main starts directly under the header, the gap from the header's bottom,
-// or the section tree bar's where it sits between them, never below zero and no more than on a
-// page taller than the viewport, however short the page; ? opens Help, whose sl-shortcuts lists
-// exactly the page's bindings as the foundation's keys module holds them, the shell's P, ?, S, and
-// the tree's H and L among them, Escape closes it, and the character-key switch in Settings turns
-// them off, so L moves to no section and P opens no drawer, and on again; every dialog a keyed
-// show-modal opener opens follows the components' shortcut dialog pattern, named by a heading
-// inside it, closed by a Close glyph button showing Esc, its opener showing its key and named,
-// with an interest hint showing the name; in a 390px viewport each header button, Pages where the
+// no section tree, and the tree is docked beside it on a page with one; a page's section tree is in
+// its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
+// and K move through its sections, marking each, and H and L move to none, and below the dock, at
+// 390px and a px under it, a closed drawer, whose show() opens it and in which following a link
+// closes it and marks the link's section, and a page with no tree has no Contents drawer; at
+// 390px, between the docks, and at 1600px, main starts directly under the header, the gap from
+// the header's bottom never below zero and no more than on a page taller than the viewport,
+// however short the page; ? opens Help, whose sl-shortcuts lists exactly the page's bindings as
+// the foundation's keys module holds them, the shell's P, ?, S, and the tree's J and K among
+// them, no H or L naming a section, Escape closes it, and the character-key switch in Settings
+// turns them off, so J moves to no section and P opens no drawer, and on again; every dialog a
+// keyed show-modal opener opens follows the components' shortcut dialog pattern, named by a heading
+// inside it, closed by a Close glyph button showing Esc, its opener showing its key and named, with
+// an interest hint showing the name; in a 390px viewport each header button, Pages where the
 // shell has one, Help, and Settings, and each shortcut dialog's Close each show one glyph, the
 // icons layer's svg for list-unordered-16, question-16, gear-16, and x-16, and the key hint in a
 // kbd, Esc for a Close, both rendered, and no word, each named by its aria-label; every rendered
@@ -54,15 +58,17 @@
 // script render-blocking, every custom element on it defined, every request under the base and none
 // failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
 // sideways in a 390px one, its navigation laid out as the shell check has it at the same widths,
-// its layout between the docks, its main under the header, its Help and the switch in Settings,
+// its layout between the docks, its section tree in its Contents drawer, its main under the
+// header, its Help and the switch in Settings,
 // its shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks
 // have them, and its title its source's front matter name, or, for a source with no name, its
 // first h1's text. Its Pages button is hidden at 1600px,
 // where the site index is docked, and at 390px is shown and opens the Pages drawer as a modal by
 // its click and by P, its aria-expanded true while the drawer is open and false once Escape closes
-// it. Each page's main opens with its page header, whose dl holds a dt and a dd per front matter
-// key, in source order, each key and value as the source holds it, and none for a source with no
-// front matter; no front matter table remains, and no key's line shows as body text. Each page's
+// it. Each page's head holds a meta per front matter key, named by the key, in source order, its
+// content the value as frontMatterText gives it, and none for a source with no front matter; no
+// page header, no front matter table, and no visible list of its keys remains, and no key's
+// "key: value" line is the page's text. Each page's
 // site index, in its Pages drawer, links every copied file's page, each once, and no other. Every
 // in-site link reaches a built page, and an element with its fragment's id when it has one. The
 // crawl checks a page for every Markdown file content.json records, every tree's: a page no link
@@ -341,11 +347,12 @@ const NAVIGATION = [
 /** The loaded page's navigation as laid out: each word of a navigation link's text, the site
  * nav's in its shadow root, the section tree's, and the site index's, that renders on more than
  * one line, broken inside it, by its range's client rects, a word on one line being one line's
- * rects; and each docked side column's width, the section tree's and the drawer's in their
- * docked state. A word is a run of neither space nor hyphen, with the hyphen that ends it: a
- * hyphenated compound, as "artifact-keyed", may wrap after its hyphen, where the line breaking
- * the components keep (overflow-wrap and word-break normal) wraps it, but no word breaks
- * elsewhere. A link not rendered, in the bar or the closed drawer, has no rects. */
+ * rects; and each docked side column's width, each drawer's in its docked state, the Contents
+ * drawer's holding the section tree and the Pages drawer's the site index. A word is a run of
+ * neither space nor hyphen, with the hyphen that ends it: a hyphenated compound, as
+ * "artifact-keyed", may wrap after its hyphen, where the line breaking the components keep
+ * (overflow-wrap and word-break normal) wraps it, but no word breaks elsewhere. A link not
+ * rendered, in a closed drawer, has no rects. */
 const NAVIGATION_LAYOUT = `(() => {
   const links = [
     ...[...document.querySelectorAll("sl-site-nav")]
@@ -367,9 +374,12 @@ const NAVIGATION_LAYOUT = `(() => {
       }
     }
   }
-  const columns = [...document.querySelectorAll("sl-section-tree, sl-drawer")]
+  const columns = [...document.querySelectorAll("sl-drawer")]
     .filter((element) => element.matches(":state(docked)"))
-    .map((element) => ({ name: element.localName, width: element.getBoundingClientRect().width }));
+    .map((element) => ({
+      name: element.localName + (element.id ? "#" + element.id : ""),
+      width: element.getBoundingClientRect().width,
+    }));
   return { broken, columns };
 })()`;
 
@@ -496,6 +506,162 @@ async function assertBetweenDocks(page: Page, url: string): Promise<void> {
   }
 }
 
+/** The widths the section tree is checked docked at, its dock and 1600px, and in the closed
+ * Contents drawer at, a phone's and a px below its dock. */
+const DOCKED = [px(docks.tree), 1600];
+const UNDOCKED = [390, px(docks.tree) - 1];
+
+/** The loaded page's section tree as laid out, null with none: the count of trees; whether its
+ * parent is the Contents drawer, sl-drawer#contents labeled "Contents", and that drawer's dock;
+ * whether the tree carries a dock of its own; whether the drawer is docked, and open as a modal
+ * dialog; whether the tree renders; whether it is beside main, at its end; and the href of its
+ * first link, the first section J moves to. */
+const CONTENTS = `(() => {
+  const tree = document.querySelector("sl-section-tree");
+  if (!tree) return null;
+  const drawer = tree.parentElement;
+  const main = document.querySelector("main").getBoundingClientRect();
+  return {
+    trees: document.querySelectorAll("sl-section-tree").length,
+    drawer: drawer.matches('sl-drawer#contents[label="Contents"]'),
+    dock: drawer.getAttribute("dock"),
+    treeDock: tree.hasAttribute("dock"),
+    docked: drawer.matches(":state(docked)"),
+    modal: !!drawer.shadowRoot?.querySelector("dialog")?.matches(":modal"),
+    shown: tree.checkVisibility(),
+    beside: tree.getBoundingClientRect().left >= main.right,
+    first: tree.querySelector('a[href^="#"]')?.getAttribute("href") ?? null,
+  };
+})()`;
+
+/** The section tree's last link, which the check follows in the open drawer. */
+const LAST_LINK = `[...document.querySelectorAll('sl-section-tree a[href^="#"]')].at(-1)`;
+
+/** Sets a viewport width wide, 900px tall, scrolled to the page's top, the section tree's held
+ * stop released by the scroll. */
+async function atWidth(page: Page, width: number): Promise<void> {
+  await page.cdp("Emulation.setDeviceMetricsOverride", {
+    width,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  await page.evaluate(SETTLED);
+}
+
+/**
+ * Asserts the loaded page's section tree, where it has one: one tree, in the Contents drawer,
+ * sl-drawer#contents labeled "Contents" and docked from the layout's tree dock, the tree with no
+ * dock of its own. At its dock and at 1600px the drawer is docked, the tree rendered as a column
+ * beside main, at its end, and, under reduced motion so each move is instant, J marks the first
+ * section and scrolls to it, H and L move to no section and scroll nowhere, and K returns to the
+ * page's top, no section marked. At a phone's width and a px below the dock the drawer is closed,
+ * the tree not rendered; its show() opens it as a modal with the tree rendered, and following the
+ * tree's last link closes it, its fragment the URL's and its section marked. A page with no tree
+ * has no Contents drawer. The fragment and the emulated motion are put back after.
+ */
+async function assertContents(page: Page, url: string): Promise<void> {
+  type Contents = {
+    trees: number;
+    drawer: boolean;
+    dock: string | null;
+    treeDock: boolean;
+    docked: boolean;
+    modal: boolean;
+    shown: boolean;
+    beside: boolean;
+    first: string | null;
+  };
+  const initial: Contents | null = await page.evaluate(CONTENTS);
+  if (initial === null) {
+    assert.equal(
+      await page.evaluate(`document.getElementById("contents")`),
+      null,
+      `${url}: with no section tree, it has no Contents drawer`,
+    );
+    return;
+  }
+  assert.equal(initial.trees, 1, `${url}: one section tree`);
+  assert.ok(initial.drawer, `${url}: its section tree is in the Contents drawer`);
+  assert.equal(initial.dock, docks.tree, `${url}: the Contents drawer docks from ${docks.tree}`);
+  assert.equal(initial.treeDock, false, `${url}: the section tree takes no dock of its own`);
+  const scrolled = `Math.round(document.documentElement.scrollTop)`;
+  await page.cdp("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
+  try {
+    for (const width of DOCKED) {
+      await atWidth(page, width);
+      const contents: Contents = await page.evaluate(CONTENTS);
+      assert.deepEqual(
+        { docked: contents.docked, modal: contents.modal, shown: contents.shown },
+        { docked: true, modal: false, shown: true },
+        `${url}: at ${width}px the Contents drawer is docked, the section tree shown`,
+      );
+      assert.ok(contents.beside, `${url}: at ${width}px the section tree is beside main`);
+      assert.equal(await page.evaluate(MARKED), null, `${url}: at the top no section is marked`);
+      await press(page, "j");
+      await page.evaluate(SETTLED);
+      assert.equal(
+        await page.evaluate(MARKED),
+        contents.first,
+        `${url}: at ${width}px J marks the first section`,
+      );
+      const at: number = await page.evaluate(scrolled);
+      for (const key of ["h", "l"]) {
+        await press(page, key);
+        await page.evaluate(SETTLED);
+        assert.deepEqual(
+          { marked: await page.evaluate(MARKED), at: await page.evaluate(scrolled) },
+          { marked: contents.first, at },
+          `${url}: at ${width}px ${key.toUpperCase()} moves to no section`,
+        );
+      }
+      await press(page, "k");
+      await page.evaluate(SETTLED);
+      assert.deepEqual(
+        { marked: await page.evaluate(MARKED), at: await page.evaluate(scrolled) },
+        { marked: null, at: 0 },
+        `${url}: at ${width}px K returns to the page's top`,
+      );
+    }
+    for (const width of UNDOCKED) {
+      await atWidth(page, width);
+      let contents: Contents = await page.evaluate(CONTENTS);
+      assert.deepEqual(
+        { docked: contents.docked, modal: contents.modal, shown: contents.shown },
+        { docked: false, modal: false, shown: false },
+        `${url}: at ${width}px the Contents drawer is closed, the section tree hidden`,
+      );
+      await page.evaluate(`document.getElementById("contents").show()`);
+      await until(page, `${CONTENTS}.modal`).catch(() =>
+        assert.fail(`${url}: at ${width}px show() opens the Contents drawer`),
+      );
+      contents = await page.evaluate(CONTENTS);
+      assert.ok(contents.shown, `${url}: at ${width}px the open drawer shows the section tree`);
+      const href: string = await page.evaluate(`${LAST_LINK}.getAttribute("href")`);
+      await clickOn(page, LAST_LINK, "the section tree's last link").catch((error: Error) =>
+        assert.fail(`${url}: at ${width}px ${error.message}`),
+      );
+      await until(page, `!${CONTENTS}.modal`).catch(() =>
+        assert.fail(`${url}: at ${width}px following a link in the Contents drawer closes it`),
+      );
+      await until(page, `${MARKED} === ${JSON.stringify(href)}`).catch(() =>
+        assert.fail(`${url}: at ${width}px the followed link's section, ${href}, is marked`),
+      );
+      assert.equal(
+        await page.evaluate(`location.hash`),
+        href,
+        `${url}: at ${width}px the followed link's fragment is the URL's`,
+      );
+      await page.evaluate(`history.replaceState(null, "", location.pathname + location.search)`);
+    }
+  } finally {
+    await page.cdp("Emulation.setEmulatedMedia", { features: [] });
+  }
+}
+
 /** The widths main is checked to start under the header at, each with the viewport setter its
  * check uses: a phone's, where the body is one column; BETWEEN, a grid with the drawer undocked;
  * and 1600px, a grid with it docked. */
@@ -506,18 +672,15 @@ const UNDER: [number, (page: Page) => Promise<unknown>][] = [
 ];
 
 /** The loaded page's gap between the header and main, scrolled to the top: main's top less the
- * bottom of the box above it, the header's, or the section tree's where it is the bar between
- * them, a docked tree being beside main, not above it; and the layout's own gap there, the same
+ * header's bottom, nothing sitting between them, each drawer docked beside main or closed; and the
+ * layout's own gap there, the same
  * gap once a spacer at main's end makes the page taller than the viewport, so the body's
  * min-height leaves no room for rows, alignment, or auto margins to push main down, and removed
  * after. */
 const UNDER_HEADER = `(() => {
   scrollTo({ top: 0, behavior: "instant" });
   const main = document.querySelector("main");
-  const tree = document.querySelector("sl-section-tree");
-  const above = tree && !tree.matches(":state(docked)") && tree.getBoundingClientRect().height > 0
-    ? tree
-    : document.querySelector("body > header");
+  const above = document.querySelector("body > header");
   const gap = () => main.getBoundingClientRect().top - above.getBoundingClientRect().bottom;
   const gaps = { above: above.localName, gap: gap() };
   const spacer = document.createElement("div");
@@ -823,11 +986,11 @@ const TARGETS = `(() => {
   return found;
 })()`;
 
-/** Asserts every glyph button the loaded page renders, at 390px, where the Pages button and the
- * section tree's bar show, and at 1600px, where the drawer and the tree are docked, is at least
- * 24 CSS px a side, in the regular and the compact space profiles; and, with each dialog a keyed
- * show-modal opener opens shown as a modal in turn, each glyph button it renders too, its Close
- * among them, then closed. The root's own data-space is put back after. */
+/** Asserts every glyph button the loaded page renders, at 390px, where the Pages button shows, and
+ * at 1600px, where both drawers are docked, is at least 24 CSS px a side, in the regular and the
+ * compact space profiles; and, with each dialog a keyed show-modal opener opens shown as a modal
+ * in turn, each glyph button it renders too, its Close among them, then closed. The root's own
+ * data-space is put back after. */
 async function assertTargetSize(page: Page, url: string): Promise<void> {
   const space: string | null = await page.evaluate(attribute("data-space"));
   const dialogs: string[] = await page.evaluate(OPENED_DIALOGS);
@@ -986,12 +1149,12 @@ async function turnCharacterKeys(page: Page, url: string): Promise<HelpRow[]> {
  * whose sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them
  * (PAGE_BINDINGS), each once, among them the shell's: P, the Pages button's, where the shell has
  * one, shown as the drawer isn't docked; ?, the Help button's; S, the Settings button's; and,
- * where the page has a section tree, H and L, its previous and next section. Escape closes Help.
- * Turning the character-key switch in the Settings dialog off marks each of them off in Help, and
- * L then marks no other section and P opens no drawer; turning it on again, L moves to another
- * section. The reader's keys settings are cleared after, so no other check runs with the keys
- * off. Every control in the header that binds a key shows it in a kbd, upper-cased as Help's rows
- * show it.
+ * where the page has a section tree, J and K, its next and previous section, and neither H nor L
+ * names a section. Escape closes Help. Turning the character-key switch in the Settings dialog off
+ * marks each of them off in Help, and J then marks no other section and P opens no drawer; turning
+ * it on again, J moves to another section. The reader's keys settings are cleared after, so no
+ * other check runs with the keys off. Every control in the header that binds a key shows it in a
+ * kbd, upper-cased as Help's rows show it.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
   await between(page);
@@ -1026,8 +1189,8 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       { keys: "S", action: "Settings", off: false },
       ...(tree
         ? [
-            { keys: "H", action: "Previous section", off: false },
-            { keys: "L", action: "Next section", off: false },
+            { keys: "J", action: "Next section", off: false },
+            { keys: "K", action: "Previous section", off: false },
           ]
         : []),
     ];
@@ -1042,6 +1205,11 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
         missing.map(({ keys, action }) => `${keys} ${action}`).join(", ") +
         " missing",
     );
+    assert.deepEqual(
+      rows.filter(({ keys, action }) => /^[HL]$/.test(keys) && / section$/.test(action)),
+      [],
+      `${url}: neither H nor L moves to a section`,
+    );
     await press(page, "Escape");
     await until(page, `!${HELP}`).catch(() => assert.fail(`${url}: Escape closes Help`));
 
@@ -1051,10 +1219,10 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       `${url}: the switch in Settings turns every character key off`,
     );
     const marked: string | null = await page.evaluate(MARKED);
-    await press(page, "l");
+    await press(page, "j");
     await press(page, "p");
     await page.evaluate(SETTLED);
-    assert.equal(await page.evaluate(MARKED), marked, `${url}: with the keys off, L doesn't move`);
+    assert.equal(await page.evaluate(MARKED), marked, `${url}: with the keys off, J doesn't move`);
     assert.equal(
       await page.evaluate(`${PAGES}.modal`),
       false,
@@ -1067,12 +1235,12 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       `${url}: the switch in Settings turns the character keys on again`,
     );
     if (tree) {
-      await press(page, "l");
+      await press(page, "j");
       await page.evaluate(SETTLED);
       assert.notEqual(
         await page.evaluate(MARKED),
         marked,
-        `${url}: with the keys on again, L moves to another section`,
+        `${url}: with the keys on again, J moves to another section`,
       );
     }
   } finally {
@@ -1209,6 +1377,14 @@ export const holdsReadingWidth: Check = async (page, site, url = site) => {
 export const holdsBetweenDocks: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertBetweenDocks(page, url);
+};
+
+/** On a page with a section tree, the tree is in the Contents drawer: a column docked beside main
+ * from the layout's tree dock, J and K moving through its sections and H and L through none, and
+ * below it a closed drawer, which following a link in it closes. A page with none has no drawer. */
+export const placesSectionTree: Check = async (page, site, url = site) => {
+  await page.goto(url);
+  await assertContents(page, url);
 };
 
 /** At 390px, between the docks, and at 1600px, main starts directly under the header, however
@@ -1437,6 +1613,8 @@ export const shell: Record<string, Check> = {
     requestsUnderBase,
   "main holds its centered reading width at 1600px": holdsReadingWidth,
   "between the docks main is centered with no section tree, beside a docked one": holdsBetweenDocks,
+  "the section tree is in the Contents drawer, docked from its dock and closed below it":
+    placesSectionTree,
   "main starts directly under the header at 390px, between the docks, and at 1600px":
     startsUnderHeader,
   "? opens Help, listing the page's bindings, and the switch in Settings turns them off":
@@ -1531,29 +1709,34 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     assert.deepEqual(await page.evaluate(BLOCKING), [true], `${url}: its entry blocks render`);
     await assertDefined(page, url);
     const data = pages.get(path) ?? null;
+    const keys = Object.keys(data ?? {});
     const shown: {
       title: string;
       h1: string | null;
       headers: number;
-      fields: string[][] | null;
+      meta: string[][];
+      lists: string[][];
       tables: number;
       index: string[];
       drawer: boolean;
-      body: string[];
+      text: string;
     } = await page.evaluate(`(() => {
-      const header = document.querySelector("main > sl-page-header:first-child");
+      const keys = ${JSON.stringify(keys)};
       return {
         title: document.title,
         h1: document.querySelector("main h1")?.textContent.trim() ?? null,
         headers: document.querySelectorAll("sl-page-header").length,
-        fields: header && [...header.querySelectorAll(":scope > dl > :is(dt, dd)")].map(
-          (field) => [field.localName, field.textContent]),
+        meta: [...document.head.querySelectorAll("meta[name]")]
+          .filter((meta) => keys.includes(meta.name))
+          .map((meta) => [meta.name, meta.getAttribute("content")]),
+        lists: [...document.querySelectorAll("dl")]
+          .filter((dl) => dl.checkVisibility())
+          .map((dl) => [...dl.querySelectorAll(":scope > dt, :scope > div > dt")]
+            .map((dt) => dt.textContent.trim())),
         tables: document.querySelectorAll("table.front-matter").length,
         index: [...document.querySelectorAll("sl-site-index a[href]")].map((a) => a.href),
         drawer: document.querySelectorAll("sl-drawer#pages > sl-site-index").length === 1,
-        body: [...document.querySelectorAll("main p, main :is(h1, h2, h3, h4, h5, h6)")]
-          .filter((element) => !element.closest("sl-page-header"))
-          .map((element) => element.textContent),
+        text: document.body.innerText,
       };
     })()`);
     await assertReadingWidth(page, url);
@@ -1561,6 +1744,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await assertPagesButton(page, url);
     await assertNavigation(page, url);
     await assertBetweenDocks(page, url);
+    await assertContents(page, url);
     await assertUnderHeader(page, url);
     await assertKeysHelp(page, url);
     await assertShortcutDialogs(page, url);
@@ -1571,24 +1755,24 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     const name = data?.name;
     assert.equal(shown.title, typeof name === "string" ? name : shown.h1, `${url}'s title`);
     assert.ok(shown.title, `${url} has a title`);
-    assert.equal(shown.headers, 1, `${url}: one page header`);
+    assert.equal(shown.headers, 0, `${url}: no page header`);
     assert.equal(shown.tables, 0, `${url}: no front matter table remains`);
     const entries = Object.entries(data ?? {});
     assert.deepEqual(
-      shown.fields,
-      entries.flatMap(([key, value]) => [
-        ["dt", key],
-        ["dd", frontMatterText(value)],
-      ]),
-      `${url}: its main opens with its page header, a dt and a dd per front matter key in order`,
+      shown.meta,
+      entries.map(([key, value]) => [key, frontMatterText(value)]),
+      `${url}: its head holds a meta per front matter key, in order, its content the value`,
     );
+    if (keys.length > 0) {
+      assert.deepEqual(
+        shown.lists.filter((terms) => keys.every((key) => terms.includes(key))),
+        [],
+        `${url}: no list of its front matter shows`,
+      );
+    }
     for (const [key, value] of entries) {
       const line = `${key}: ${frontMatterText(value)}`;
-      assert.deepEqual(
-        shown.body.filter((body) => body.includes(line)),
-        [],
-        `${url}: ${line} isn't body text`,
-      );
+      assert.ok(!shown.text.includes(line), `${url}: ${line} isn't the page's text`);
     }
     assert.deepEqual(
       shown.index.toSorted(),

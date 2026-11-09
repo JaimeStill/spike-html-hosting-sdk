@@ -1,42 +1,42 @@
 /*
- * The site's page layout, which the foundation and the components leave to the page: the body
- * held off the viewport's edges, main a centered reading column, and room around the header, the
- * page header, tables, and code blocks. Its own layer, site, declared after the foundation's
- * layers, which the page entry declares first, so it wins over them. Every length is a --space-*
- * token, so the reader's Space profile changes it, but main's reading width, in ch, the side
- * columns' 16rem minimum, the two widths the layout changes at, the shortcut dialogs' 56rem cap,
- * a callout's rule, the foundation's --line-m, and its icon, 1em, the size of its title's text.
- * Only the Pages button's display sits outside the layer, after the components' glyph-button.css,
- * which the page links before this sheet.
+ * The site's page layout, which the foundation and the components leave to the page: the body held
+ * off the viewport's edges, main a centered reading column, and room around the header, tables, and
+ * code blocks. Its own layer, site, declared after the foundation's layers, which the page entry
+ * declares first, so it wins over them. Every length is a --space-* token, so the reader's Space
+ * profile changes it, but main's reading width, in ch, the side columns' 16rem minimum, the two
+ * widths the layout changes at, the shortcut dialogs' 56rem cap, a callout's rule, the foundation's
+ * --line-m, and its icon, 1em, the size of its title's text. Only the Pages button's display sits
+ * outside the layer, after the components' glyph-button.css, which the page links before this
+ * sheet.
  *
- * The renderer (markdown-pages.ts) writes the section tree's div, when the page has one, then
- * main, then the site index in the Pages drawer, an sl-drawer. Each side column docks only where it
- * fits at 16rem beside main's 80ch, so no column is cramped and no link's words break; the two
- * widths are the renderer's docks, which it writes as each element's dock attribute, and the
- * media queries here write the same lengths, as the Pages button's does:
+ * The renderer (markdown-pages.ts) writes main, then, when the page has a section tree, the
+ * Contents drawer holding it, then the site index in the Pages drawer, each an sl-drawer. Each
+ * drawer docks as a side column only where it fits at 16rem beside main's 80ch, so no column is
+ * cramped and no link's words break; the two widths are the renderer's docks, which it writes as
+ * each drawer's dock attribute, and the media queries here write the same lengths, as the Pages
+ * button's does:
  * - 86rem and wider: three columns, main's reading width between two equal columns of at least
- *   16rem, so main stays centered whether or not the page has a tree: the site index's drawer,
- *   docked, in the start column and the section tree in the end one, each held in view as the page
- *   scrolls and scrolling itself when taller than the viewport.
+ *   16rem, so main stays centered whether or not the page has a tree: the Pages drawer, docked, in
+ *   the start column and the Contents drawer in the end one, each held in view as the page scrolls,
+ *   its body scrolling under its heading when taller than the viewport.
  * - 70rem to 86rem: the same grid, its side columns equal, so main is centered, on a page with no
- *   section tree; on a page with one, only the end column is held to 16rem, the tree docked there,
- *   the start column empty, so main is as near centered as fits. The site index is the Pages
- *   drawer, a modal the Pages button opens, taking no space in the page.
- * - Narrower than 70rem: one column. The section tree is a bar stuck to the top of the viewport,
- *   its wrapper display: contents so the bar's containing block is the body, and the page's flow
- *   places it before main; the site index is still the drawer.
+ *   section tree; on a page with one, only the end column is held to 16rem, the Contents drawer
+ *   docked there, the start column empty, so main is as near centered as fits. The Pages drawer is
+ *   a modal the Pages button opens, taking no space in the page.
+ * - Narrower than 70rem: one column. Both drawers are closed modals, taking no space in the page;
+ *   following a link in either closes it, by the shell's script.
  * At both grid widths the rows pack at the top, so main starts directly under the header on a page
  * shorter than the viewport, as on a taller one. Main's track and its reading width may shrink, and
- * each table scrolls sideways in its region, so no page is wider than a 390px viewport. The marks
- * the components set on the light-DOM links, below a shadow sheet's reach, are painted here: the
- * section in view and the page on screen in a heavier weight. The shell's header holds the site
- * nav, wrapping its links, and one group of glyph buttons at its inline end, Pages, Help, and
- * Settings, on its first line at every width; the components' glyph-button.css lays out each
- * button. The shell's two shortcut dialogs, Help and Settings, take the foundation's theme menu
- * width, the viewport less --space-s on each side, up to 56rem. A GitHub alert, as the renderer
- * writes it through marked-alert, is a callout: a rule at its start and its title, the kind's
- * octicon and its name, in its kind's color, the foundation's palette color GitHub gives it: note
- * blue, tip green, important purple, warning yellow, and caution red.
+ * each table scrolls sideways in its region, so no page is wider than a 390px viewport. The page on
+ * screen, which the site index marks on its light-DOM link, below a shadow sheet's reach, is
+ * painted here in a heavier weight; the section tree paints its own mark, by the sheet it adopts.
+ * The shell's header holds the site nav, wrapping its links, and one group of glyph buttons at its
+ * inline end, Pages, Help, and Settings, on its first line at every width; the components'
+ * glyph-button.css lays out each button. The shell's two shortcut dialogs, Help and Settings, take
+ * the foundation's theme menu width, the viewport less --space-s on each side, up to 56rem. A
+ * GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule at its start
+ * and its title, the kind's octicon and its name, in its kind's color, the foundation's palette
+ * color GitHub gives it: note blue, tip green, important purple, warning yellow, and caution red.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -87,14 +87,6 @@
     overflow-wrap: break-word;
   }
 
-  /* The section tree as the bar: its wrapper leaves the flow to it, so it sticks within the body,
-     the whole page's height, not within a wrapper only as tall as the bar. */
-  @media (width < 70rem) {
-    .section-tree {
-      display: contents;
-    }
-  }
-
   /* Wide enough for main's 80ch and the section tree's 16rem column beside it. Main is centered
      between equal side columns; only a page with a tree holds the end column to 16rem, below. The
      rows pack at the top: the foundation's reset gives the body a min-height of the viewport's, and
@@ -118,13 +110,16 @@
       inline-size: 100%;
     }
 
-    .section-tree {
+    /* The Contents drawer, docked, a column of its header over its body, held to the viewport's
+       height: its body scrolls, the Contents heading staying in view. Closed, below its dock, it
+       takes no space. */
+    #contents {
       grid-area: 2 / 3;
       position: sticky;
       inset-block-start: var(--space-m);
+      display: flex;
+      flex-direction: column;
       max-block-size: calc(100svh - 2 * var(--space-m));
-      overflow-y: auto;
-      padding-block-end: var(--space-l);
     }
 
     /* The drawer, closed, takes no space here; docked, its column is the start one. */
@@ -133,9 +128,10 @@
     }
   }
 
-  /* Below the drawer's dock, the tree's column alone is held to 16rem, on a page that has one. */
+  /* Below the Pages drawer's dock, the Contents drawer's column alone is held to 16rem, on a page
+     that has one. */
   @media (70rem <= width < 86rem) {
-    body:has(> .section-tree) {
+    body:has(> #contents) {
       grid-template-columns: minmax(0, 1fr) minmax(0, 80ch) minmax(16rem, 1fr);
     }
   }
@@ -157,11 +153,6 @@
     }
   }
 
-  sl-page-header:has(dt) {
-    margin-block-end: var(--space-l);
-  }
-
-  sl-section-tree a[aria-current],
   sl-site-index a[aria-current="page"] {
     font-weight: 600;
   }
@@ -236,16 +227,16 @@
   }
 }
 
-/* The Pages button, shown only where the site index is the drawer and once the drawer is defined,
-   so with no script, or on a page with no drawer, it is never shown. Unlayered, after the
-   components' glyph-button.css, whose unlayered display: inline-flex would otherwise win over any
-   rule in the site layer. */
+/* The Pages button, shown only where the site index is the drawer and once the Pages drawer is
+   defined, so with no script, or on a page with no Pages drawer, it is never shown. Unlayered,
+   after the components' glyph-button.css, whose unlayered display: inline-flex would otherwise win
+   over any rule in the site layer. */
 .pages-opener {
   display: none;
 }
 
 @media (width < 86rem) {
-  body:has(sl-drawer:defined) .pages-opener {
+  body:has(#pages:defined) .pages-opener {
     display: inline-flex;
   }
 }

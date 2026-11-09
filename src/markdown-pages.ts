@@ -14,12 +14,15 @@
 // A file's page is its path with .md turned to .html, except a README.md, which is its
 // directory's index.html, so a single tree's root README.md is the site's index. A file's
 // leading YAML front matter, when it has one, is parsed and never rendered as body text: the page
-// shows it in its header, an sl-page-header of spike-html-hosting-components, as a dl of a dt for
-// each key and a dd for its value, in source order, escaped. The page's title is the front
-// matter's name, or, with no name, the text of the file's first h1; a file with neither fails the
-// build, naming it. Headings carry GitHub's ids (marked-gfm-heading-id), so a fragment written
-// against the source on GitHub resolves here. A relative link to a file copied in the linking
-// file's tree is rewritten to that file's page, relative to the linking page, its fragment kept;
+// carries it in its head, a <meta name="<key>" content="<value>"> for each key, in source order,
+// after its title, each key and value escaped, the value as frontMatterText gives it, so nothing
+// of it shows on the page. A key keeps its name: one naming a meta the shell already writes, as
+// its viewport, would give the page two, so it fails the build, naming the file and the key. The
+// page's title is the front matter's name, or, with no name, the text of the file's first h1; a
+// file with neither fails the build, naming it. Headings carry GitHub's ids
+// (marked-gfm-heading-id), so a fragment written against the source on GitHub resolves here. A
+// relative link to a file copied in the linking file's tree is rewritten to that file's page,
+// relative to the linking page, its fragment kept;
 // one to a file listed as external, present in the source but not copied, to the file's blob on
 // GitHub at the tree's pinned commit; any other relative link, one leaving its tree among them,
 // fails the build, naming the page and the link, so no link is left to break. A fragment alone,
@@ -32,22 +35,20 @@
 // warning, and stop-16 for caution, each an svg 1em square in currentColor, aria-hidden and
 // focusable="false".
 //
-// Each page's data is written as the light-DOM markup the components slot, so with no script it
-// renders as the page's own: the page header, at the top of main, where GitHub shows the front
-// matter; the section tree, an sl-section-tree of the page's h2s, each with its h3s in a nested
-// list, linked by the ids the headings carry, in a div.section-tree before main, or none for a
-// page with neither; and the site index, an sl-site-index of every copied page, nested by
-// directory, each linked relative to the page, as its body's links are, in the Pages drawer, an
-// sl-drawer labeled "Pages" with the id the shell's Pages button controls, after main. The tree
-// comes before main so that, as the bar it is in a narrow viewport, it sticks to the top of the
-// viewport from the page's own flow, and so the reading order, and a keyboard's, is the order the
-// page shows; the index, after main, is a column beside it or a closed drawer. Each element's dock,
-// the width from which it is a column, is the layout's (docks), which site.css's media queries
-// write too. The renderer writes no aria-current: the components mark the current section and page
-// at runtime, and the site nav, which takes no content, is the shell's to place, with the Pages
-// button. Each body table is wrapped in a div.table-region, a region named by its header cells
-// that a keyboard focuses, as Shiki's tabindex makes each code block, which scrolls the table
-// sideways in a viewport narrower than it.
+// Each page's navigation is written as the light-DOM markup the components slot, so with no script
+// it renders as the page's own, after main, in two drawers, each an sl-drawer: the section tree,
+// an sl-section-tree of the page's h2s, each with its h3s in a nested list, linked by the ids the
+// headings carry, in the Contents drawer, or no drawer for a page with neither; then the site
+// index, an sl-site-index of every copied page, nested by directory, each linked relative to the
+// page, as its body's links are, in the Pages drawer. Each drawer has the id its header button
+// controls, contents and pages, and docks from its width in the layout (docks), which site.css's
+// media queries write too: a column beside main from there, a closed modal drawer below it. The
+// drawers come after main so the reading order, and a keyboard's, is the page's body first. The
+// renderer writes no aria-current: the components mark the current section and page at runtime,
+// and the site nav, which takes no content, is the shell's to place, with the header's buttons.
+// Each body table is wrapped in a div.table-region, a region named by its header cells that a
+// keyboard focuses, as Shiki's tabindex makes each code block, which scrolls the table sideways in
+// a viewport narrower than it.
 //
 // Every page the build writes, each rendered page and each of a site's hand pages, has its glyph
 // markers filled with their icons at build, by icons.ts's fill, and a marker the icons layer
@@ -104,7 +105,7 @@ import type { Syntax, SyntaxTheme } from "./syntax.ts";
  * default type and regular space, with a scrollbar: the section tree alone in the end column, the
  * start one left empty so main stays as near centered as fits, from 70rem (about 69.3rem needed),
  * and the site index too, in the start column, from 86rem (about 85.3rem needed). Below index, the
- * index is the Pages drawer; below tree, the tree is the sticky bar.
+ * index is the closed Pages drawer; below tree, the tree is the closed Contents drawer.
  */
 export const docks = { tree: "70rem", index: "86rem" } as const;
 
@@ -321,8 +322,8 @@ const escape = (text: string): string =>
 /** Escapes text for an HTML attribute's double-quoted value. */
 const attribute = (text: string): string => escape(text).replace(/"/g, "&quot;");
 
-/** A front matter value as its dd's text: a sequence its items' text and a mapping its keys and
- * their values' text, each joined by ", ", a mapping's pair as "key: value"; null nothing; any
+/** A front matter value as its meta's content: a sequence its items' text and a mapping its keys
+ * and their values' text, each joined by ", ", a mapping's pair as "key: value"; null nothing; any
  * other value its text. */
 export function frontMatterText(value: unknown): string {
   if (value === null || value === undefined) return "";
@@ -335,21 +336,32 @@ export function frontMatterText(value: unknown): string {
   return String(value);
 }
 
-/** The page's header, an sl-page-header slotting a dl of its front matter, a dt for each key and a
- * dd for its value, in source order, escaped; with no front matter, or an empty one, the element
- * holds nothing, and takes no space. */
-export function pageHeader(data: Rendered["data"]): string {
-  const entries = Object.entries(data ?? {});
-  if (entries.length === 0) return "<sl-page-header></sl-page-header>\n";
-  const fields = entries.map(
-    ([key, value]) => `<dt>${escape(key)}</dt><dd>${escape(frontMatterText(value))}</dd>`,
-  );
-  return `<sl-page-header><dl>${fields.join("")}</dl></sl-page-header>\n`;
+/** The page's front matter as head metadata: a <meta name="<key>" content="<value>"> per key, in
+ * source order, the value as frontMatterText gives it, both escaped, each on its own line; nothing
+ * with no front matter, or an empty one. */
+export function frontMatterMeta(data: Rendered["data"]): string {
+  return Object.entries(data ?? {})
+    .map(
+      ([key, value]) =>
+        `<meta name="${attribute(key)}" content="${attribute(frontMatterText(value))}" />\n`,
+    )
+    .join("");
 }
 
-/** The page's section tree, an sl-section-tree docked from docks.tree, slotting a list of its h2s,
- * each linking its heading's id, percent-encoded, with the h3s under it in a nested list; an h3
- * before any h2 stands at the top level. Nothing for a page with neither. */
+/** The names, lowercased, of the meta elements the shell's markup writes, as <meta name="…">. */
+function shellMetaNames(shell: string): Set<string> {
+  return new Set(
+    [...shell.matchAll(/<meta\b[^>]*?\bname\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi)].map(
+      (match) => (match[1] ?? match[2] ?? match[3]).toLowerCase(),
+    ),
+  );
+}
+
+/** The page's section tree in the Contents drawer: an sl-drawer docked from docks.tree, labeled
+ * "Contents", its id contents, which the shell's Contents button controls, holding an
+ * sl-section-tree slotting a list of the page's h2s, each linking its heading's id,
+ * percent-encoded, with the h3s under it in a nested list; an h3 before any h2 stands at the top
+ * level. Nothing for a page with neither. */
 export function sectionTree(headings: readonly Heading[]): string {
   if (headings.length === 0) return "";
   const link = ({ id, text }: Heading): string =>
@@ -364,7 +376,10 @@ export function sectionTree(headings: readonly Heading[]): string {
     const list = nested.length > 0 ? `<ul>${nested.join("")}</ul>` : "";
     items.push(`<li>${link(heading)}${list}</li>`);
   }
-  return `<sl-section-tree dock="${docks.tree}"><ul>${items.join("")}</ul></sl-section-tree>`;
+  return (
+    `<sl-drawer id="contents" label="Contents" dock="${docks.tree}">` +
+    `<sl-section-tree><ul>${items.join("")}</ul></sl-section-tree></sl-drawer>`
+  );
 }
 
 /** A directory of the copied root, as the site index nests it: its index page's file, its pages'
@@ -419,14 +434,18 @@ export function siteIndex(titles: ReadonlyMap<string, string>, from: string): st
   );
 }
 
-/** Fills the shell with a rendered page: its title; its section tree, when it has one, in its div;
- * its header and its body in <main>; then the site index, index, in its drawer. */
+/** Fills the shell with a rendered page: its title, and its front matter's meta after it; its body
+ * in <main>; then its section tree, when it has one, in the Contents drawer, and the site index,
+ * index, in the Pages drawer. */
 function fill(shell: string, { data, title, html, headings }: Rendered, index: string): string {
   const tree = sectionTree(headings);
-  const before = tree === "" ? "" : `<div class="section-tree">\n${tree}\n</div>\n`;
+  const drawers = `${tree === "" ? "" : `${tree}\n`}${index}`;
   return shell
-    .replace(/<title>[^<]*<\/title>/, () => `<title>${escape(title)}</title>`)
-    .replace("<main></main>", () => `${before}<main>\n${pageHeader(data)}${html}</main>\n${index}`);
+    .replace(
+      /<title>[^<]*<\/title>/,
+      () => `<title>${escape(title)}</title>\n${frontMatterMeta(data)}`,
+    )
+    .replace("<main></main>", () => `<main>\n${html}</main>\n${drawers}`);
 }
 
 /** A copied file the plugin builds: its path under the copied root, its path in its tree's source,
@@ -576,6 +595,17 @@ export function markdownPages(options: Options): Plugin {
       const page = rendered.get(file);
       if (page === undefined)
         throw new Error(`markdown-pages: ${file} loads before the build starts`);
+      // A front matter key keeps its name as its meta's, so one the shell's own meta has, its
+      // viewport, would give the page two of it.
+      const metas = shellMetaNames(shell);
+      for (const key of Object.keys(page.data ?? {})) {
+        if (metas.has(key.toLowerCase())) {
+          throw new Error(
+            `markdown-pages: ${file}'s front matter key ${key} names a meta ${shellName} ` +
+              `already writes`,
+          );
+        }
+      }
       return fill(shell, page, siteIndex(titles, file));
     },
     // After Vite's own transform of the page, so the link, to an asset the build emits, is
