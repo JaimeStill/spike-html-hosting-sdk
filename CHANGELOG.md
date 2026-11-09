@@ -12,14 +12,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   every glyph button the page renders, its own and those in the components' shadow roots, is at
   least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
   space. A smaller one fails it, naming the page, the width, the space, and the button.
-- `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 1120px,
-  and 1376px the header's `header-actions` group holds its rendered buttons on one line, at the
-  header's inline end and on the site nav's first line, and at 390px nothing scrolls sideways.
+- `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 40rem,
+  1120px, and 1376px the header's `header-actions` group holds its rendered buttons on one line,
+  at the header's inline end; at 390px, below 40rem, the site nav keeps its links on one line and
+  the group is on its own row below it, and from 40rem the group is on the site nav's first line;
+  at 390px nothing scrolls sideways.
 - `./browser.js`'s `followsShortcutDialogs`, a shell check, which the crawl runs too: every dialog
   a keyed `show-modal` opener opens, a `button[data-keys][commandfor][command=show-modal]`,
   follows the components' shortcut dialog pattern. A page fails, naming the dialog and what it
   lacks, where the dialog has no name from a heading inside it by `aria-labelledby`, no Close, a
-  glyph button with `command="close"` for it showing `<kbd>Esc</kbd>`, or where its opener
+  glyph button with `command="close"` for it showing `<kbd>Esc</kbd>`, no header row, a
+  `header.dialog-header` holding both the heading and the Close, or where its opener
   doesn't show its key in a `kbd`, has no `aria-label`, or has no interest hint holding that name.
 - `./browser.js`'s `opensSettings`, in place of `opensThemeMenu`: the Settings button and S open
   `dialog#settings`, whose `sl-settings` renders, its shadow root adopting the build's constructed
@@ -30,9 +33,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 - `./browser.js`'s `placesSectionTree`, a shell check, which the crawl runs too: a page's section
   tree is in its Contents drawer, `sl-drawer#contents` docked from 70rem. At 70rem and 1600px the
   tree is a docked column beside main, where J marks and moves to the first section and K back to
-  the top; at 390px and a pixel under 70rem the drawer is closed,
-  and once open, a followed link in it closes it and marks its section. A page with no tree has
-  no Contents drawer.
+  the top, and the header's Contents button is hidden; at 390px and a pixel under 70rem the drawer
+  is closed, the Contents button shown and opening it by its click and by C, its `aria-expanded`
+  in step, and once open, a followed link in it closes it and marks its section. A page with no
+  tree has no Contents drawer and shows no Contents button.
 - `./markdown-pages.js`'s `frontMatterMeta`, a page's front matter as head meta.
 - A pager at the top and the foot of each copied page's main, `./markdown-pages.js`'s `pager`: a
   `nav` named "Previous and next page", and "Previous and next page, end of page" at the foot,
@@ -48,18 +52,22 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 ### Changed
 
 - The template's header is the site nav and one group of buttons at its inline end,
-  `<div class="header-actions">`: Pages under P, Help under ?, and Settings under S, Octicons'
-  `gear-16`, in place of Theme under T. Each is a glyph button of the class `glyph-button`, with
+  `<div class="header-actions">`: Pages under P, Contents under C, Octicons' `list-ordered-16`,
+  Help under ?, and Settings under S, Octicons' `gear-16`, in place of Theme under T. The Contents
+  button controls `#contents` by `aria-controls`, and the shell's script opens the drawer on its
+  click and keeps its `aria-expanded` in step. Each is a glyph button of the class `glyph-button`, with
   an empty `aria-description` and an interest hint, a `glyph-hint` popover holding its name, as
   spike-html-hosting-components' README gives the header. The Settings button sends `show-modal`
   to `dialog#settings`, its shortcut dialog. The shell links the components' `glyph-button.css`
   between the foundation's entry and `site.css`. A site takes the template's header again, or the
   shell checks fail on it.
-- `site.css` lays the header out as the nav, taking the rest of the row and wrapping its own
-  links, and the `header-actions` group, which never wraps and stays on the nav's first line at
-  every width. It drops its own row for the shell's buttons, which `glyph-button.css` lays out,
-  and its Pages button rules sit outside its layer, after `glyph-button.css`, whose unlayered
-  `display` would otherwise win.
+- `site.css` lays the header out as the nav and the `header-actions` group, which never wraps:
+  from 40rem one row, the nav taking the rest of it and wrapping its own links, the group on the
+  nav's first line; below 40rem two, the nav on a row of its own and the group on the next, at its
+  inline end. It drops its own row for the shell's buttons, which `glyph-button.css` lays out, and
+  its Pages and Contents button rules sit outside its layer, after `glyph-button.css`, whose
+  unlayered `display` would otherwise win: each button shows only below its drawer's dock, 86rem
+  for Pages and 70rem for Contents, once the drawer is defined.
 - The shell checks and the crawl expect Settings under S where they expected Theme under T: the
   keys help lists S Settings, and the glyph check names the Settings button.
 
@@ -70,23 +78,32 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 - The template's shell holds the components' two shortcut dialogs in place of the theme menu, the
   placeholder `dialog#settings`, and the script that bridged them: `dialog#help`, headed "Keyboard
   shortcuts", holds `sl-shortcuts` alone, with no `[data-keys-list]`, and `dialog#settings`,
-  headed "Settings", holds `sl-settings`. Each is named by its heading through `aria-labelledby`
-  and closed by a Close glyph button showing `x-16` and `<kbd>Esc</kbd>`, with no `data-keys`;
-  Help's Close no longer binds ?. The shell imports the components' `shortcuts.js` and
+  headed "Settings", holds `sl-settings`. Each opens with its header row, a
+  `<header class="dialog-header">` holding its heading, which names it through `aria-labelledby`,
+  and its Close, a glyph button showing `x-16` and `<kbd>Esc</kbd>`, with no `data-keys`, in place
+  of a trailing footer; Help's Close no longer binds ?, and, the first control in Help, takes focus
+  as it opens. The shell imports the components' `shortcuts.js` and
   `settings.js`, which need a components release past `v0.4.0`. A site takes the template's
   shell again, or the shell checks fail on it.
-- `site.css` gives `dialog#help` and `dialog#settings` the foundation theme menu's width,
-  `min(100% - 2 * var(--space-s), 56rem)`, so both shortcut dialogs are the size the settings'
-  rows and preview were laid out for.
+- `site.css` gives `dialog#settings` the foundation theme menu's width,
+  `min(100% - 2 * var(--space-s), 56rem)`, the size the settings' rows and preview were laid out
+  for, and `dialog#help` its content's, `fit-content`, up to the same cap. It lays out each
+  `.dialog-header`, the heading at its inline start and the Close at its inline end, aligned on
+  their centers, with `--space-m` under it, more than the `--space-s` between the content's
+  sections.
 - The theme checks work through `sl-settings`: `stepsEachFacet` and `highlightsEachPalette` step
   its rows in the Settings dialog, opened by S, and remove the choice they store after, since
   every step is stored at once. `requestsUnderBase` opens Settings and Help and fails where the
   foundation's `theme-menu.js` or `keys-help.js` is requested.
-- `opensKeysHelp`: ? opens Help, whose `sl-shortcuts` lists exactly the page's bindings as the
-  foundation's keys module holds them, the shell's P, ?, S, H, and L among them; Escape closes it;
-  the character-key switch, now in Settings' `sl-settings`, turns them off and on again.
-- `showsGlyphs` checks each shortcut dialog's Close, showing `x-16` and Esc, and `hasTargetSize`
-  measures each dialog's glyph buttons, its Close among them, with the dialog open.
+- `opensKeysHelp`, a pixel under 70rem, below both docks: ? opens Help, its Close focused, whose
+  `sl-shortcuts` lists exactly the page's bindings as the foundation's keys module holds them, the
+  shell's P, C where the page has a Contents drawer, ?, S, H, and L among them; Escape closes it;
+  the character-key switch, now in Settings' `sl-settings`, turns them off, C among them, and on
+  again.
+- `showsGlyphs` checks the Contents button, showing `list-ordered-16` and C, and each shortcut
+  dialog's Close, showing `x-16` and Esc, and `hasTargetSize` measures the Contents button at
+  390px on a page with a Contents drawer, and each dialog's glyph buttons, its Close among them,
+  with the dialog open.
 - `./screenshots.js`'s index state with the theme menu open is Settings open, by the Settings
   button's click and ready once `sl-settings` renders, named as `index-settings-1120`; Help open
   is ready once `sl-shortcuts` renders its rows. `leavesNoCapture` asserts the nine by those

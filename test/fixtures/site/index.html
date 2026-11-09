@@ -8,10 +8,11 @@
      start, and the site index, the section tree, and the drawers that hold them, Pages and
      Contents, which markdownPages writes into each page, and the shortcuts list and the
      settings; the page's script, which closes each drawer as a link in it is followed; and, as
-     the template's shell, the three buttons of the header's header-actions group: Pages, which
-     opens its drawer below its dock, the page's script wiring it,
-     and Help and Settings, the openers of the shortcut dialogs, dialog#help holding sl-shortcuts
-     and dialog#settings holding sl-settings, each named by its heading and closed by its Close.
+     the template's shell, the four buttons of the header's header-actions group: Pages and
+     Contents, each opening its drawer below its dock, the page's script wiring it, and Help and
+     Settings, the openers of the shortcut dialogs, dialog#help holding sl-shortcuts and
+     dialog#settings holding sl-settings, each opening with its header row, its heading, which
+     names it, and its Close.
      Each header button, and each dialog's Close, is a glyph button showing a glyph marker, which
      the build fills from the icons layer, and its key hint, Esc for a Close, named by its
      aria-label with no word shown, and that name in its interest hint.
@@ -25,7 +26,8 @@
      header-actions group, the Settings opener, each glyph button's class and interest hint, and
      the shortcut dialogs, Help's and Settings'.
      Adapted from spike-html-hosting-components (c5bcf30): README.md, sl-drawer's script, each
-     drawer closed as a link in it is followed.
+     drawer closed as a link in it is followed, the Contents opener, and the shortcut dialogs'
+     header row.
      Adapted from spike-html-apps-foundation (18e0c55): demo/keys.html, its Help button. -->
 <html lang="en">
   <head>
@@ -86,6 +88,21 @@
         <div id="pages-hint" class="glyph-hint" popover="hint" aria-hidden="true">Pages</div>
         <button
           type="button"
+          class="glyph-button contents-opener"
+          aria-controls="contents"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Contents"
+          data-keys="c"
+          interestfor="contents-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/list-ordered-16"></svg>
+          <span aria-hidden="true"><kbd>C</kbd></span>
+        </button>
+        <div id="contents-hint" class="glyph-hint" popover="hint" aria-hidden="true">Contents</div>
+        <button
+          type="button"
           class="glyph-button"
           commandfor="help"
           command="show-modal"
@@ -116,9 +133,8 @@
     </header>
     <main></main>
     <dialog id="help" aria-labelledby="help-title">
-      <h2 id="help-title">Keyboard shortcuts</h2>
-      <sl-shortcuts></sl-shortcuts>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="help-title">Keyboard shortcuts</h2>
         <button
           type="button"
           class="glyph-button"
@@ -132,12 +148,12 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-shortcuts></sl-shortcuts>
     </dialog>
     <dialog id="settings" aria-labelledby="settings-title">
-      <h2 id="settings-title">Settings</h2>
-      <sl-settings></sl-settings>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
         <button
           type="button"
           class="glyph-button"
@@ -151,7 +167,8 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-settings></sl-settings>
     </dialog>
   </body>
 </html>

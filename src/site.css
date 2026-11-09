@@ -4,17 +4,17 @@
  * code blocks. Its own layer, site, declared after the foundation's layers, which the page entry
  * declares first, so it wins over them. Every length is a --space-* token, so the reader's Space
  * profile changes it, but main's reading width, in ch, the side columns' 16rem minimum, the two
- * widths the layout changes at, the shortcut dialogs' 56rem cap, a callout's rule, the foundation's
- * --line-m, and its icon, 1em, the size of its title's text. Only the Pages button's display sits
- * outside the layer, after the components' glyph-button.css, which the page links before this
- * sheet.
+ * widths the layout changes at, the header's 40rem, the shortcut dialogs' 56rem cap, a callout's
+ * rule, the foundation's --line-m, and its icon, 1em, the size of its title's text. Only the Pages
+ * and Contents buttons' display sits outside the layer, after the components' glyph-button.css,
+ * which the page links before this sheet.
  *
  * The renderer (markdown-pages.ts) writes main, then, when the page has a section tree, the
  * Contents drawer holding it, then the site index in the Pages drawer, each an sl-drawer. Each
  * drawer docks as a side column only where it fits at 16rem beside main's 80ch, so no column is
  * cramped and no link's words break; the two widths are the renderer's docks, which it writes as
  * each drawer's dock attribute, and the media queries here write the same lengths, as the Pages
- * button's does:
+ * and Contents buttons' do:
  * - 86rem and wider: three columns, main's reading width between two equal columns of at least
  *   16rem, so main stays centered whether or not the page has a tree: the Pages drawer, docked, in
  *   the start column and the Contents drawer in the end one, each held in view as the page scrolls,
@@ -30,11 +30,14 @@
  * each table scrolls sideways in its region, so no page is wider than a 390px viewport. The page on
  * screen, which the site index marks on its light-DOM link, below a shadow sheet's reach, is
  * painted here in a heavier weight; the section tree paints its own mark, by the sheet it adopts.
- * The shell's header holds the site nav, wrapping its links, and one group of glyph buttons at its
- * inline end, Pages, Help, and Settings, on its first line at every width; the components'
- * glyph-button.css lays out each button. The shell's two shortcut dialogs, Help and Settings, take
- * the foundation's theme menu width, the viewport less --space-s on each side, up to 56rem. A
- * Each rendered page's two pagers, at main's top and foot, are a quiet row of plain links, the
+ * The shell's header holds the site nav and one group of glyph buttons at its inline end, Pages,
+ * Contents, Help, and Settings: from 40rem one row, the nav wrapping its links and the group on its
+ * first line, and below 40rem two, the nav on a row of its own and the group on the next, at its
+ * inline end; the components' glyph-button.css lays out each button. The Pages and Contents
+ * buttons show only below their drawers' docks. The shell's two shortcut dialogs, Help and
+ * Settings, each open with a header row, the heading and the Close; Settings takes the foundation's
+ * theme menu width, the viewport less --space-s on each side, up to 56rem, and Help its list's
+ * width, up to the same cap. Each rendered page's two pagers, at main's top and foot, are a quiet row of plain links, the
  * previous page's at the inline start and the next's at the inline end, each title wrapping in its
  * half of the row. A
  * GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule at its start
@@ -52,9 +55,9 @@
     padding-block: var(--space-s);
   }
 
-  /* The shell's header: the site nav at the start, taking the rest of the row and wrapping its own
-     links, and the header-actions group at the end, never wrapping, so the group stays on the
-     header's first line at every width; the first baseline holds the group to the nav's first
+  /* The shell's header: from 40rem one row, the site nav at the start, taking the rest of the row
+     and wrapping its own links, and the header-actions group at the end, never wrapping, so the
+     group stays on the header's first line; the first baseline holds the group to the nav's first
      line however many lines the nav wraps to. */
   body > header {
     display: flex;
@@ -66,8 +69,8 @@
     flex: 1;
   }
 
-  /* The header's buttons, Pages, Help, and Settings, one group in a row. Each is a glyph button,
-     which the components' glyph-button.css lays out. */
+  /* The header's buttons, Pages, Contents, Help, and Settings, one group in a row. Each is a glyph
+     button, which the components' glyph-button.css lays out. */
   .header-actions {
     display: flex;
     flex: none;
@@ -75,11 +78,50 @@
     gap: var(--space-2xs);
   }
 
-  /* The shortcut dialogs, Help and Settings: the foundation theme menu's width, which the
-     settings' rows and preview were laid out for, the viewport less --space-s on each side, up to
-     its 56rem cap; the shortcuts list takes the same, so the two dialogs are one size. */
-  dialog:is(#help, #settings) {
+  /* Below 40rem, two rows: the site nav takes the first whole, so its links keep one line, and the
+     group the next, at its inline end, a step closer under the nav than the row's own gap. */
+  @media (width < 40rem) {
+    body > header {
+      flex-wrap: wrap;
+      row-gap: var(--space-2xs);
+    }
+
+    body > header > sl-site-nav {
+      flex-basis: 100%;
+    }
+
+    .header-actions {
+      margin-inline-start: auto;
+    }
+  }
+
+  /* The shortcut dialogs, Help and Settings: Settings takes the foundation theme menu's width,
+     which the settings' rows and preview were laid out for, the viewport less --space-s on each
+     side, up to its 56rem cap; Help is as wide as its shortcuts list, up to the same cap. */
+  dialog#settings {
     inline-size: min(100% - 2 * var(--space-s), 56rem);
+  }
+
+  dialog#help {
+    inline-size: fit-content;
+    max-inline-size: min(100% - 2 * var(--space-s), 56rem);
+  }
+
+  /* A shortcut dialog's header row: its heading at the inline start and its Close at the inline
+     end, aligned on their centers, with --space-m under it, more than the --space-s between the
+     content's own sections, so the first section stands apart from the heading. The heading takes
+     none of its own margins in the row. */
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-block-end: var(--space-m);
+    padding-block: 0;
+  }
+
+  .dialog-header > h2 {
+    margin-block: 0;
   }
 
   /* Body text breaks a word too long for the column; the components' navigation never does. */
@@ -297,16 +339,24 @@
   }
 }
 
-/* The Pages button, shown only where the site index is the drawer and once the Pages drawer is
-   defined, so with no script, or on a page with no Pages drawer, it is never shown. Unlayered,
-   after the components' glyph-button.css, whose unlayered display: inline-flex would otherwise win
-   over any rule in the site layer. */
-.pages-opener {
+/* The Pages and Contents buttons, each shown only where its drawer is a modal, below its dock, and
+   once the drawer is defined, so with no script, or on a page with no such drawer, as a page with
+   no section tree has no Contents drawer, it is never shown. Unlayered, after the components'
+   glyph-button.css, whose unlayered display: inline-flex would otherwise win over any rule in the
+   site layer. */
+.pages-opener,
+.contents-opener {
   display: none;
 }
 
 @media (width < 86rem) {
   body:has(#pages:defined) .pages-opener {
+    display: inline-flex;
+  }
+}
+
+@media (width < 70rem) {
+  body:has(#contents:defined) .contents-opener {
     display: inline-flex;
   }
 }

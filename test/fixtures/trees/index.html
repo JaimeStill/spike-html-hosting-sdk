@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- The trees fixture's index, a hand page at the base, as the root's index is: no Markdown fills
-     it. Its header is the shell's but for the Pages button, which a page with no Pages drawer
-     leaves out, with its script; its main links the two trees' copied pages, under their
+     it. Its header is the shell's but for the Pages and Contents buttons, which a page with
+     neither drawer leaves out, with its script; its main links the two trees' copied pages, under their
      directories, and the hand page at a path elsewhere under the base. Its buttons hold glyph
      markers, which the build fills from the icons layer. -->
 <html lang="en">
@@ -63,9 +63,8 @@
       </ul>
     </main>
     <dialog id="help" aria-labelledby="help-title">
-      <h2 id="help-title">Keyboard shortcuts</h2>
-      <sl-shortcuts></sl-shortcuts>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="help-title">Keyboard shortcuts</h2>
         <button
           type="button"
           class="glyph-button"
@@ -79,12 +78,12 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-shortcuts></sl-shortcuts>
     </dialog>
     <dialog id="settings" aria-labelledby="settings-title">
-      <h2 id="settings-title">Settings</h2>
-      <sl-settings></sl-settings>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
         <button
           type="button"
           class="glyph-button"
@@ -98,7 +97,8 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-settings></sl-settings>
     </dialog>
   </body>
 </html>

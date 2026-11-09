@@ -1,8 +1,9 @@
 <!doctype html>
 <!-- The trees fixture's hand page at a path under the base other than its own, briefs/, as the
      root's hand orientation page is: written as HTML, with the section tree over its own headings
-     in its Contents drawer, which its script closes as a link in it is followed, all of which the
-     shell checks hold under the base by its URL. Its header is the index's; it links the
+     in its Contents drawer, which its script closes as a link in it is followed, and the header's
+     Contents button, which its script wires to the drawer, all of which the shell checks hold under
+     the base by its URL. Its header is the index's and that button; it links the
      orientation brief's rendered page, and the rendered page's alert is written here as the
      renderer writes one, so site.css draws it the same. -->
 <html lang="en">
@@ -22,18 +23,39 @@
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
     <script type="module" blocking="render">
-      // The Contents drawer closes as a link in it is followed, as the rendered pages' shell has
-      // each drawer close.
+      // The Contents drawer closes as a link in it is followed, and the header's Contents button
+      // opens it and says through aria-expanded whether it is open, as the rendered pages' shell
+      // has each drawer and its button.
       const contents = document.getElementById("contents");
       contents.addEventListener("click", (event) => {
         if (event.target instanceof Element && event.target.closest("a[href]")) contents.close();
       });
+      const opener = document.querySelector('[aria-controls="contents"]');
+      opener.addEventListener("click", () => contents.show());
+      const expanded = () => opener.setAttribute("aria-expanded", String(contents.open));
+      contents.addEventListener("open", expanded);
+      contents.addEventListener("close", expanded);
     </script>
   </head>
   <body>
     <header>
       <sl-site-nav></sl-site-nav>
       <div class="header-actions">
+        <button
+          type="button"
+          class="glyph-button contents-opener"
+          aria-controls="contents"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Contents"
+          data-keys="c"
+          interestfor="contents-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/list-ordered-16"></svg>
+          <span aria-hidden="true"><kbd>C</kbd></span>
+        </button>
+        <div id="contents-hint" class="glyph-hint" popover="hint" aria-hidden="true">Contents</div>
         <button
           type="button"
           class="glyph-button"
@@ -84,9 +106,8 @@
       </sl-section-tree>
     </sl-drawer>
     <dialog id="help" aria-labelledby="help-title">
-      <h2 id="help-title">Keyboard shortcuts</h2>
-      <sl-shortcuts></sl-shortcuts>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="help-title">Keyboard shortcuts</h2>
         <button
           type="button"
           class="glyph-button"
@@ -100,12 +121,12 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-shortcuts></sl-shortcuts>
     </dialog>
     <dialog id="settings" aria-labelledby="settings-title">
-      <h2 id="settings-title">Settings</h2>
-      <sl-settings></sl-settings>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
         <button
           type="button"
           class="glyph-button"
@@ -119,7 +140,8 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-settings></sl-settings>
     </dialog>
   </body>
 </html>

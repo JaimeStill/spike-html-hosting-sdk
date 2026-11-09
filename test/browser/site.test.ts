@@ -25,13 +25,15 @@
 // button's markup before v0.3.1 had it, or a handler that opens the Pages drawer on P whatever the
 // switch in Settings says, the keys help check fails, naming the page and the assertion. With a
 // shortcut dialog's heading name, its Close's Esc, its opener's kbd, or its opener's hint wrong,
-// the shortcut dialog check fails, naming the dialog and what it lacks; with Help holding a
+// or its Close moved to a trailing footer or its heading out of its header row, the shortcut
+// dialog check fails, naming the dialog and what it lacks; with Help holding a
 // [data-keys-list], which loads the foundation's keys-help.js, the request check fails. With the
 // Help button's glyph removed, the Settings button's word shown beside its glyph, or Help's Close
 // showing the Help button's glyph, the glyph check fails, naming the page and the button. With the glyph buttons' padding and border dropped and their text small, the target size
 // check fails, naming the width, the space, and the button; with the header's group wrapping its
-// buttons, or the header wrapping the group under the nav, the header row check fails, naming the
-// width; and with the header too wide for a phone, it fails naming the sideways scroll. With the
+// buttons, laid over the nav's row below 40rem, wrapped under the nav from 40rem, or at the
+// header's start, or the nav wrapping its links below 40rem, the header row check fails, naming
+// the width; and with the header too wide for a phone, it fails naming the sideways scroll. With the
 // bottom pager removed, a pager's links swapped, a pager link that follows nowhere, or every L
 // binding removed, the crawl fails, naming the page; with the top pager's L dropped, so keys lists
 // the bottom one's, or a handler that follows the previous link on H whatever the switch in
@@ -595,6 +597,20 @@ describe("the fixture site with its shortcut dialogs wrong", () => {
       message: /\/fixture-site\/: the shortcut dialog #settings, opened on s, lacks a Close/,
     },
     {
+      change: "Settings' Close moved to a trailing footer",
+      script: `const settings = document.querySelector("dialog#settings");
+      const footer = document.createElement("footer");
+      footer.append(...settings.querySelectorAll(".dialog-header > :not(h2)"));
+      settings.append(footer);`,
+      message:
+        /\/fixture-site\/: the shortcut dialog #settings, opened on s, lacks its header row, a header\.dialog-header holding its heading and its Close/,
+    },
+    {
+      change: "Help's heading outside its header row",
+      script: `document.querySelector("dialog#help").prepend(document.getElementById("help-title"));`,
+      message: /\/fixture-site\/: the shortcut dialog #help, opened on \?, lacks its header row/,
+    },
+    {
       change: "the Help button showing no key",
       script: `document.querySelector("header [commandfor=help] kbd").remove();`,
       message:
@@ -668,15 +684,28 @@ describe("the fixture site with its header's row broken", () => {
       message: /\/fixture-site\/: at 390px the header's buttons, [\w, ]+, share one line/,
     },
     {
-      change: "the header wrapping the group under the nav",
+      change: "the group laid over the nav's row below 40rem",
+      css:
+        "@media (width < 40rem) { .header-actions { position: absolute; " +
+        "inset-block-start: 0; inset-inline-end: var(--space-m); } }",
+      message:
+        /\/fixture-site\/: at 390px the header's buttons are on their own row below the site nav/,
+    },
+    {
+      change: "the nav wrapping its links below 40rem",
+      css: "@media (width < 40rem) { body > header > sl-site-nav { max-inline-size: 6rem; } }",
+      message: /\/fixture-site\/: at 390px the site nav keeps its links on one line, not \d+/,
+    },
+    {
+      change: "the header wrapping the group under the nav from 40rem",
       css:
         "body > header { flex-wrap: wrap; } body > header > sl-site-nav { flex-basis: 100%; } " +
         ".header-actions { margin-inline-start: auto; }",
-      message: /\/fixture-site\/: at 390px the header's buttons are on the site nav's first line/,
+      message: /\/fixture-site\/: at 640px the header's buttons are on the site nav's first line/,
     },
     {
       change: "the group at the header's start",
-      css: "body > header { flex-direction: row-reverse; }",
+      css: ".header-actions { margin-inline-start: 0; }",
       message: /\/fixture-site\/: at 390px the header's buttons end at its inline end/,
     },
     {

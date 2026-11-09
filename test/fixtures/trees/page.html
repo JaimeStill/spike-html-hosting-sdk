@@ -4,8 +4,8 @@
      the page's body, while its index.html is a hand page of its own, as a site whose index is
      written by hand keeps it. Its markup is the fixture site's shell's, index.html there: the
      foundation's full page entry, registrations, preferences, and keys modules, the components'
-     glyph-button.css, the SDK's site.css, the components' six elements, the Pages button and the
-     drawers' script, and the Help and Settings buttons and their shortcut dialogs, each button's
+     glyph-button.css, the SDK's site.css, the components' six elements, the Pages and Contents buttons
+     and the drawers' script, and the Help and Settings buttons and their shortcut dialogs, each button's
      glyph a marker the build fills from the icons layer.
      From test/fixtures/site/index.html: its markup, its title the fixture's. -->
 <html lang="en">
@@ -67,6 +67,21 @@
         <div id="pages-hint" class="glyph-hint" popover="hint" aria-hidden="true">Pages</div>
         <button
           type="button"
+          class="glyph-button contents-opener"
+          aria-controls="contents"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Contents"
+          data-keys="c"
+          interestfor="contents-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/list-ordered-16"></svg>
+          <span aria-hidden="true"><kbd>C</kbd></span>
+        </button>
+        <div id="contents-hint" class="glyph-hint" popover="hint" aria-hidden="true">Contents</div>
+        <button
+          type="button"
           class="glyph-button"
           commandfor="help"
           command="show-modal"
@@ -97,9 +112,8 @@
     </header>
     <main></main>
     <dialog id="help" aria-labelledby="help-title">
-      <h2 id="help-title">Keyboard shortcuts</h2>
-      <sl-shortcuts></sl-shortcuts>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="help-title">Keyboard shortcuts</h2>
         <button
           type="button"
           class="glyph-button"
@@ -113,12 +127,12 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-shortcuts></sl-shortcuts>
     </dialog>
     <dialog id="settings" aria-labelledby="settings-title">
-      <h2 id="settings-title">Settings</h2>
-      <sl-settings></sl-settings>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
         <button
           type="button"
           class="glyph-button"
@@ -132,7 +146,8 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-settings></sl-settings>
     </dialog>
   </body>
 </html>

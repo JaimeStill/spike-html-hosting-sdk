@@ -11,7 +11,9 @@
      Adapted from spike-html-hosting-sdk (237a769): test/fixtures/site/index.html, its title and
      Noctis's sheet and module.
      Adapted from spike-html-hosting-components (e3e60a8): README.md, the Settings opener and its
-     shortcut dialog. -->
+     shortcut dialog.
+     Adapted from spike-html-hosting-components (c5bcf30): README.md, the shortcut dialog's header
+     row. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -48,9 +50,8 @@
     </header>
     <main></main>
     <dialog id="settings" aria-labelledby="settings-title">
-      <h2 id="settings-title">Settings</h2>
-      <sl-settings></sl-settings>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
         <button
           type="button"
           class="glyph-button"
@@ -64,7 +65,8 @@
           <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
         <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-      </footer>
+      </header>
+      <sl-settings></sl-settings>
     </dialog>
   </body>
 </html>

@@ -21,28 +21,34 @@
 // reading width, centered; at 1200px, between the layout's docks, main is centered on a page with
 // no section tree, and the tree is docked beside it on a page with one; a page's section tree is in
 // its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
-// and K move through its sections, marking each, and below the dock, at
-// 390px and a px under it, a closed drawer, whose show() opens it and in which following a link
-// closes it and marks the link's section, and a page with no tree has no Contents drawer; at
+// and K move through its sections, marking each, and the header's Contents button is hidden, and
+// below the dock, at 390px and a px under it, a closed drawer, which the Contents button, shown
+// there, opens by its click and by C, its aria-expanded in step, and whose show() opens it and in
+// which following a link closes it and marks the link's section, and a page with no tree has no
+// Contents drawer and shows no Contents button; at
 // 390px, between the docks, and at 1600px, main starts directly under the header, the gap from
 // the header's bottom never below zero and no more than on a page taller than the viewport,
-// however short the page; ? opens Help, whose sl-shortcuts lists exactly the page's bindings as
-// the foundation's keys module holds them, the shell's P, ?, S, and the tree's J and K among
-// them, and, where the page has a pager, its H and L, each once, named as its previous and next
-// page, and neither on a page with none, Escape closes it, and the character-key switch in
-// Settings turns them off, so J moves to no section, P opens no drawer, and H and L move to no
-// page, and on again; every dialog a
-// keyed show-modal opener opens follows the components' shortcut dialog pattern, named by a heading
-// inside it, closed by a Close glyph button showing Esc, its opener showing its key and named, with
-// an interest hint showing the name; in a 390px viewport each header button, Pages where the
-// shell has one, Help, and Settings, and each shortcut dialog's Close each show one glyph, the
-// icons layer's svg for list-unordered-16, question-16, gear-16, and x-16, and the key hint in a
-// kbd, Esc for a Close, both rendered, and no word, each named by its aria-label; every rendered
-// glyph button, the page's and its components' in their shadow roots, and with each shortcut
-// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the
-// regular and the compact space profiles; the header's buttons, its header-actions group, share
-// one line at the header's inline end, on the site nav's first line, at the capture widths, 390px,
-// 1120px, and 1376px; nothing scrolls sideways at 390px; and at a phone's width, a px below and at
+// however short the page; below both docks, ? opens Help, its Close focused, whose sl-shortcuts
+// lists exactly the page's bindings as the foundation's keys module holds them, the shell's P, C
+// where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
+// page has a pager, its H and L, each once, named as its previous and next page, and neither on a
+// page with none, Escape closes it, and the character-key switch in Settings turns them off, so J
+// moves to no section, P and C open no drawer, and H and L move to no page, and on again; every
+// dialog a keyed show-modal opener opens follows the components' shortcut dialog pattern, named by
+// a heading inside it, closed by a Close glyph button showing Esc, the heading and the Close in
+// its header row, a header.dialog-header, its opener showing its key and named, with an interest
+// hint showing the name; in a 390px viewport each header button, Pages and Contents where the
+// shell has them, Help, and Settings, and each shortcut dialog's Close each show one glyph, the
+// icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16, and x-16, and
+// the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by its
+// aria-label; every rendered glyph button, the page's and its components' in their shadow roots,
+// the Contents button at 390px on a page with a Contents drawer, and with each shortcut dialog
+// open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular
+// and the compact space profiles; the header's buttons, its header-actions group, share one line
+// at the header's inline end, at the capture widths, 390px, 1120px, and 1376px, and at 40rem: at
+// 390px, below 40rem, the site nav keeps its links on one line and the group is on its own row
+// below it, and from 40rem the group is on the site nav's first line; nothing scrolls sideways at
+// 390px; and at a phone's width, a px below and at
 // each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word
 // breaks across lines and every docked side column is at least 16rem wide. A check that changes
 // the reader's stored theme or keys settings removes them after. shell lists them by name, for a
@@ -101,6 +107,7 @@ import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import arrowLeftIcon from "@jaimestill/spike-html-hosting-icons/octicon/arrow-left-16";
 import arrowRightIcon from "@jaimestill/spike-html-hosting-icons/octicon/arrow-right-16";
 import gearIcon from "@jaimestill/spike-html-hosting-icons/octicon/gear-16";
+import listOrderedIcon from "@jaimestill/spike-html-hosting-icons/octicon/list-ordered-16";
 import listUnorderedIcon from "@jaimestill/spike-html-hosting-icons/octicon/list-unordered-16";
 import questionIcon from "@jaimestill/spike-html-hosting-icons/octicon/question-16";
 import xIcon from "@jaimestill/spike-html-hosting-icons/octicon/x-16";
@@ -204,7 +211,7 @@ async function openSettings(page: Page, url: string, by: "button" | "s"): Promis
   await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
   if (by === "s") await press(page, "s");
   else {
-    await click(page, "header button[commandfor=settings]").catch((error: Error) =>
+    await click(page, "body > header button[commandfor=settings]").catch((error: Error) =>
       assert.fail(`${opens}; ${error.message}`),
     );
   }
@@ -543,6 +550,22 @@ const CONTENTS = `(() => {
   };
 })()`;
 
+/** The Contents button's state: whether it renders and its aria-expanded, null with no button. */
+const CONTENTS_BUTTON = `(() => {
+  const opener = document.querySelector("body > header .contents-opener");
+  return {
+    shown: !!opener && getComputedStyle(opener).display !== "none",
+    expanded: opener?.getAttribute("aria-expanded") ?? null,
+  };
+})()`;
+
+/** The loaded page's Contents button's state, as CONTENTS_BUTTON reads it. */
+const contentsButton = (page: Page): Promise<{ shown: boolean; expanded: string | null }> =>
+  page.evaluate(CONTENTS_BUTTON);
+
+/** The Contents drawer is open as a modal dialog. */
+const CONTENTS_MODAL = `!!document.getElementById("contents")?.shadowRoot?.querySelector("dialog")?.matches(":modal")`;
+
 /** The section tree's last link, which the check follows in the open drawer. */
 const LAST_LINK = `[...document.querySelectorAll('sl-section-tree a[href^="#"]')].at(-1)`;
 
@@ -565,10 +588,13 @@ async function atWidth(page: Page, width: number): Promise<void> {
  * dock of its own. At its dock and at 1600px the drawer is docked, the tree rendered as a column
  * beside main, at its end, and, under reduced motion so each move is instant, J marks the first
  * section and scrolls to it, and K returns to the page's top, no section marked; H and L are the
- * pager's, which move to another page, so the check presses neither. At a phone's width and a px below the dock the drawer is closed,
- * the tree not rendered; its show() opens it as a modal with the tree rendered, and following the
- * tree's last link closes it, its fragment the URL's and its section marked. A page with no tree
- * has no Contents drawer. The fragment and the emulated motion are put back after.
+ * pager's, which move to another page, so the check presses neither; the header's Contents button
+ * is hidden there. At a phone's width and a px below the dock the drawer is closed, the tree not
+ * rendered, and the Contents button shown, opening it as a modal by its click and by C, its
+ * aria-expanded true while the drawer is open and false once Escape closes it; the drawer's show()
+ * opens it with the tree rendered, and following the tree's last link closes it, its fragment the
+ * URL's and its section marked. A page with no tree has no Contents drawer, and no Contents button
+ * shown at a phone's width. The fragment and the emulated motion are put back after.
  */
 async function assertContents(page: Page, url: string): Promise<void> {
   type Contents = {
@@ -588,6 +614,12 @@ async function assertContents(page: Page, url: string): Promise<void> {
       await page.evaluate(`document.getElementById("contents")`),
       null,
       `${url}: with no section tree, it has no Contents drawer`,
+    );
+    await atWidth(page, 390);
+    assert.equal(
+      (await contentsButton(page)).shown,
+      false,
+      `${url}: with no section tree, no Contents button is shown at 390px`,
     );
     return;
   }
@@ -609,6 +641,11 @@ async function assertContents(page: Page, url: string): Promise<void> {
         `${url}: at ${width}px the Contents drawer is docked, the section tree shown`,
       );
       assert.ok(contents.beside, `${url}: at ${width}px the section tree is beside main`);
+      assert.equal(
+        (await contentsButton(page)).shown,
+        false,
+        `${url}: at ${width}px, the drawer docked, the Contents button is hidden`,
+      );
       assert.equal(await page.evaluate(MARKED), null, `${url}: at the top no section is marked`);
       await press(page, "j");
       await page.evaluate(SETTLED);
@@ -633,6 +670,31 @@ async function assertContents(page: Page, url: string): Promise<void> {
         { docked: false, modal: false, shown: false },
         `${url}: at ${width}px the Contents drawer is closed, the section tree hidden`,
       );
+      assert.deepEqual(
+        await contentsButton(page),
+        { shown: true, expanded: "false" },
+        `${url}: at ${width}px the Contents button is shown, the drawer closed`,
+      );
+      for (const [by, open] of [
+        ["its click", () => click(page, "body > header .contents-opener")],
+        ["C", () => press(page, "c")],
+      ] as const) {
+        await open();
+        await until(page, CONTENTS_MODAL).catch(() =>
+          assert.fail(`${url}: at ${width}px the Contents button opens the drawer by ${by}`),
+        );
+        assert.equal(
+          (await contentsButton(page)).expanded,
+          "true",
+          `${url}: at ${width}px the Contents button's aria-expanded is true while it is open`,
+        );
+        await press(page, "Escape");
+        await until(page, `!${CONTENTS_MODAL}`);
+        // The dialog's close event, which the drawer's own follows, is a task after Escape's.
+        await until(page, `${CONTENTS_BUTTON}.expanded === "false"`, 2000).catch(() =>
+          assert.fail(`${url}: at ${width}px aria-expanded is false once the drawer closes`),
+        );
+      }
       await page.evaluate(`document.getElementById("contents").show()`);
       await until(page, `${CONTENTS}.modal`).catch(() =>
         assert.fail(`${url}: at ${width}px show() opens the Contents drawer`),
@@ -760,7 +822,7 @@ const PAGE_BINDINGS = `(() => {
 
 /** The header's controls that bind a key, each as its data-keys and the text of the kbd elements
  * it shows, joined by a space. */
-const HEADER_KEYS = `[...document.querySelectorAll("header [data-keys]")].map((control) => ({
+const HEADER_KEYS = `[...document.querySelectorAll("body > header [data-keys]")].map((control) => ({
     keys: control.dataset.keys,
     shown: [...control.querySelectorAll("kbd")].map((kbd) => kbd.textContent).join(" "),
   }))`;
@@ -785,11 +847,25 @@ const MARKED = `document.querySelector("sl-section-tree a[aria-current]")?.getAt
 
 /** The shell's glyph buttons, by the selector that finds each: its name, its aria-label; its key
  * hint, the kbd it shows; and its glyph, the icons module whose svg the build fills its marker
- * with. The Pages button is the shell's where it has one, which a hand page may leave out. */
+ * with. The Pages and Contents buttons are the shell's where it has them, which a hand page may
+ * leave out. */
 const GLYPHS: Record<string, { name: string; hint: string; icon: string }> = {
-  "header .pages-opener[data-keys=p]": { name: "Pages", hint: "P", icon: listUnorderedIcon },
-  "header button[commandfor=help][data-keys]": { name: "Help", hint: "?", icon: questionIcon },
-  "header button[commandfor=settings][data-keys]": { name: "Settings", hint: "S", icon: gearIcon },
+  "body > header .pages-opener[data-keys=p]": { name: "Pages", hint: "P", icon: listUnorderedIcon },
+  "body > header .contents-opener[data-keys=c]": {
+    name: "Contents",
+    hint: "C",
+    icon: listOrderedIcon,
+  },
+  "body > header button[commandfor=help][data-keys]": {
+    name: "Help",
+    hint: "?",
+    icon: questionIcon,
+  },
+  "body > header button[commandfor=settings][data-keys]": {
+    name: "Settings",
+    hint: "S",
+    icon: gearIcon,
+  },
   "dialog#help button[commandfor=help][command=close]": { name: "Close", hint: "Esc", icon: xIcon },
   "dialog#settings button[commandfor=settings][command=close]": {
     name: "Close",
@@ -801,8 +877,8 @@ const GLYPHS: Record<string, { name: string; hint: string; icon: string }> = {
 /** The shell's shortcut dialogs, each by its id, as its name in a message, with its opener in the
  * header. */
 const DIALOGS = [
-  { id: "help", name: "Help", opener: "header button[commandfor=help]" },
-  { id: "settings", name: "Settings", opener: "header button[commandfor=settings]" },
+  { id: "help", name: "Help", opener: "body > header button[commandfor=help]" },
+  { id: "settings", name: "Settings", opener: "body > header button[commandfor=settings]" },
 ];
 
 /** Each glyph button the page has, by its GLYPHS selector, as shown: its aria-label; its svg
@@ -872,7 +948,7 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
     const glyph = icons.get(selector) ?? null;
     return { selector, name, svgs: 1, glyph, hints: [hint], words: "", rendered: true };
   };
-  const header = Object.keys(GLYPHS).filter((selector) => selector.startsWith("header "));
+  const header = Object.keys(GLYPHS).filter((selector) => selector.startsWith("body > header "));
   const shown: Shown[] = await page.evaluate(glyphsShown(header));
   const names = shown.map(({ selector }) => GLYPHS[selector].name);
   assert.ok(
@@ -926,8 +1002,9 @@ async function assertGlyphs(page: Page, url: string): Promise<void> {
  * lacks of the components' shortcut dialog pattern: its opener's name, an aria-label; its opener's
  * key, upper-cased, shown in its kbd; its opener's interest hint, the element its interestfor
  * names, holding that name; the dialog itself; a name from a heading inside it, an h1 to h6 its
- * aria-labelledby names; and a Close, a glyph button inside it with command=close for it, showing
- * Esc in a kbd.
+ * aria-labelledby names; a Close, a glyph button inside it with command=close for it, showing Esc
+ * in a kbd; and its header row, a header.dialog-header, a child of the dialog, holding both the
+ * naming heading and that Close, never a trailing Close alone.
  */
 const SHORTCUT_DIALOGS = `[...document.querySelectorAll('button[data-keys][commandfor][command="show-modal"]')]
   .map((opener) => {
@@ -944,15 +1021,21 @@ const SHORTCUT_DIALOGS = `[...document.querySelectorAll('button[data-keys][comma
     }
     const dialog = document.getElementById(id);
     if (!(dialog instanceof HTMLDialogElement)) return { id, keys, lacks: [...lacks, "a dialog"] };
-    const named = (dialog.getAttribute("aria-labelledby") ?? "").split(/\\s+/)
+    const headings = (dialog.getAttribute("aria-labelledby") ?? "").split(/\\s+/)
       .map((ref) => document.getElementById(ref))
-      .some((heading) => !!heading && dialog.contains(heading) &&
+      .filter((heading) => !!heading && dialog.contains(heading) &&
         /^h[1-6]$/.test(heading.localName) && heading.textContent.trim() !== "");
-    if (!named) lacks.push("a name from a heading inside it, by aria-labelledby");
+    if (headings.length === 0) lacks.push("a name from a heading inside it, by aria-labelledby");
     const closes = [...dialog.querySelectorAll('button.glyph-button[command="close"]')]
       .filter((close) => close.getAttribute("commandfor") === id &&
         [...close.querySelectorAll("kbd")].some((kbd) => kbd.textContent.trim() === "Esc"));
     if (closes.length === 0) lacks.push("a Close, a glyph button for it showing Esc in a kbd");
+    else {
+      const row = [...dialog.querySelectorAll(":scope > header.dialog-header")].some((header) =>
+        headings.some((heading) => header.contains(heading)) &&
+        closes.some((close) => header.contains(close)));
+      if (!row) lacks.push("its header row, a header.dialog-header holding its heading and its Close");
+    }
     return { id, keys, lacks };
   })`;
 
@@ -998,13 +1081,14 @@ const TARGETS = `(() => {
 })()`;
 
 /** Asserts every glyph button the loaded page renders, at 390px, where the Pages button shows, and
- * at 1600px, where both drawers are docked, is at least 24 CSS px a side, in the regular and the
- * compact space profiles; and, with each dialog a keyed show-modal opener opens shown as a modal
+ * the Contents button on a page with a Contents drawer, and at 1600px, where both drawers are
+ * docked, is at least 24 CSS px a side, in the regular and the compact space profiles; and, with each dialog a keyed show-modal opener opens shown as a modal
  * in turn, each glyph button it renders too, its Close among them, then closed. The root's own
  * data-space is put back after. */
 async function assertTargetSize(page: Page, url: string): Promise<void> {
   const space: string | null = await page.evaluate(attribute("data-space"));
   const dialogs: string[] = await page.evaluate(OPENED_DIALOGS);
+  const contents: boolean = await page.evaluate(`!!document.getElementById("contents")`);
   /** Asserts the size of each glyph button rendered, in the dialog with the id when one is open. */
   const measure = async (width: number, profile: string, dialog?: string): Promise<void> => {
     await page.evaluate(SETTLED);
@@ -1015,6 +1099,11 @@ async function assertTargetSize(page: Page, url: string): Promise<void> {
       assert.ok(
         targets.some(({ name }) => name === "Close"),
         `${url}: at ${width}px${where} its Close renders`,
+      );
+    } else if (contents && width === 390) {
+      assert.ok(
+        targets.some(({ name }) => name === "Contents"),
+        `${url}: at ${width}px its Contents button renders`,
       );
     }
     for (const target of targets) {
@@ -1054,14 +1143,20 @@ async function assertTargetSize(page: Page, url: string): Promise<void> {
   }
 }
 
-/** The widths the header's row is checked at, the captures' (screenshots.ts's WIDTHS): a phone's,
- * and a laptop's on each side of the drawer's dock. */
-const HEADER_WIDTHS = [390, 1120, 1376];
+/** The width below which the header is two rows, the site nav over its header-actions group, as
+ * site.css's media query has it. */
+const HEADER_ROWS = px("40rem");
+
+/** The widths the header's row is checked at: the captures' (screenshots.ts's WIDTHS), a phone's,
+ * where the header is two rows, and a laptop's on each side of the drawer's dock; and HEADER_ROWS,
+ * the narrowest width the header is one row at. */
+const HEADER_WIDTHS = [390, HEADER_ROWS, 1120, 1376];
 
 /** The loaded page's header as laid out: whether it holds its header-actions group; each rendered
  * button of the group, by its aria-label, and its box's top and bottom; the group's inline end and
- * the header's content box's; the group's top and bottom; and the site nav's first link's top and
- * bottom, its first line, or null with no nav. */
+ * the header's content box's; the group's top and bottom; and the site nav's, or null with no
+ * nav: its first link's top and bottom, its first line, its box's bottom, and the count of lines
+ * its links render on, by their client rects' tops. */
 const HEADER_ROW = `(() => {
   const header = document.querySelector("body > header");
   const group = header?.querySelector(":scope > .header-actions");
@@ -1069,8 +1164,12 @@ const HEADER_ROW = `(() => {
   const box = header.getBoundingClientRect();
   const style = getComputedStyle(header);
   const g = group.getBoundingClientRect();
-  const first = header.querySelector(":scope > sl-site-nav")?.shadowRoot?.querySelector("a");
-  const line = first?.getBoundingClientRect();
+  const nav = header.querySelector(":scope > sl-site-nav");
+  const links = [...(nav?.shadowRoot?.querySelectorAll("a") ?? [])];
+  const line = links[0]?.getBoundingClientRect();
+  const lines = new Set(links.flatMap((link) => [...link.getClientRects()])
+    .filter((rect) => rect.width > 0)
+    .map((rect) => Math.round(rect.top)));
   return {
     buttons: [...group.querySelectorAll(":scope > button")]
       .filter((button) => button.checkVisibility())
@@ -1082,14 +1181,17 @@ const HEADER_ROW = `(() => {
     inline: box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth),
     top: g.top,
     bottom: g.bottom,
-    line: line ? { top: line.top, bottom: line.bottom } : null,
+    nav: line
+      ? { top: line.top, bottom: line.bottom, end: nav.getBoundingClientRect().bottom, lines: lines.size }
+      : null,
   };
 })()`;
 
 /** Asserts the loaded page's header at each of HEADER_WIDTHS: it holds its header-actions group,
- * whose rendered buttons share one line, the group at the header's inline end and on the site
- * nav's first line, however many lines the nav wraps to; and, at 390px, nothing scrolls
- * sideways. */
+ * whose rendered buttons share one line, the group at the header's inline end. Below HEADER_ROWS
+ * the header is two rows: the site nav keeps its links on one line, and the group is on its own
+ * row below the nav. From HEADER_ROWS it is one row: the group is on the site nav's first line,
+ * however many lines the nav wraps to. And, at 390px, nothing scrolls sideways. */
 async function assertHeaderRow(page: Page, url: string): Promise<void> {
   type Row = {
     buttons: { name: string; top: number; bottom: number }[];
@@ -1097,7 +1199,7 @@ async function assertHeaderRow(page: Page, url: string): Promise<void> {
     inline: number;
     top: number;
     bottom: number;
-    line: { top: number; bottom: number } | null;
+    nav: { top: number; bottom: number; end: number; lines: number } | null;
   };
   for (const width of HEADER_WIDTHS) {
     await page.cdp("Emulation.setDeviceMetricsOverride", {
@@ -1121,9 +1223,21 @@ async function assertHeaderRow(page: Page, url: string): Promise<void> {
       `${url}: at ${width}px the header's buttons end at its inline end, ${row.end}px, ` +
         `not ${row.inline}px`,
     );
-    if (row.line) {
+    if (!row.nav) continue;
+    if (width < HEADER_ROWS) {
+      assert.equal(
+        row.nav.lines,
+        1,
+        `${url}: at ${width}px the site nav keeps its links on one line, not ${row.nav.lines}`,
+      );
       assert.ok(
-        row.top < row.line.bottom && row.bottom > row.line.top,
+        row.top >= row.nav.end - 0.5,
+        `${url}: at ${width}px the header's buttons are on their own row below the site nav, ` +
+          `their top ${row.top}px above its bottom ${row.nav.end}px`,
+      );
+    } else {
+      assert.ok(
+        row.top < row.nav.bottom && row.bottom > row.nav.top,
         `${url}: at ${width}px the header's buttons are on the site nav's first line`,
       );
     }
@@ -1145,7 +1259,7 @@ async function turnCharacterKeys(page: Page, url: string): Promise<HelpRow[]> {
   );
   await closeSettings(page, url);
   await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
-  await click(page, "header button[commandfor=help]");
+  await click(page, "body > header button[commandfor=help]");
   await until(page, HELP);
   await until(page, `${HELP_ROWS}.length > 0`);
   await page.evaluate(SETTLED);
@@ -1155,22 +1269,33 @@ async function turnCharacterKeys(page: Page, url: string): Promise<HelpRow[]> {
   return rows;
 }
 
+/** The width the keys help is checked at, a px below the section tree's dock, under both docks,
+ * so the Pages and Contents buttons, each shown only while its drawer isn't docked, both show. */
+const KEYS_WIDTH = px(docks.tree) - 1;
+
 /**
- * Asserts the loaded page's keys help, between the docks: ? opens Help, the shell's dialog#help,
- * whose sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them
- * (PAGE_BINDINGS), each once, among them the shell's: P, the Pages button's, where the shell has
- * one, shown as the drawer isn't docked; ?, the Help button's; S, the Settings button's; and,
- * where the page has a section tree, J and K, its next and previous section; and, where the page
- * has a pager, H and L, each once, named "Previous page: <title>" and "Next page: <title>" by the
- * top pager's links, where it has them, and neither on a page with none. Escape closes Help.
- * Turning the character-key switch in the Settings dialog off marks each of them off in Help, and
- * J then marks no other section, P opens no drawer, and H and L leave the page where it is; turning
- * it on again, J moves to another section. The reader's keys settings are cleared after, so no
+ * Asserts the loaded page's keys help, below both docks (KEYS_WIDTH): ? opens Help, the shell's
+ * dialog#help, its Close focused, the first control in it, and its sl-shortcuts lists exactly the
+ * page's bindings as the foundation's keys module holds them (PAGE_BINDINGS), each once, among
+ * them the shell's: P, the Pages button's, where the shell has one, shown as its drawer isn't
+ * docked; C, the Contents button's, wherever the page has a Contents drawer; ?, the Help
+ * button's; S, the Settings button's; and, where the page has a section tree, J and K, its next
+ * and previous section; and, where the page has a pager, H and L, each once, named
+ * "Previous page: <title>" and "Next page: <title>" by the top pager's links, where it has them,
+ * and neither on a page with none. Escape closes Help. Turning the character-key switch in the
+ * Settings dialog off marks each of them off in Help, and J then marks no other section, P and C
+ * open no drawer, and H and L leave the page where it is; turning it on again, J moves to another
+ * section. The reader's keys settings are cleared after, so no
  * other check runs with the keys off. Every control in the header that binds a key shows it in a
  * kbd, upper-cased as Help's rows show it.
  */
 async function assertKeysHelp(page: Page, url: string): Promise<void> {
-  await between(page);
+  await page.cdp("Emulation.setDeviceMetricsOverride", {
+    width: KEYS_WIDTH,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
   await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
   await page.evaluate(SETTLED);
   const controls: { keys: string; shown: string }[] = await page.evaluate(HEADER_KEYS);
@@ -1187,8 +1312,15 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     );
     // Past the dialog's toggle event, a task after the open, so the list is read as it stays.
     await page.evaluate(SETTLED);
+    assert.ok(
+      await page.evaluate(
+        `!!document.activeElement?.matches("dialog#help > header.dialog-header > button[command=close]")`,
+      ),
+      `${url}: Help opens with its Close focused`,
+    );
     const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
     const pages: boolean = await page.evaluate(`${PAGES}.shown`);
+    const contents: boolean = await page.evaluate(`!!document.getElementById("contents")`);
     const pager: HelpRow[] = await page.evaluate(PAGER_ROWS);
     const rows: HelpRow[] = await page.evaluate(HELP_ROWS);
     const bindings: HelpRow[] = await page.evaluate(PAGE_BINDINGS);
@@ -1199,6 +1331,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     );
     const shell = [
       ...(pages ? [{ keys: "P", action: "Pages", off: false }] : []),
+      ...(contents ? [{ keys: "C", action: "Contents", off: false }] : []),
       { keys: "?", action: "Help", off: false },
       { keys: "S", action: "Settings", off: false },
       ...(tree
@@ -1237,6 +1370,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     const at: string = await page.evaluate(`location.href`);
     await press(page, "j");
     await press(page, "p");
+    await press(page, "c");
     await press(page, "h");
     await press(page, "l");
     await page.evaluate(SETTLED);
@@ -1250,6 +1384,11 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       await page.evaluate(`${PAGES}.modal`),
       false,
       `${url}: with the keys off, P doesn't open the drawer`,
+    );
+    assert.equal(
+      await page.evaluate(CONTENTS_MODAL),
+      false,
+      `${url}: with the keys off, C doesn't open the Contents drawer`,
     );
 
     assert.deepEqual(
@@ -1373,7 +1512,7 @@ export const requestsUnderBase: Check = async (page, site, url = site) => {
   await openSettings(page, url, "button");
   await closeSettings(page, url);
   await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
-  await click(page, "header button[commandfor=help]");
+  await click(page, "body > header button[commandfor=help]");
   await until(page, HELP).catch(() => assert.fail(`${url}: the Help button opens Help`));
   await until(page, `${HELP_ROWS}.length > 0`).catch(() =>
     assert.fail(`${url}: Help's sl-shortcuts lists the page's bindings`),
@@ -1403,8 +1542,9 @@ export const holdsBetweenDocks: Check = async (page, site, url = site) => {
 };
 
 /** On a page with a section tree, the tree is in the Contents drawer: a column docked beside main
- * from the layout's tree dock, J and K moving through its sections, and below it a closed drawer,
- * which following a link in it closes. A page with none has no drawer. */
+ * from the layout's tree dock, J and K moving through its sections, the Contents button hidden,
+ * and below it a closed drawer, which the Contents button opens by its click and by C and
+ * following a link in it closes. A page with none has no drawer and shows no Contents button. */
 export const placesSectionTree: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertContents(page, url);
@@ -1417,22 +1557,24 @@ export const startsUnderHeader: Check = async (page, site, url = site) => {
   await assertUnderHeader(page, url);
 };
 
-/** ? opens Help, listing exactly the page's bindings, Escape closes it, and the character-key
- * switch in the Settings dialog turns them off and on again. */
+/** ? opens Help, its Close focused, listing exactly the page's bindings, Escape closes it, and the
+ * character-key switch in the Settings dialog turns them off and on again. */
 export const opensKeysHelp: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertKeysHelp(page, url);
 };
 
 /** Each dialog a keyed show-modal opener opens follows the components' shortcut dialog pattern: a
- * name from a heading inside it, a Close showing Esc, and an opener that shows its key and has a
- * name its interest hint shows; it fails naming each dialog and what it lacks. */
+ * name from a heading inside it, a Close showing Esc, the two in its header row, a
+ * header.dialog-header, and an opener that shows its key and has a name its interest hint shows;
+ * it fails naming each dialog and what it lacks. */
 export const followsShortcutDialogs: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertShortcutDialogs(page, url);
 };
 
-/** Each header button, Pages where the shell has one, Help, and Settings, and each shortcut
+/** Each header button, Pages and Contents where the shell has them, Help, and Settings, and each
+ * shortcut
  * dialog's Close, shows its glyph and its key hint, and no word, named by its aria-label. */
 export const showsGlyphs: Check = async (page, site, url = site) => {
   await page.goto(url);
@@ -1447,8 +1589,9 @@ export const hasTargetSize: Check = async (page, site, url = site) => {
   await assertTargetSize(page, url);
 };
 
-/** At 390px, 1120px, and 1376px, the header's buttons share one line at its inline end, on the
- * site nav's first line, and at 390px nothing scrolls sideways. */
+/** At 390px, 40rem, 1120px, and 1376px, the header's buttons share one line at its inline end:
+ * below 40rem on their own row under the site nav, which keeps its links on one line, and from
+ * 40rem on the site nav's first line; and at 390px nothing scrolls sideways. */
 export const keepsHeaderRow: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertHeaderRow(page, url);
@@ -1647,7 +1790,7 @@ export const shell: Record<string, Check> = {
   "each header button and each dialog's Close show their glyph and key hint, named, no word":
     showsGlyphs,
   "every glyph button is at least 24px a side, in the regular and the compact space": hasTargetSize,
-  "the header's buttons share one line at its inline end, on its first line, at 390px and wider":
+  "the header's buttons share one line at its inline end, under the nav below 40rem, beside it after":
     keepsHeaderRow,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
   "no navigation link breaks inside a word, and each docked column is 16rem or wider":

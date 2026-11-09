@@ -230,32 +230,39 @@ The shell checks, each named in `shell`, assert these:
 - A page's section tree is in its Contents drawer, `sl-drawer#contents` labeled "Contents" and
   docked from 70rem, the tree with no `dock` of its own; a page with no tree has no such drawer. At
   70rem and at 1600px the drawer is docked, the tree a column beside main, where J marks and moves
-  to the first section and K back to the page's top. At 390px and a
-  pixel under 70rem the drawer is closed and the tree hidden; opened by its `show()`, a modal, it
-  closes as a link in it is followed, and the link's section is marked.
+  to the first section and K back to the page's top, and the header's Contents button is hidden.
+  At 390px and a pixel under 70rem the drawer is closed and the tree hidden; the Contents button,
+  shown, opens it as a modal by its click and by C, its `aria-expanded` true while it is open and
+  false once Escape closes it; opened by its `show()`, it closes as a link in it is followed, and
+  the link's section is marked. A page with no tree shows no Contents button.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into it, and no further below it than on a page taller than the viewport.
-- ? opens Help, whose `sl-shortcuts` lists exactly the page's bindings, as the foundation's keys
-  module holds them, the shell's P, ?, S, and the tree's J and K among them, and, where the page
-  has a pager, H and L once each, named by the top pager's links, "Previous page: <title>" and
-  "Next page: <title>", and neither where it has none; Escape closes it. The character-key switch
-  in Settings turns them off, so J, P, H, and L do nothing, and on again. Every header control that
-  binds a key shows it in a `kbd`.
+- A pixel under 70rem, below both docks, ? opens Help, its Close focused, whose `sl-shortcuts`
+  lists exactly the page's bindings, as the foundation's keys module holds them, the shell's P, C
+  where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
+  page has a pager, H and L once each, named by the top pager's links, "Previous page: <title>"
+  and "Next page: <title>", and neither where it has none; Escape closes it. The character-key
+  switch in Settings turns them off, so J, P, C, H, and L do nothing, and on again. Every header
+  control that binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
   components' shortcut dialog pattern: it is named by a heading inside it through
   `aria-labelledby`, and has a Close, a glyph button with `command="close"` for it showing
-  `<kbd>Esc</kbd>`; its opener shows its key in a `kbd`, has a name, its `aria-label`, and an
+  `<kbd>Esc</kbd>`, the heading and the Close in its header row, a `header.dialog-header`, never a
+  trailing Close; its opener shows its key in a `kbd`, has a name, its `aria-label`, and an
   interest hint holding that name. It fails naming each dialog and what it lacks.
-- At 390px, each header button, Pages where the shell has one, Help, and Settings, and, with each
-  shortcut dialog open, its Close, shows one glyph, the icons layer's `list-unordered-16`,
-  `question-16`, `gear-16`, and `x-16`, its markup the icons module's own, and its key hint in a
-  `kbd`, Esc for a Close, both rendered, and no word, named by its `aria-label`: Pages, Help,
-  Settings, and Close.
+- At 390px, each header button, Pages and Contents where the shell has them, Help, and Settings,
+  and, with each shortcut dialog open, its Close, shows one glyph, the icons layer's
+  `list-unordered-16`, `list-ordered-16`, `question-16`, `gear-16`, and `x-16`, its markup the
+  icons module's own, and its key hint in a `kbd`, Esc for a Close, both rendered, and no word,
+  named by its `aria-label`: Pages, Contents, Help, Settings, and Close.
 - Every glyph button the page renders, its own and those in the components' shadow roots, is at
   least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
-  space, and with each shortcut dialog open, its own, its Close among them.
-- At 390px, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one line
-  at the header's inline end, on the site nav's first line, and at 390px nothing scrolls sideways.
+  space, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
+  dialog open, its own, its Close among them.
+- At 390px, 40rem, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one
+  line at the header's inline end. At 390px, below 40rem, the site nav keeps its links on one line
+  and the group is on its own row below it; from 40rem the group is on the site nav's first line.
+  At 390px nothing scrolls sideways.
 - Nothing scrolls sideways at 390px.
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
   word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
@@ -532,9 +539,11 @@ its scroll land on the page the drawer covered; the drawer leaves that to the pa
 
 Main's track may shrink, main breaks long words while the components' navigation never breaks
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
-shell's header is the site nav, taking the rest of the row and wrapping its own links, and one
-group of buttons at its inline end, `header-actions`, Pages, Help, and Settings, which never wraps
-and stays on the nav's first line at every width. Each button, and each shortcut dialog's Close, is
+shell's header is the site nav and one group of buttons at its inline end, `header-actions`,
+Pages, Contents, Help, and Settings, which never wraps. From 40rem it is one row, the nav taking
+the rest of the row and wrapping its own links, the group on the nav's first line; below 40rem it
+is two, the nav on a row of its own, its links on one line, and the group on the next row, at its
+inline end. Each button, and each shortcut dialog's Close, is
 a glyph button, laid out by the components' `glyph-button.css`, which the shell links between the
 foundation's entry and `site.css`.
 
@@ -542,36 +551,43 @@ The shell wires the components in: it loads their six modules, `site-nav.js`, `s
 `section-tree.js`, `drawer.js`, `shortcuts.js`, and `settings.js`, render-blocking like the
 foundation's, from `github:JaimeStill/spike-html-hosting-components`, at a release that holds
 `sl-shortcuts` and `sl-settings`; places `sl-site-nav`, which takes no content, at its header's
-start, with no `src`, so it lists the components' built `SITES`; and adds the Pages button first in
-the header's group, as the components' README gives it. keys.js clicks the button on P, as it does
-Settings on S; `site.css` shows it only below 86rem, the drawer's dock, and only once the Pages
-drawer is defined, so with no script it stays hidden and the index renders as the page's own; and
-the page's script opens the drawer on its click, keeps its `aria-expanded` in step with the drawer's
-`open` and `close` events, and closes each drawer, Pages and Contents, as a link in it is followed.
-The drawer, open, is a modal: Escape, its Close button, or a followed link closes it.
+start, with no `src`, so it lists the components' built `SITES`; and adds the Pages and Contents
+buttons first in the header's group, as the components' README gives them. keys.js clicks Pages on
+P and Contents on C, as it does Settings on S; `site.css` shows each only below its drawer's dock,
+86rem for Pages and 70rem for Contents, and only once its drawer is defined, so with no script, or
+on a page with no such drawer, as a page with no section tree has no Contents drawer, it stays
+hidden and the navigation renders as the page's own; and the page's script opens each drawer on its
+button's click, keeps the button's `aria-expanded` in step with the drawer's `open` and `close`
+events, and closes each drawer as a link in it is followed. A drawer, open, is a modal: Escape, its
+Close button, or a followed link closes it.
 
 A site's shell carries two shortcut dialogs, as the components' README gives the pattern: a key
 and its opener, a glyph button in the header with `commandfor` and `command="show-modal"`, open a
-native modal dialog named by its heading through `aria-labelledby`, holding what its operation
-needs, and closed by its Close, a glyph button with `command="close"` showing `<kbd>Esc</kbd>`, or
-by Escape. Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds
-`sl-shortcuts` alone: it lists every binding the page has outside the dialog, the Pages button's
-P, the Help button's ?, the Settings button's S, the section tree's J and K, and the pager's H and
+native modal dialog that opens with its header row, a `header.dialog-header` holding its heading,
+which names it through `aria-labelledby`, and, at the row's inline end, its Close, a glyph button
+with `command="close"` showing `<kbd>Esc</kbd>`; its content, what its operation needs, follows the
+row, and Escape closes it too. Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds
+`sl-shortcuts` alone, so its Close is the first control in it and takes focus as it opens: it
+lists every binding the page has outside the dialog, the Pages button's P, the Contents button's
+C, the Help button's ?, the Settings button's S, the section tree's J and K, and the pager's H and
 L, each named by its
 element's `aria-label` or its registered label. Settings, under S, opens `dialog#settings`, headed
 "Settings", which holds `sl-settings`: the theme, a row each for color, scheme, space, and type
 beside a preview, and the keyboard, among it the switch that turns the character keys off (WCAG
 2.1.4), each change applied and stored at once, with no Save and no Cancel. Neither loads the
-foundation's `theme-menu.js` or `keys-help.js`. `site.css` gives both dialogs the foundation theme
-menu's width, the viewport less `--space-s` on each side, up to 56rem. The SDK's template and
+foundation's `theme-menu.js` or `keys-help.js`. `site.css` lays out each header row, the heading
+at its inline start and the Close at its inline end, aligned on their centers, with `--space-m`
+under it, more than the `--space-s` between the content's sections; it gives Settings the
+foundation theme menu's width, the viewport less `--space-s` on each side, up to 56rem, and Help
+its content's, `fit-content`, up to the same cap. The SDK's template and
 fixture shells carry them; a site whose shell lacks them adds them.
 
-The Pages, Help, and Settings buttons, and each dialog's Close, each of the class `glyph-button`,
-show a glyph and their key hint, a `kbd` alone, `aria-hidden`, and no word: each is named by its
-`aria-label`, Pages, Help, Settings, and Close, which Help lists, and shows that name in its
+The Pages, Contents, Help, and Settings buttons, and each dialog's Close, each of the class
+`glyph-button`, show a glyph and their key hint, a `kbd` alone, `aria-hidden`, and no word: each
+is named by its `aria-label`, Pages, Contents, Help, Settings, and Close, which Help lists, and shows that name in its
 interest hint, a `glyph-hint` popover its `interestfor` names. Each glyph is a marker that
 `markdownPages` fills at build from the icons layer, as the components' README gives the shell:
-Octicons' `list-unordered-16` for Pages, `question-16` for Help, `gear-16` for Settings, and
+Octicons' `list-unordered-16` for Pages, `list-ordered-16` for Contents, `question-16` for Help, `gear-16` for Settings, and
 `x-16` for Close. A site pins the
 icons layer, which the components and the SDK both peer, at `v0.1.0`; a marker the build can't
 fill fails it.
@@ -622,6 +638,21 @@ fill fails it.
     <div id="pages-hint" class="glyph-hint" popover="hint" aria-hidden="true">Pages</div>
     <button
       type="button"
+      class="glyph-button contents-opener"
+      aria-controls="contents"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-label="Contents"
+      data-keys="c"
+      interestfor="contents-hint"
+      aria-description=""
+    >
+      <svg data-icon="octicon/list-ordered-16"></svg>
+      <span aria-hidden="true"><kbd>C</kbd></span>
+    </button>
+    <div id="contents-hint" class="glyph-hint" popover="hint" aria-hidden="true">Contents</div>
+    <button
+      type="button"
       class="glyph-button"
       commandfor="help"
       command="show-modal"
@@ -652,9 +683,8 @@ fill fails it.
 </header>
 <main></main>
 <dialog id="help" aria-labelledby="help-title">
-  <h2 id="help-title">Keyboard shortcuts</h2>
-  <sl-shortcuts></sl-shortcuts>
-  <footer>
+  <header class="dialog-header">
+    <h2 id="help-title">Keyboard shortcuts</h2>
     <button
       type="button"
       class="glyph-button"
@@ -668,12 +698,12 @@ fill fails it.
       <span aria-hidden="true"><kbd>Esc</kbd></span>
     </button>
     <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-  </footer>
+  </header>
+  <sl-shortcuts></sl-shortcuts>
 </dialog>
 <dialog id="settings" aria-labelledby="settings-title">
-  <h2 id="settings-title">Settings</h2>
-  <sl-settings></sl-settings>
-  <footer>
+  <header class="dialog-header">
+    <h2 id="settings-title">Settings</h2>
     <button
       type="button"
       class="glyph-button"
@@ -687,7 +717,8 @@ fill fails it.
       <span aria-hidden="true"><kbd>Esc</kbd></span>
     </button>
     <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
-  </footer>
+  </header>
+  <sl-settings></sl-settings>
 </dialog>
 ```
 
@@ -840,10 +871,11 @@ exports alone:
 - `vite.config.ts`, the SDK's three plugins and the base from the package's name; `index.html`, the
   shell, with the foundation's full page entry, its preferences and keys modules, the components'
   six modules, `sl-site-nav` and the `header-actions` group in the header, the Pages button on P,
-  the Help button on ?, and the Settings button on S, each a glyph button showing its glyph and its
-  key hint, named by its `aria-label` and its interest hint, the Help and Settings shortcut
-  dialogs, holding `sl-shortcuts` and `sl-settings`, each Close showing its glyph and Esc, the
-  script that opens the Pages drawer and closes each drawer at a followed link, and the components'
+  the Contents button on C, the Help button on ?, and the Settings button on S, each a glyph button
+  showing its glyph and its key hint, named by its `aria-label` and its interest hint, the Help and
+  Settings shortcut dialogs, holding `sl-shortcuts` and `sl-settings`, each opening with its
+  header row, its heading and its Close showing its glyph and Esc, the script that opens the Pages
+  and Contents drawers and closes each drawer at a followed link, and the components'
   `glyph-button.css` and the SDK's stylesheet; the sample copied tree, `content/` and
   `content.json`.
 - `eslint.config.js`, `tsconfig.json`, `tsconfig.test.json`, `.prettierrc.json`, and

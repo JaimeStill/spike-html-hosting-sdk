@@ -68,7 +68,7 @@ const WIDTHS: Viewport[] = [
 /** Opens Help: the Help button's command="show-modal", ready once the dialog's sl-shortcuts has
  * rendered a row of the page's bindings. */
 const openHelp: Step = async (page) => {
-  await page.evaluate(`document.querySelector("header button[commandfor=help]").click()`);
+  await page.evaluate(`document.querySelector("body > header button[commandfor=help]").click()`);
   await until(page, `document.querySelector("dialog#help")?.open`);
   await until(
     page,
@@ -79,7 +79,9 @@ const openHelp: Step = async (page) => {
 /** Opens Settings: the Settings button's command="show-modal", ready once the dialog's sl-settings
  * has rendered its theme rows. */
 const openSettings: Step = async (page) => {
-  await page.evaluate(`document.querySelector("header button[commandfor=settings]").click()`);
+  await page.evaluate(
+    `document.querySelector("body > header button[commandfor=settings]").click()`,
+  );
   await until(page, `document.querySelector("dialog#settings")?.open`);
   await until(
     page,
