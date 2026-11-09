@@ -30,8 +30,8 @@
  * each table scrolls sideways in its region, so no page is wider than a 390px viewport. The page on
  * screen, which the site index marks on its light-DOM link, below a shadow sheet's reach, is
  * painted here in a heavier weight; the section tree paints its own mark, by the sheet it adopts.
- * The shell's header holds the site nav and one group of glyph buttons at its inline end, Pages,
- * Contents, Help, and Settings: from 40rem one row, the nav wrapping its links and the group on its
+ * The shell's header holds the site nav and one group of glyph buttons, Pages, Contents, Help,
+ * and Settings: from 40rem one row, the nav wrapping its links and the group on its
  * first line at the inline end, and below 40rem two, the nav on a row of its own and the group on
  * the next, at its inline start, aligned with the nav; the components' glyph-button.css lays out
  * each button. The Pages and Contents buttons show only below their drawers' docks. The shell's two

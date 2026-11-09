@@ -484,7 +484,7 @@ export const pagerLabels = {
  * words it shows (WCAG 2.5.3, Label in Name), and Help lists it by that text, its kbd left out.
  * Each link is relative to from's page, as the site index's are, and carries rel prev or next.
  * The first page has no previous link and the last no next, and nothing wraps; a page with
- * neither, the only one, has no pager, nor does a file order doesn't list. */
+ * neither, the only one, has no pager, nor does a file that order doesn't list. */
 export function pager(
   order: readonly string[],
   titles: ReadonlyMap<string, string>,

@@ -90,8 +90,8 @@ const openSettings: Step = async (page) => {
 };
 
 /** A page's states: the whole page at each width, and, for the index, Help open and Settings open
- * at each, nine. A state's name, which names its files, holds the width and no
- * directory, so a page name's slashes are dashes there. */
+ * at each, nine. A state's name, which names its files, holds the width and no directory, so a
+ * page name's slashes are dashes there. */
 function states(name: string, caption: string, index: boolean): DescribedState[] {
   const file = name.replaceAll("/", "-");
   const whole = WIDTHS.map((viewport): DescribedState => ({
