@@ -13,10 +13,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
   space. A smaller one fails it, naming the page, the width, the space, and the button.
 - `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 40rem,
-  1120px, and 1376px the header's `header-actions` group holds its rendered buttons on one line,
-  at the header's inline end; at 390px, below 40rem, the site nav keeps its links on one line and
-  the group is on its own row below it, and from 40rem the group is on the site nav's first line;
-  at 390px nothing scrolls sideways.
+  1120px, and 1376px the header's `header-actions` group holds its rendered buttons on one line;
+  at 390px, below 40rem, the site nav keeps its links on one line and the group is on its own row
+  below it, its inline start within a pixel of the nav's, and from 40rem the group is on the site
+  nav's first line, at the header's inline end; at 390px nothing scrolls sideways.
 - `./browser.js`'s `followsShortcutDialogs`, a shell check, which the crawl runs too: every dialog
   a keyed `show-modal` opener opens, a `button[data-keys][commandfor][command=show-modal]`,
   follows the components' shortcut dialog pattern. A page fails, naming the dialog and what it
@@ -43,10 +43,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   linking the pages before and after it in the site index's order, `indexOrder`, with no wrap.
   Each link shows its arrow glyph, its word, the page's title, and its key hint, binds H or L,
   and is named by its visible text, "Previous <title>" or "Next <title>", its arrow and key hint
-  aria-hidden, which Help lists once each. A
-  hand page has none. `site.css` draws it as a quiet row of plain links, titles wrapping.
+  aria-hidden, which Help lists once each. A hand page has none. `site.css` draws it as a quiet
+  row of plain links, titles wrapping; below 40rem each link shows only its arrow and word,
+  "← Previous" and "Next →", its title visually hidden but still in its name, and its key hint,
+  `.pager-key`, not rendered.
 - The crawl checks each copied page's pagers against its site index, follows each link, and
-  presses H and L, each landing on its page; a hand page has no pager and binds neither key.
+  presses H and L, each landing on its page; at 390px each link shows only its arrow and word,
+  its title and key hint not visible, its name still "<word> <title>", the two links on one row at
+  the pager's inline start and end; a hand page has no pager and binds neither key.
   `opensKeysHelp` expects H and L where the page has a pager, and none where it has none, and the
   switch in Settings turns them off.
 
@@ -65,10 +69,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 - `site.css` lays the header out as the nav and the `header-actions` group, which never wraps:
   from 40rem one row, the nav taking the rest of it and wrapping its own links, the group on the
   nav's first line; below 40rem two, the nav on a row of its own and the group on the next, at its
-  inline end. It drops its own row for the shell's buttons, which `glyph-button.css` lays out, and
-  its Pages and Contents button rules sit outside its layer, after `glyph-button.css`, whose
-  unlayered `display` would otherwise win: each button shows only below its drawer's dock, 86rem
-  for Pages and 70rem for Contents, once the drawer is defined.
+  inline start, aligned with the nav. It drops its own row for the shell's buttons, which
+  `glyph-button.css` lays out, and its Pages and Contents button rules sit outside its layer,
+  after `glyph-button.css`, whose unlayered `display` would otherwise win: each button shows only
+  below its drawer's dock, 86rem for Pages and 70rem for Contents, once the drawer is defined.
 - The shell checks and the crawl expect Settings under S where they expected Theme under T: the
   keys help lists S Settings, and the glyph check names the Settings button.
 

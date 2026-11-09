@@ -32,17 +32,19 @@
  * painted here in a heavier weight; the section tree paints its own mark, by the sheet it adopts.
  * The shell's header holds the site nav and one group of glyph buttons at its inline end, Pages,
  * Contents, Help, and Settings: from 40rem one row, the nav wrapping its links and the group on its
- * first line, and below 40rem two, the nav on a row of its own and the group on the next, at its
- * inline end; the components' glyph-button.css lays out each button. The Pages and Contents
- * buttons show only below their drawers' docks. The shell's two shortcut dialogs, Help and
- * Settings, each open with a header row, the heading and the Close; Settings takes the foundation's
- * theme menu width, the viewport less --space-s on each side, up to 56rem, and Help its list's
- * width, up to the same cap. Each rendered page's two pagers, at main's top and foot, are a quiet row of plain links, the
- * previous page's at the inline start and the next's at the inline end, each title wrapping in its
- * half of the row. A
- * GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule at its start
- * and its title, the kind's octicon and its name, in its kind's color, the foundation's palette
- * color GitHub gives it: note blue, tip green, important purple, warning yellow, and caution red.
+ * first line at the inline end, and below 40rem two, the nav on a row of its own and the group on
+ * the next, at its inline start, aligned with the nav; the components' glyph-button.css lays out
+ * each button. The Pages and Contents buttons show only below their drawers' docks. The shell's two
+ * shortcut dialogs, Help and Settings, each open with a header row, the heading and the Close;
+ * Settings takes the foundation's theme menu width, the viewport less --space-s on each side, up to
+ * 56rem, and Help its list's width, up to the same cap. Each rendered page's two pagers, at main's
+ * top and foot, are a quiet row of plain links, the previous page's at the inline start and the
+ * next's at the inline end, each title wrapping in its half of the row; below 40rem each link shows
+ * only its arrow and word, its title visually hidden but still in its name, and its key hint not
+ * rendered. A GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule at
+ * its start and its title, the kind's octicon and its name, in its kind's color, the foundation's
+ * palette color GitHub gives it: note blue, tip green, important purple, warning yellow, and
+ * caution red.
  * From spike-html-hosting-architecture (18eaa89): site.css.
  */
 
@@ -79,7 +81,8 @@
   }
 
   /* Below 40rem, two rows: the site nav takes the first whole, so its links keep one line, and the
-     group the next, at its inline end, a step closer under the nav than the row's own gap. */
+     group the next, at its inline start, aligned with the nav above it, a step closer under the
+     nav than the row's own gap. */
   @media (width < 40rem) {
     body > header {
       flex-wrap: wrap;
@@ -88,10 +91,6 @@
 
     body > header > sl-site-nav {
       flex-basis: 100%;
-    }
-
-    .header-actions {
-      margin-inline-start: auto;
     }
   }
 
@@ -263,6 +262,29 @@
     inline-size: 1em;
     block-size: 1em;
     fill: currentColor;
+  }
+
+  /* Below 40rem, a compact pager: each link shows only its arrow and word, "← Previous" and
+     "Next →", one row, Previous at the inline start and Next at the inline end. The title is
+     visually hidden, out of the flow and clipped to nothing, but not display: none, so it stays
+     in the link's accessible name, "Previous <title>", which still starts with the word it shows
+     (WCAG 2.5.3); the key hint, aria-hidden already, is not rendered. The foundation's utilities
+     have no visually-hidden class, so the rule is here, in zero lengths only. */
+  @media (width < 40rem) {
+    .pager-title {
+      position: absolute;
+      inline-size: 0;
+      block-size: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .pager-key {
+      display: none;
+    }
   }
 
   sl-site-index a[aria-current="page"] {

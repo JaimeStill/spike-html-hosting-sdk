@@ -31,11 +31,13 @@
 // Help button's glyph removed, the Settings button's word shown beside its glyph, or Help's Close
 // showing the Help button's glyph, the glyph check fails, naming the page and the button. With the glyph buttons' padding and border dropped and their text small, the target size
 // check fails, naming the width, the space, and the button; with the header's group wrapping its
-// buttons, laid over the nav's row below 40rem, wrapped under the nav from 40rem, or at the
-// header's start, or the nav wrapping its links below 40rem, the header row check fails, naming
+// buttons, laid over the nav's row below 40rem, wrapped under the nav from 40rem, at the
+// header's inline end below 40rem or before the nav from 40rem, or the nav wrapping its links
+// below 40rem, the header row check fails, naming
 // the width; and with the header too wide for a phone, it fails naming the sideways scroll. With the
-// bottom pager removed, a pager's links swapped, a pager link that follows nowhere, or every L
-// binding removed, the crawl fails, naming the page; with the top pager's L dropped, so keys lists
+// bottom pager removed, a pager's links swapped, a pager link that follows nowhere, every L
+// binding removed, or, below 40rem, a pager's title shown or out of its name or its key hint
+// shown, the crawl fails, naming the page; with the top pager's L dropped, so keys lists
 // the bottom one's, or a handler that follows the previous link on H whatever the switch in
 // Settings says, the keys help check fails on a paged page, naming it.
 
@@ -699,14 +701,21 @@ describe("the fixture site with its header's row broken", () => {
     {
       change: "the header wrapping the group under the nav from 40rem",
       css:
-        "body > header { flex-wrap: wrap; } body > header > sl-site-nav { flex-basis: 100%; } " +
-        ".header-actions { margin-inline-start: auto; }",
+        "@media (width >= 40rem) { body > header { flex-wrap: wrap; } " +
+        "body > header > sl-site-nav { flex-basis: 100%; } " +
+        ".header-actions { margin-inline-start: auto; } }",
       message: /\/fixture-site\/: at 640px the header's buttons are on the site nav's first line/,
     },
     {
-      change: "the group at the header's start",
-      css: ".header-actions { margin-inline-start: 0; }",
-      message: /\/fixture-site\/: at 390px the header's buttons end at its inline end/,
+      change: "the group at the header's inline end below 40rem",
+      css: "@media (width < 40rem) { .header-actions { margin-inline-start: auto; } }",
+      message:
+        /\/fixture-site\/: at 390px the header's buttons start at the site nav's inline start/,
+    },
+    {
+      change: "the group before the nav from 40rem",
+      css: "@media (width >= 40rem) { .header-actions { order: -1; } }",
+      message: /\/fixture-site\/: at 640px the header's buttons end at its inline end/,
     },
     {
       change: "the header too wide for a phone",
@@ -756,6 +765,27 @@ describe("the fixture site with its pagers wrong", () => {
       try {
         await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
           assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
+
+  for (const [change, css] of [
+    ["the pager's title shown below 40rem", ".pager-title { all: revert !important; }"],
+    ["the pager's title out of its name below 40rem", ".pager-title { display: none !important; }"],
+    ["the pager's key hint shown below 40rem", ".pager-key { display: inline !important; }"],
+  ] as const) {
+    test(`${change} fails the crawl, naming the page`, async () => {
+      const page = await withSheet(`@media (width < 40rem) { ${css} }`);
+      try {
+        await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
+          assert.match(
+            error.message,
+            /\/fixture-site\/: at 390px the pager's next link shows only its arrow and word, its title still in its name/,
+          );
           return true;
         });
       } finally {

@@ -260,8 +260,9 @@ The shell checks, each named in `shell`, assert these:
   space, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
   dialog open, its own, its Close among them.
 - At 390px, 40rem, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one
-  line at the header's inline end. At 390px, below 40rem, the site nav keeps its links on one line
-  and the group is on its own row below it; from 40rem the group is on the site nav's first line.
+  line. At 390px, below 40rem, the site nav keeps its links on one line and the group is on its own
+  row below it, its inline start within a pixel of the nav's; from 40rem the group is on the site
+  nav's first line, at the header's inline end.
   At 390px nothing scrolls sideways.
 - Nothing scrolls sideways at 390px.
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
@@ -286,17 +287,19 @@ content="<value>">` per front matter key, in order, the value as `frontMatterTex
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
 text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
 no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
-P, its `aria-expanded` following the drawer open and closed; its two pagers, at main's top and
-foot, each named, link the pages before and after it in its site index's order, none past either
-end, each link its arrow, its word, the page's title, its key hint, and its binding, H or L, and
-each link followed, and H and L pressed, lands on its page; and every in-site link reaches a built
-page, and its fragment's element. Since each page's index links every other, the crawl reaches every
-page from the index. It checks a page for every Markdown file `content.json` records, every tree's,
-crawling from one no link reaches once the links run out. A page it reaches that no record names is
-a hand page the site builds, as a root-style site's index is: it loads with a 2xx, every request
-under the base and none failed, it has no pager and binds neither H nor L, its ids the targets of
-the fragments linking it, and its links followed, but the copied pages' checks are left to the
-shell checks, which the site runs on it by its URL; `Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
+P, its `aria-expanded` following the drawer open and closed; its two pagers, at main's top and foot,
+each named, link the pages before and after it in its site index's order, none past either end, each
+link its arrow, its word, the page's title, its key hint, and its binding, H or L; at 390px each
+link only its arrow and word, its title and key hint not visible, its name still "<word> <title>";
+and each link followed, and H and L pressed at 390px, lands on its page; and every in-site link
+reaches a built page, and its fragment's element. Since each page's index links every other, the
+crawl reaches every page from the index. It checks a page for every Markdown file `content.json`
+records, every tree's, crawling from one no link reaches once the links run out. A page it reaches
+that no record names is a hand page the site builds, as a root-style site's index is: it loads with
+a 2xx, every request under the base and none failed, it has no pager and binds neither H nor L, its
+ids the targets of the fragments linking it, and its links followed, but the copied pages' checks
+are left to the shell checks, which the site runs on it by its URL; `Crawled.hand` lists each, by
+its path under the base, in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -444,7 +447,7 @@ Contents drawer and the site index in the Pages drawer:
 <meta name="tags" content="one, two" />
 …
 <main>
-<nav class="pager" aria-label="Previous and next page"><a class="pager-prev" href="./" rel="prev" data-keys="h"><svg data-icon="octicon/arrow-left-16"></svg><span class="pager-text"><span class="pager-word">Previous</span> <span class="pager-title">The site</span></span><span aria-hidden="true"><kbd>H</kbd></span></a><a class="pager-next" …>…</a></nav>
+<nav class="pager" aria-label="Previous and next page"><a class="pager-prev" href="./" rel="prev" data-keys="h"><svg data-icon="octicon/arrow-left-16"></svg><span class="pager-text"><span class="pager-word">Previous</span> <span class="pager-title">The site</span></span><span class="pager-key" aria-hidden="true"><kbd>H</kbd></span></a><a class="pager-next" …>…</a></nav>
 <h1 id="a-page">A page</h1>
 …
 <nav class="pager" aria-label="Previous and next page, end of page">…</nav>
@@ -477,10 +480,13 @@ Contents drawer and the site index in the Pages drawer:
   build, on its outer side, its word, the page's title, and its key hint, and binds H or L by
   `data-keys`, so keys.js clicks it. It has no `aria-label`: its name is the text it shows,
   "Previous <title>" or "Next <title>", the arrow and the hint `aria-hidden`, so the name holds
-  the visible label (WCAG 2.5.3, Label in Name), and Help lists it by that text. Both pagers bind the same keys: keys.js fires and lists the
-  first in document order, the top one's, once. A hand page has no pager. `site.css` draws it as
-  a quiet row of plain links, Previous at the inline start and Next at the inline end, each title
-  in the secondary text color wrapping in its half of the row.
+  the visible label (WCAG 2.5.3, Label in Name), and Help lists it by that text. Both pagers bind
+  the same keys: keys.js fires and lists the first in document order, the top one's, once. A hand
+  page has no pager. `site.css` draws it as a quiet row of plain links, Previous at the inline
+  start and Next at the inline end, each title in the secondary text color wrapping in its half of
+  the row. Below 40rem it is compact, each link only its arrow and word, "← Previous" and
+  "Next →": the title is visually hidden but stays in the link's name, which still starts with the
+  word it shows, and the key hint, `.pager-key`, is not rendered.
 
 Each drawer's `dock` is the layout's, `docks` exported: `docks.tree`, 70rem, and `docks.index`,
 86rem. The renderer writes no `aria-current`: the components mark the section in view and the page
@@ -542,11 +548,11 @@ Main's track may shrink, main breaks long words while the components' navigation
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
 shell's header is the site nav and one group of buttons at its inline end, `header-actions`,
 Pages, Contents, Help, and Settings, which never wraps. From 40rem it is one row, the nav taking
-the rest of the row and wrapping its own links, the group on the nav's first line; below 40rem it
-is two, the nav on a row of its own, its links on one line, and the group on the next row, at its
-inline end. Each button, and each shortcut dialog's Close, is
-a glyph button, laid out by the components' `glyph-button.css`, which the shell links between the
-foundation's entry and `site.css`.
+the rest of the row and wrapping its own links, the group on the nav's first line at its inline
+end; below 40rem it is two, the nav on a row of its own, its links on one line, and the group on
+the next row, at its inline start, aligned with the nav. Each button, and each shortcut dialog's
+Close, is a glyph button, laid out by the components' `glyph-button.css`, which the shell links
+between the foundation's entry and `site.css`.
 
 The shell wires the components in: it loads their six modules, `site-nav.js`, `site-index.js`,
 `section-tree.js`, `drawer.js`, `shortcuts.js`, and `settings.js`, render-blocking like the

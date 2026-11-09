@@ -507,7 +507,7 @@ export function pager(
       (rel === "prev" ? glyph : "") +
       `<span class="pager-text"><span class="pager-word">${word}</span> ` +
       `<span class="pager-title">${escape(title)}</span></span>` +
-      `<span aria-hidden="true"><kbd>${key.toUpperCase()}</kbd></span>` +
+      `<span class="pager-key" aria-hidden="true"><kbd>${key.toUpperCase()}</kbd></span>` +
       (rel === "next" ? glyph : "") +
       `</a>`
     );

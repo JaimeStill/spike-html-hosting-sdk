@@ -273,11 +273,11 @@ describe("the Markdown pages", () => {
         '<svg data-icon="octicon/arrow-left-16"></svg>' +
         '<span class="pager-text"><span class="pager-word">Previous</span> ' +
         '<span class="pager-title">The &lt;site&gt;</span></span>' +
-        '<span aria-hidden="true"><kbd>H</kbd></span></a>' +
+        '<span class="pager-key" aria-hidden="true"><kbd>H</kbd></span></a>' +
         '<a class="pager-next" href="dir/b.html" rel="next" data-keys="l">' +
         '<span class="pager-text"><span class="pager-word">Next</span> ' +
         '<span class="pager-title">B</span></span>' +
-        '<span aria-hidden="true"><kbd>L</kbd></span>' +
+        '<span class="pager-key" aria-hidden="true"><kbd>L</kbd></span>' +
         '<svg data-icon="octicon/arrow-right-16"></svg></a>' +
         "</nav>",
     );

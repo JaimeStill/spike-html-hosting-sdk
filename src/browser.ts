@@ -45,10 +45,10 @@
 // the Contents button at 390px on a page with a Contents drawer, and with each shortcut dialog
 // open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular
 // and the compact space profiles; the header's buttons, its header-actions group, share one line
-// at the header's inline end, at the capture widths, 390px, 1120px, and 1376px, and at 40rem: at
-// 390px, below 40rem, the site nav keeps its links on one line and the group is on its own row
-// below it, and from 40rem the group is on the site nav's first line; nothing scrolls sideways at
-// 390px; and at a phone's width, a px below and at
+// at the capture widths, 390px, 1120px, and 1376px, and at 40rem: at 390px, below 40rem, the site
+// nav keeps its links on one line and the group is on its own row below it, at the nav's inline
+// start, and from 40rem the group is on the site nav's first line, at the header's inline end;
+// nothing scrolls sideways at 390px; and at a phone's width, a px below and at
 // each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word
 // breaks across lines and every docked side column is at least 16rem wide. A check that changes
 // the reader's stored theme or keys settings removes them after. shell lists them by name, for a
@@ -74,23 +74,24 @@
 // where the site index is docked, and at 390px is shown and opens the Pages drawer as a modal by
 // its click and by P, its aria-expanded true while the drawer is open and false once Escape closes
 // it. Each page has a pager at main's top and at its foot, each a nav named apart, linking the
-// pages before and after it in its site index's order, none past either end, each link showing
-// its arrow glyph, filled, its word, the page's title, and its key hint, binding H or L, and named
-// by its visible text, "Previous <title>" or "Next <title>", as the browser computes it; each link, followed, lands on its page, and H
-// and L, pressed, on the previous and the next. Each page's head holds a meta per front matter key, named by the key, in source order, its
-// content the value as frontMatterText gives it, and none for a source with no front matter; no
-// page header, no front matter table, and no visible list of its keys remains, and no key's
-// "key: value" line is the page's text. Each page's
-// site index, in its Pages drawer, links every copied file's page, each once, and no other. Every
-// in-site link reaches a built page, and an element with its fragment's id when it has one. The
-// crawl checks a page for every Markdown file content.json records, every tree's: a page no link
-// from the index reaches is crawled from once the links run out, and returned, for the test's
-// diagnostics. A page reached that no record names is a hand page the site also builds, a hand
-// index at the base or a hand page elsewhere: it loads with a 2xx, every request under the base and
-// none failed, it has no pager and binds neither H nor L, its ids are the targets of the fragments
-// linking it, and its links are followed, but
-// the copied pages' checks are left to the shell checks, which a site runs on each hand page by its
-// URL; it is returned too.
+// pages before and after it in its site index's order, none past either end, each link showing its
+// arrow glyph, filled, its word, the page's title, and its key hint, binding H or L, and named by
+// its visible text, "Previous <title>" or "Next <title>", as the browser computes it; at 390px each
+// link shows only its arrow and word, its title and key hint not visible but the title still in its
+// name, the two links on one row at the pager's inline start and end; each link, followed, lands on
+// its page, and H and L, pressed at 390px, on the previous and the next. Each page's head holds a
+// meta per front matter key, named by the key, in source order, its content the value as
+// frontMatterText gives it, and none for a source with no front matter; no page header, no front
+// matter table, and no visible list of its keys remains, and no key's "key: value" line is the
+// page's text. Each page's site index, in its Pages drawer, links every copied file's page, each
+// once, and no other. Every in-site link reaches a built page, and an element with its fragment's
+// id when it has one. The crawl checks a page for every Markdown file content.json records, every
+// tree's: a page no link from the index reaches is crawled from once the links run out, and
+// returned, for the test's diagnostics. A page reached that no record names is a hand page the site
+// also builds, a hand index at the base or a hand page elsewhere: it loads with a 2xx, every
+// request under the base and none failed, it has no pager and binds neither H nor L, its ids are
+// the targets of the fragments linking it, and its links are followed, but the copied pages' checks
+// are left to the shell checks, which a site runs on each hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -1159,10 +1160,10 @@ const HEADER_ROWS = px("40rem");
 const HEADER_WIDTHS = [390, HEADER_ROWS, 1120, 1376];
 
 /** The loaded page's header as laid out: whether it holds its header-actions group; each rendered
- * button of the group, by its aria-label, and its box's top and bottom; the group's inline end and
- * the header's content box's; the group's top and bottom; and the site nav's, or null with no
- * nav: its first link's top and bottom, its first line, its box's bottom, and the count of lines
- * its links render on, by their client rects' tops. */
+ * button of the group, by its aria-label, and its box's top and bottom; the group's inline start
+ * and end and the header's content box's inline end; the group's top and bottom; and the site
+ * nav's, or null with no nav: its first link's top and bottom, its first line, its box's bottom
+ * and inline start, and the count of lines its links render on, by their client rects' tops. */
 const HEADER_ROW = `(() => {
   const header = document.querySelector("body > header");
   const group = header?.querySelector(":scope > .header-actions");
@@ -1183,29 +1184,38 @@ const HEADER_ROW = `(() => {
         const { top, bottom } = button.getBoundingClientRect();
         return { name: button.getAttribute("aria-label"), top, bottom };
       }),
+    start: g.left,
     end: g.right,
     inline: box.right - parseFloat(style.paddingRight) - parseFloat(style.borderRightWidth),
     top: g.top,
     bottom: g.bottom,
     nav: line
-      ? { top: line.top, bottom: line.bottom, end: nav.getBoundingClientRect().bottom, lines: lines.size }
+      ? {
+          top: line.top,
+          bottom: line.bottom,
+          end: nav.getBoundingClientRect().bottom,
+          start: nav.getBoundingClientRect().left,
+          lines: lines.size,
+        }
       : null,
   };
 })()`;
 
 /** Asserts the loaded page's header at each of HEADER_WIDTHS: it holds its header-actions group,
- * whose rendered buttons share one line, the group at the header's inline end. Below HEADER_ROWS
- * the header is two rows: the site nav keeps its links on one line, and the group is on its own
- * row below the nav. From HEADER_ROWS it is one row: the group is on the site nav's first line,
- * however many lines the nav wraps to. And, at 390px, nothing scrolls sideways. */
+ * whose rendered buttons share one line. Below HEADER_ROWS the header is two rows: the site nav
+ * keeps its links on one line, and the group is on its own row below the nav, at its inline start,
+ * within a pixel of the nav's. From HEADER_ROWS it is one row: the group is on the site nav's first
+ * line, however many lines the nav wraps to, at the header's inline end. With no site nav, the
+ * group is at the header's inline end at every width. And, at 390px, nothing scrolls sideways. */
 async function assertHeaderRow(page: Page, url: string): Promise<void> {
   type Row = {
     buttons: { name: string; top: number; bottom: number }[];
+    start: number;
     end: number;
     inline: number;
     top: number;
     bottom: number;
-    nav: { top: number; bottom: number; end: number; lines: number } | null;
+    nav: { top: number; bottom: number; end: number; start: number; lines: number } | null;
   };
   for (const width of HEADER_WIDTHS) {
     await page.cdp("Emulation.setDeviceMetricsOverride", {
@@ -1224,11 +1234,13 @@ async function assertHeaderRow(page: Page, url: string): Promise<void> {
         Math.min(...row.buttons.map(({ bottom }) => bottom)),
       `${url}: at ${width}px the header's buttons, ${names}, share one line`,
     );
-    assert.ok(
-      Math.abs(row.end - row.inline) <= 0.5,
-      `${url}: at ${width}px the header's buttons end at its inline end, ${row.end}px, ` +
-        `not ${row.inline}px`,
-    );
+    if (!row.nav || width >= HEADER_ROWS) {
+      assert.ok(
+        Math.abs(row.end - row.inline) <= 0.5,
+        `${url}: at ${width}px the header's buttons end at its inline end, ${row.end}px, ` +
+          `not ${row.inline}px`,
+      );
+    }
     if (!row.nav) continue;
     if (width < HEADER_ROWS) {
       assert.equal(
@@ -1240,6 +1252,11 @@ async function assertHeaderRow(page: Page, url: string): Promise<void> {
         row.top >= row.nav.end - 0.5,
         `${url}: at ${width}px the header's buttons are on their own row below the site nav, ` +
           `their top ${row.top}px above its bottom ${row.nav.end}px`,
+      );
+      assert.ok(
+        Math.abs(row.start - row.nav.start) <= 1,
+        `${url}: at ${width}px the header's buttons start at the site nav's inline start, ` +
+          `${row.start}px, not ${row.nav.start}px`,
       );
     } else {
       assert.ok(
@@ -1595,9 +1612,10 @@ export const hasTargetSize: Check = async (page, site, url = site) => {
   await assertTargetSize(page, url);
 };
 
-/** At 390px, 40rem, 1120px, and 1376px, the header's buttons share one line at its inline end:
- * below 40rem on their own row under the site nav, which keeps its links on one line, and from
- * 40rem on the site nav's first line; and at 390px nothing scrolls sideways. */
+/** At 390px, 40rem, 1120px, and 1376px, the header's buttons share one line: below 40rem on their
+ * own row under the site nav, which keeps its links on one line, at its inline start, and from
+ * 40rem on the site nav's first line, at the header's inline end; and at 390px nothing scrolls
+ * sideways. */
 export const keepsHeaderRow: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertHeaderRow(page, url);
@@ -1796,7 +1814,7 @@ export const shell: Record<string, Check> = {
   "each header button and each dialog's Close show their glyph and key hint, named, no word":
     showsGlyphs,
   "every glyph button is at least 24px a side, in the regular and the compact space": hasTargetSize,
-  "the header's buttons share one line at its inline end, under the nav below 40rem, beside it after":
+  "the header's buttons share one line, under the nav at its start below 40rem, at the end after":
     keepsHeaderRow,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,
   "no navigation link breaks inside a word, and each docked column is 16rem or wider":
@@ -1838,6 +1856,42 @@ const PAGERS = `(() => {
   };
 })()`;
 
+/** The loaded page's pager links as laid out, in document order: each nav.pager's inline start
+ * and end, and each of its links' rel, height, top, bottom, inline start and end, and which of its
+ * parts are visible, rendered with a box and no clip: its arrow, its word, its title, and its key
+ * hint. */
+const PAGER_LAYOUT = `(() => {
+  const visible = (element) => {
+    if (!element?.checkVisibility()) return false;
+    const { width, height } = element.getBoundingClientRect();
+    return width > 0 && height > 0 && getComputedStyle(element).clipPath === "none";
+  };
+  return [...document.querySelectorAll("nav.pager")].map((nav) => {
+    const box = nav.getBoundingClientRect();
+    return {
+      start: box.left,
+      end: box.right,
+      links: [...nav.querySelectorAll("a")].map((a) => {
+        const { height, top, bottom, left, right } = a.getBoundingClientRect();
+        return {
+          rel: a.rel,
+          height,
+          top,
+          bottom,
+          start: left,
+          end: right,
+          shows: {
+            arrow: visible(a.querySelector("svg")),
+            word: visible(a.querySelector(".pager-word")),
+            title: visible(a.querySelector(".pager-title")),
+            hint: visible(a.querySelector('[aria-hidden="true"] kbd')),
+          },
+        };
+      }),
+    };
+  });
+})()`;
+
 /** The accessible name the browser computes for each element the selector matches, in document
  * order, from its accessibility tree, or null for one the tree leaves out. */
 async function axNames(page: Page, selector: string): Promise<(string | null)[]> {
@@ -1870,9 +1924,9 @@ const pagerLink = (selector: string): string =>
  * arrow its icons module gives, filled, its word, the page's title as the index shows it, and its
  * key hint, H or L, binding that key, named by its visible text, "<word> <title>", the name the
  * browser computes for it (axNames), so the words it shows are its name (WCAG 2.5.3, Label in
- * Name), and at least 24px tall. A page
- * with neither neighbour has no pager. Each link, followed by a click, lands on its page, and H and
- * L, pressed, on the previous and the next. The page is loaded again after.
+ * Name), and at least 24px tall. A page with neither neighbour has no pager. At 390px each is
+ * compact (assertCompactPagers). Each link, followed by a click at 1600px, lands on its page, and
+ * H and L, pressed at 390px, on the previous and the next. The page is loaded again after.
  */
 async function assertPagers(page: Page, url: string, index: Linked[]): Promise<void> {
   type Link = {
@@ -1934,6 +1988,8 @@ async function assertPagers(page: Page, url: string, index: Linked[]): Promise<v
         ],
     `${url}: a pager at main's top and foot links the pages before and after it in the site index`,
   );
+  await assertCompactPagers(page, url, links);
+  await wide(page);
   try {
     for (const where of ["first-child", "last-child"]) {
       for (const { rel, href } of links) {
@@ -1950,6 +2006,7 @@ async function assertPagers(page: Page, url: string, index: Linked[]): Promise<v
         await page.goto(url);
       }
     }
+    await narrow(page);
     for (const { keys, href } of links) {
       await page.evaluate(SETTLED);
       const landed = await landing(page, () => press(page, keys));
@@ -1958,6 +2015,67 @@ async function assertPagers(page: Page, url: string, index: Linked[]): Promise<v
     }
   } finally {
     if ((await page.evaluate(`location.href`)) !== url) await page.goto(url);
+  }
+}
+
+/** Asserts the loaded page's pagers in a 390px viewport, below 40rem, against links, the
+ * pager's links as the 1600px one shows them: each link shows only its arrow and word, its title
+ * and key hint not visible, and its name the browser computes is still "<word> <title>", the
+ * visible word first (WCAG 2.5.3); each is at least 24px tall; and each pager's links share one
+ * row, Previous at its inline start and Next at its inline end, within a pixel. */
+async function assertCompactPagers(
+  page: Page,
+  url: string,
+  links: { rel: string; name: string }[],
+): Promise<void> {
+  type Laid = {
+    start: number;
+    end: number;
+    links: {
+      rel: string;
+      height: number;
+      top: number;
+      bottom: number;
+      start: number;
+      end: number;
+      shows: { arrow: boolean; word: boolean; title: boolean; hint: boolean };
+    }[];
+  };
+  await narrow(page);
+  await page.evaluate(SETTLED);
+  const pagers: Laid[] = await page.evaluate(PAGER_LAYOUT);
+  const names = await axNames(page, "nav.pager a");
+  let next = 0;
+  for (const pager of pagers) {
+    for (const link of pager.links) {
+      const name = names[next++] ?? null;
+      assert.deepEqual(
+        { name, shows: link.shows },
+        {
+          name: links.find(({ rel }) => rel === link.rel)?.name ?? null,
+          shows: { arrow: true, word: true, title: false, hint: false },
+        },
+        `${url}: at 390px the pager's ${link.rel} link shows only its arrow and word, its ` +
+          "title still in its name",
+      );
+      assert.ok(
+        link.height >= 24,
+        `${url}: at 390px the pager's ${link.rel} link is at least 24px tall, ${link.height}px`,
+      );
+      const [edge, side] =
+        link.rel === "prev"
+          ? [pager.start - link.start, "inline start"]
+          : [pager.end - link.end, "inline end"];
+      assert.ok(
+        Math.abs(edge) <= 1,
+        `${url}: at 390px the pager's ${link.rel} link is at its ${side}`,
+      );
+    }
+    assert.ok(
+      Math.max(...pager.links.map(({ top }) => top)) <
+        Math.min(...pager.links.map(({ bottom }) => bottom)),
+      `${url}: at 390px the pager's links share one row`,
+    );
   }
 }
 
