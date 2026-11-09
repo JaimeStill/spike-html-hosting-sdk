@@ -42,7 +42,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   `nav` named "Previous and next page", and "Previous and next page, end of page" at the foot,
   linking the pages before and after it in the site index's order, `indexOrder`, with no wrap.
   Each link shows its arrow glyph, its word, the page's title, and its key hint, binds H or L,
-  and is named "Previous page: <title>" or "Next page: <title>", which Help lists once each. A
+  and is named by its visible text, "Previous <title>" or "Next <title>", its arrow and key hint
+  aria-hidden, which Help lists once each. A
   hand page has none. `site.css` draws it as a quiet row of plain links, titles wrapping.
 - The crawl checks each copied page's pagers against its site index, follows each link, and
   presses H and L, each landing on its page; a hand page has no pager and binds neither key.

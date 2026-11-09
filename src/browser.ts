@@ -76,7 +76,7 @@
 // it. Each page has a pager at main's top and at its foot, each a nav named apart, linking the
 // pages before and after it in its site index's order, none past either end, each link showing
 // its arrow glyph, filled, its word, the page's title, and its key hint, binding H or L, and named
-// "Previous page: <title>" or "Next page: <title>"; each link, followed, lands on its page, and H
+// by its visible text, "Previous <title>" or "Next <title>", as the browser computes it; each link, followed, lands on its page, and H
 // and L, pressed, on the previous and the next. Each page's head holds a meta per front matter key, named by the key, in source order, its
 // content the value as frontMatterText gives it, and none for a source with no front matter; no
 // page header, no front matter table, and no visible list of its keys remains, and no key's
@@ -790,7 +790,8 @@ const KEYS_SETTINGS = "spike-html-apps-foundation.keys";
  * The page's bindings, as the foundation's keys module holds them with Help closed, read apart
  * from Help's list, each as HELP_ROWS reads a row: first each data-keys element outside Help that
  * can act, enabled, not inert, and rendered, in document order, its keys upper-cased as the keys
- * grammar labels a character key and named by its aria-label, else its text; then each binding
+ * grammar labels a character key and named by its aria-label, else its text without its kbd
+ * hints, whitespace collapsed, as sl-shortcuts names a row; then each binding
  * register() added, from the module's store at its well-known global key, which every copy
  * shares, named by its label. A sequence an earlier binding has is left out, as the module lists
  * it once. A binding of a character key alone is off while the reader's switch, stored under
@@ -811,10 +812,15 @@ const PAGE_BINDINGS = `(() => {
     seen.add(keys);
     listed.push({ keys: label(keys), action, off: !enabled && [...keys].length === 1 });
   };
+  const text = (element) => {
+    const copy = element.cloneNode(true);
+    for (const kbd of copy.querySelectorAll("kbd")) kbd.remove();
+    return copy.textContent.replace(/\\s+/g, " ").trim();
+  };
   for (const element of document.querySelectorAll("[data-keys]")) {
     if (help?.contains(element) || element.matches(":disabled") || element.closest("[inert]")) continue;
     if (!element.checkVisibility()) continue;
-    add(element.dataset.keys, element.getAttribute("aria-label")?.trim() || element.textContent.trim());
+    add(element.dataset.keys, element.getAttribute("aria-label")?.trim() || text(element));
   }
   for (const { keys, label } of store.registered) add(keys, label);
   return listed;
@@ -831,13 +837,13 @@ const HEADER_KEYS = `[...document.querySelectorAll("body > header [data-keys]")]
 type HelpRow = { keys: string; action: string; off: boolean };
 
 /** The rows Help lists for the loaded page's pager, as HELP_ROWS reads them: H for the top pager's
- * previous link and L for its next, where it has them, each its word, "page:", and its title, as
- * the pager shows it; none with no pager. The bottom pager binds the same keys, which keys lists
+ * previous link and L for its next, where it has them, each its word and its title, as the pager
+ * shows them, the link's name; none with no pager. The bottom pager binds the same keys, which keys lists
  * once, under the first in document order. */
 const PAGER_ROWS = `[...document.querySelectorAll("main > nav.pager:first-child a[data-keys]")]
   .map((a) => ({
     keys: a.dataset.keys.toUpperCase(),
-    action: a.querySelector(".pager-word")?.textContent + " page: " +
+    action: a.querySelector(".pager-word")?.textContent + " " +
       a.querySelector(".pager-title")?.textContent,
     off: false,
   }))`;
@@ -1281,7 +1287,7 @@ const KEYS_WIDTH = px(docks.tree) - 1;
  * docked; C, the Contents button's, wherever the page has a Contents drawer; ?, the Help
  * button's; S, the Settings button's; and, where the page has a section tree, J and K, its next
  * and previous section; and, where the page has a pager, H and L, each once, named
- * "Previous page: <title>" and "Next page: <title>" by the top pager's links, where it has them,
+ * "Previous <title>" and "Next <title>" by the top pager's links' text, where it has them,
  * and neither on a page with none. Escape closes Help. Turning the character-key switch in the
  * Settings dialog off marks each of them off in Help, and J then marks no other section, P and C
  * open no drawer, and H and L leave the page where it is; turning it on again, J moves to another
@@ -1821,7 +1827,6 @@ const PAGERS = `(() => {
       links: [...nav.querySelectorAll("a")].map((a) => ({
         rel: a.rel,
         href: a.href,
-        name: a.getAttribute("aria-label"),
         keys: a.dataset.keys ?? null,
         word: a.querySelector(".pager-word")?.textContent ?? null,
         title: a.querySelector(".pager-title")?.textContent ?? null,
@@ -1833,6 +1838,26 @@ const PAGERS = `(() => {
   };
 })()`;
 
+/** The accessible name the browser computes for each element the selector matches, in document
+ * order, from its accessibility tree, or null for one the tree leaves out. */
+async function axNames(page: Page, selector: string): Promise<(string | null)[]> {
+  const { root } = await page.cdp("DOM.getDocument", { depth: 0 });
+  const { nodeIds }: { nodeIds: number[] } = await page.cdp("DOM.querySelectorAll", {
+    nodeId: root.nodeId,
+    selector,
+  });
+  const names: (string | null)[] = [];
+  for (const nodeId of nodeIds) {
+    const { nodes } = await page.cdp("Accessibility.getPartialAXTree", {
+      nodeId,
+      fetchRelatives: false,
+    });
+    const node = nodes.find((n: { ignored?: boolean }) => !n.ignored);
+    names.push(node?.name?.value ?? null);
+  }
+  return names;
+}
+
 /** The pager link the selector, under main, names. */
 const pagerLink = (selector: string): string =>
   `document.querySelector(${JSON.stringify(`main > ${selector}`)})`;
@@ -1843,7 +1868,9 @@ const pagerLink = (selector: string): string =>
  * named pagerLabels.top, and its last, named pagerLabels.bottom; each linking the page before it
  * in index, rel prev, and the page after it, rel next, none past either end, each link showing the
  * arrow its icons module gives, filled, its word, the page's title as the index shows it, and its
- * key hint, H or L, binding that key, named "<word> page: <title>", and at least 24px tall. A page
+ * key hint, H or L, binding that key, named by its visible text, "<word> <title>", the name the
+ * browser computes for it (axNames), so the words it shows are its name (WCAG 2.5.3, Label in
+ * Name), and at least 24px tall. A page
  * with neither neighbour has no pager. Each link, followed by a click, lands on its page, and H and
  * L, pressed, on the previous and the next. The page is loaded again after.
  */
@@ -1858,7 +1885,12 @@ async function assertPagers(page: Page, url: string, index: Linked[]): Promise<v
     hints: string[];
     glyph: string | null;
   };
-  type Pager = { at: string; name: string | null; links: Link[]; heights: number[] };
+  type Pager = {
+    at: string;
+    name: string | null;
+    links: Omit<Link, "name">[];
+    heights: number[];
+  };
   await wide(page);
   const place = index.findIndex(({ href }) => href === url);
   assert.ok(place >= 0, `${url}: its site index lists it`);
@@ -1866,8 +1898,14 @@ async function assertPagers(page: Page, url: string, index: Linked[]): Promise<v
     { rel: "prev", word: "Previous", key: "h", linked: index[place - 1] },
     { rel: "next", word: "Next", key: "l", linked: index[place + 1] },
   ].filter((neighbour): neighbour is typeof neighbour & { linked: Linked } => !!neighbour.linked);
-  const { icons, pagers }: { icons: Record<string, string>; pagers: Pager[] } =
-    await page.evaluate(PAGERS);
+  const shown: { icons: Record<string, string>; pagers: Pager[] } = await page.evaluate(PAGERS);
+  const { icons } = shown;
+  const names = await axNames(page, "nav.pager a");
+  let next = 0;
+  const pagers = shown.pagers.map((pager) => ({
+    ...pager,
+    links: pager.links.map((link) => ({ ...link, name: names[next++] ?? null })),
+  }));
   for (const { at, links, heights } of pagers) {
     links.forEach(({ rel }, i) =>
       assert.ok(
@@ -1879,7 +1917,7 @@ async function assertPagers(page: Page, url: string, index: Linked[]): Promise<v
   const links = neighbours.map(({ rel, word, key, linked }) => ({
     rel,
     href: linked.href,
-    name: `${word} page: ${linked.title}`,
+    name: `${word} ${linked.title}`,
     keys: key,
     word,
     title: linked.title,

@@ -240,8 +240,8 @@ The shell checks, each named in `shell`, assert these:
 - A pixel under 70rem, below both docks, ? opens Help, its Close focused, whose `sl-shortcuts`
   lists exactly the page's bindings, as the foundation's keys module holds them, the shell's P, C
   where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
-  page has a pager, H and L once each, named by the top pager's links, "Previous page: <title>"
-  and "Next page: <title>", and neither where it has none; Escape closes it. The character-key
+  page has a pager, H and L once each, named by the top pager's links' text, "Previous <title>"
+  and "Next <title>", and neither where it has none; Escape closes it. The character-key
   switch in Settings turns them off, so J, P, C, H, and L do nothing, and on again. Every header
   control that binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
@@ -444,7 +444,7 @@ Contents drawer and the site index in the Pages drawer:
 <meta name="tags" content="one, two" />
 …
 <main>
-<nav class="pager" aria-label="Previous and next page"><a class="pager-prev" href="./" rel="prev" data-keys="h" aria-label="Previous page: The site"><svg data-icon="octicon/arrow-left-16"></svg><span class="pager-text"><span class="pager-word">Previous</span> <span class="pager-title">The site</span></span><span aria-hidden="true"><kbd>H</kbd></span></a><a class="pager-next" …>…</a></nav>
+<nav class="pager" aria-label="Previous and next page"><a class="pager-prev" href="./" rel="prev" data-keys="h"><svg data-icon="octicon/arrow-left-16"></svg><span class="pager-text"><span class="pager-word">Previous</span> <span class="pager-title">The site</span></span><span aria-hidden="true"><kbd>H</kbd></span></a><a class="pager-next" …>…</a></nav>
 <h1 id="a-page">A page</h1>
 …
 <nav class="pager" aria-label="Previous and next page, end of page">…</nav>
@@ -475,8 +475,9 @@ Contents drawer and the site index in the Pages drawer:
   `indexOrder` gives both: the first page has no Previous, the last no Next, and nothing wraps; the
   only page has no pager. Each link shows its arrow, `arrow-left-16` or `arrow-right-16`, filled at
   build, on its outer side, its word, the page's title, and its key hint, and binds H or L by
-  `data-keys`, so keys.js clicks it; its `aria-label`, "Previous page: <title>" or "Next page:
-  <title>", is the name Help lists. Both pagers bind the same keys: keys.js fires and lists the
+  `data-keys`, so keys.js clicks it. It has no `aria-label`: its name is the text it shows,
+  "Previous <title>" or "Next <title>", the arrow and the hint `aria-hidden`, so the name holds
+  the visible label (WCAG 2.5.3, Label in Name), and Help lists it by that text. Both pagers bind the same keys: keys.js fires and lists the
   first in document order, the top one's, once. A hand page has no pager. `site.css` draws it as
   a quiet row of plain links, Previous at the inline start and Next at the inline end, each title
   in the secondary text color wrapping in its half of the row.

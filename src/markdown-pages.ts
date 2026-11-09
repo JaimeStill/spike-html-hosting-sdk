@@ -481,8 +481,9 @@ export const pagerLabels = {
  * neighbour's title, from titles, and its key hint, H or L, aria-hidden, with an arrow glyph
  * marker, which the build fills, on its outer side, before a previous link's text and after a
  * next link's hint, so each arrow points off the row's edge; it binds that key by data-keys,
- * which the foundation's keys module clicks; its name, its aria-label, is "Previous page: <title>"
- * or "Next page: <title>", which Help lists.
+ * which the foundation's keys module clicks. It has no aria-label: its name is its visible text,
+ * "Previous <title>" or "Next <title>", the glyph and the hint aria-hidden, so the name holds the
+ * words it shows (WCAG 2.5.3, Label in Name), and Help lists it by that text, its kbd left out.
  * Each link is relative to from's page, as the site index's are, and carries rel prev or next.
  * The first page has no previous link and the last no next, and nothing wraps; a page with
  * neither, the only one, has no pager, nor does a file order doesn't list. */
@@ -502,7 +503,7 @@ export function pager(
     const glyph = `<svg data-icon="octicon/${icon}"></svg>`;
     return (
       `<a class="pager-${rel}" href="${attribute(pageUrl(from, file))}" rel="${rel}" ` +
-      `data-keys="${key}" aria-label="${attribute(`${word} page: ${title}`)}">` +
+      `data-keys="${key}">` +
       (rel === "prev" ? glyph : "") +
       `<span class="pager-text"><span class="pager-word">${word}</span> ` +
       `<span class="pager-title">${escape(title)}</span></span>` +
