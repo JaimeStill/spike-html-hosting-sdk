@@ -2,29 +2,31 @@
 // spike-html-apps-screenshots bin, and the run of that bin its browser tier makes once.
 //
 // description takes the site's root and its page list, each page its built path under dist/, and
-// describes each page captured whole, in tiles, at a wide and a narrow width, and the index also
-// with its theme menu open, wide and narrow, opened by the Theme button's click and ready once the
-// menu's dialog is open. A page's name is its built path without .html, a directory's index its
-// directory: index.html is --page index, a/index.html --page a, and a/b.html --page a/b; a state's
-// name, which names its files, turns the name's slashes to dashes. A page's path is its absolute
-// URL path under the base, /<repository>/ for the index, /<repository>/a/ and
-// /<repository>/a/b.html for the others, which is its caption too, and which the bin's messages
-// name. The profile's facets, palette, space, and type, at flexoki, regular, and mono; --all's
-// profiles, every palette at the defaults, then compact and sans at flexoki; the profiles each
-// page registers, from the foundation's registry, every built-in one, as the shell loads the full
-// entry. The site is served as its browser tier serves it, by served(), so a capture makes the
-// requests the deployed site makes. contentPages lists a Markdown site's copied pages, every
-// tree's, from its content.json; a site with hand pages lists those beside them.
+// describes each page captured whole, in tiles, at 390px, 1120px, and 1376px, a phone's width and
+// the layout's two docks, and the index also with Help open, opened by the Help button's click and
+// ready once its sl-shortcuts has rendered its rows, and with Settings open, opened by the Settings
+// button's click and ready once its sl-settings has rendered its rows, each at the three widths. A
+// page's name is its built path without .html, a directory's index its directory: index.html is
+// --page index, a/index.html --page a, and a/b.html --page a/b; a state's name, which names its
+// files, holds its width and turns the name's slashes to dashes. A page's path is its absolute URL
+// path under the base, /<repository>/ for the index, /<repository>/a/ and /<repository>/a/b.html
+// for the others, which is its caption too, and which the bin's messages name. The profile's
+// facets, palette, space, and type, at flexoki, regular, and mono; --all's profiles, every palette
+// at the defaults, then compact and sans at flexoki; the profiles each page registers, from the
+// foundation's registry, every built-in one, as the shell loads the full entry. The site is served
+// as its browser tier serves it, by served(), so a capture makes the requests the deployed site
+// makes. contentPages lists a Markdown site's copied pages, every tree's, from its content.json; a
+// site with hand pages lists those beside them.
 //
 // capture runs the bin on a capture file as mise run screenshots does: the index alone, light
 // alone, to the terminal, with TMPDIR a scratch directory of its own and node's compile cache,
 // which writes there too, off; it returns what the run printed and left there, and removes the
-// scratch directory. leavesNoCapture asserts the run exits 0, prints the index's four states'
+// scratch directory. leavesNoCapture asserts the run exits 0, prints the index's nine states'
 // captures under that TMPDIR, and leaves it empty; keepsCaptures that with --keep it leaves every
 // capture it printed, so the first run's empty TMPDIR is the output's cleanup, not a capture that
 // never wrote.
 // Adapted from spike-html-apps-foundation (d5037b4): scripts/screenshots.config.ts, its theme
-// menu's open step, viewports, facets, --all, and registry read.
+// menu's open step, now Settings', viewports, facets, --all, and registry read.
 // Adapted from spike-html-apps-components (19d4f59): scripts/screenshots.config.ts, its pages
 // mapped from a list and its server the browser tier's.
 // Adapted from spike-html-hosting-architecture (a09e7db): scripts/screenshots.config.ts, its
@@ -53,45 +55,65 @@ import { copiedFiles } from "./content.ts";
 import { pageFile } from "./markdown-pages.ts";
 import { base, command, served } from "./served.ts";
 
-// A desktop's width, and, below the theme menu's 48rem breakpoint, a phone's.
-const WIDE: Viewport = { width: 1280, height: 800 };
-const NARROW: Viewport = { width: 390, height: 844 };
+// The widths each page is captured at: a phone's, below the settings' 48rem breakpoint; 70rem,
+// where the section tree docks; and 86rem, where the site index docks too, the three-column
+// layout (markdown-pages.ts's docks, at the 16px rem). browser.ts's target size check measures at
+// each.
+export const WIDTHS: Viewport[] = [
+  { width: 390, height: 844 },
+  { width: 1120, height: 700 },
+  { width: 1376, height: 860 },
+];
 
-/**
- * Opens the theme menu: the Theme button's command="--open", as a click sends it to
- * <sl-theme-menu>.
- */
-const openThemeMenu: Step = async (page) => {
-  await page.evaluate(`document.querySelector("button[commandfor=theme]").click()`);
-  await until(page, `document.querySelector("sl-theme-menu dialog")?.open`);
+/** Opens Help: the Help button's command="show-modal", ready once the dialog's sl-shortcuts has
+ * rendered a row of the page's bindings. */
+const openHelp: Step = async (page) => {
+  await page.evaluate(`document.querySelector("body > header button[commandfor=help]").click()`);
+  await until(page, `document.querySelector("dialog#help")?.open`);
+  await until(
+    page,
+    `!!document.querySelector("dialog#help sl-shortcuts")?.shadowRoot?.querySelector("tbody tr")`,
+  );
 };
 
-/** A page's states: the whole page at each width, and, for the index, the theme menu open at
- * each. A state's name names its files, which hold no directory, so a page name's slashes are
- * dashes there. */
+/** Opens Settings: the Settings button's command="show-modal", ready once the dialog's sl-settings
+ * has rendered its theme rows. */
+const openSettings: Step = async (page) => {
+  await page.evaluate(
+    `document.querySelector("body > header button[commandfor=settings]").click()`,
+  );
+  await until(page, `document.querySelector("dialog#settings")?.open`);
+  await until(
+    page,
+    `!!document.querySelector("dialog#settings sl-settings")?.shadowRoot?.querySelector(".theme-menu-row")`,
+  );
+};
+
+/** A page's states: the whole page at each width, and, for the index, Help open and Settings open
+ * at each, nine. A state's name, which names its files, holds the width and no directory, so a
+ * page name's slashes are dashes there. */
 function states(name: string, caption: string, index: boolean): DescribedState[] {
   const file = name.replaceAll("/", "-");
-  const whole: DescribedState[] = [
-    { name: `${file}-wide`, caption: `${caption}, wide`, viewport: WIDE, full: true },
-    { name: `${file}-narrow`, caption: `${caption}, narrow`, viewport: NARROW, full: true },
-  ];
+  const whole = WIDTHS.map((viewport): DescribedState => ({
+    name: `${file}-${viewport.width}`,
+    caption: `${caption}, ${viewport.width}px`,
+    viewport,
+    full: true,
+  }));
   if (!index) return whole;
-  return whole.concat(
-    {
-      name: `${file}-theme-menu-wide`,
-      caption: `${caption}, the theme menu open, wide`,
-      viewport: WIDE,
+  const opened = (state: string, label: string, open: Step): DescribedState[] =>
+    WIDTHS.map((viewport) => ({
+      name: `${file}-${state}-${viewport.width}`,
+      caption: `${caption}, ${label} open, ${viewport.width}px`,
+      viewport,
       full: false,
-      open: openThemeMenu,
-    },
-    {
-      name: `${file}-theme-menu-narrow`,
-      caption: `${caption}, the theme menu open, narrow`,
-      viewport: NARROW,
-      full: false,
-      open: openThemeMenu,
-    },
-  );
+      open,
+    }));
+  return [
+    ...whole,
+    ...opened("help", "Help", openHelp),
+    ...opened("settings", "Settings", openSettings),
+  ];
 }
 
 /** The page built at the path under dist/, as the bin captures it under base: its name the path
@@ -184,13 +206,16 @@ export function capture(root: string, config: string, ...flags: string[]): Captu
   }
 }
 
-/** Asserts the capture run of the site at root on config captures the index's four states under
+/** Asserts the capture run of the site at root on config captures the index's nine states under
  * its TMPDIR and leaves nothing there. */
 export function leavesNoCapture(root: string, config: string): void {
   const { status, stderr, printed, left } = capture(root, config);
   assert.equal(status, 0, stderr);
-  // The index's four states: whole, wide and narrow, and the theme menu open at each.
-  for (const state of ["wide", "narrow", "theme-menu-wide", "theme-menu-narrow"]) {
+  // The index's nine states: whole, Help open, and Settings open, at each width.
+  const states = ["", "help-", "settings-"].flatMap((open) =>
+    WIDTHS.map(({ width }) => `${open}${width}`),
+  );
+  for (const state of states) {
     assert.ok(
       printed.some((path) => path.includes(`-index-${state}--`)),
       `a capture of index-${state} among ${printed}`,

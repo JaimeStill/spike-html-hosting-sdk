@@ -2,12 +2,16 @@
 // rewrites (to a copied file's page, relative to the linking page, its fragment kept; to an
 // external file's blob at the pinned commit), the links it passes through, and the build failing on
 // a relative link it can't place. The front matter is parsed, never rendered as body text, and
-// shown in the page header as a dl of its keys and values in source order, escaped; a file with
-// none shows an empty header and takes its title from its first h1, and one with neither a name nor
-// an h1 fails the build. Headings carry GitHub's ids, counted per page, and the section tree lists
-// the h2s and their h3s by those ids, docked from the layout's tree dock. The site index nests
+// written as head metadata, a meta per key with its value, in source order, escaped; a file with
+// none writes no meta and takes its title from its first h1, and one with neither a name nor an h1
+// fails the build, as does a front matter key naming a meta the shell already writes. Headings
+// carry GitHub's ids, counted per page, and the section tree lists the h2s and their h3s by those
+// ids, in the Contents drawer docked from the layout's tree dock. The site index nests
 // every page by directory, each directory labeled by its index page or its name, and marks none
-// current, in the Pages drawer docked from the layout's index dock. Each body table is in a named
+// current, in the Pages drawer docked from the layout's index dock. The pages' order is the site
+// index's, top to bottom, and each page's two pagers, named apart, link its neighbours in it, each
+// link its arrow glyph, word, title, key hint, and binding, with none past either end and none for
+// the only page or a page the order doesn't list. Each body table is in a named
 // region a keyboard focuses. Each GitHub alert is marked-alert's callout, its kind's name visible
 // text and its octicon the icons layer's, aria-hidden and focusable="false", pinned per kind, a
 // link in it placed as any other; a plain blockquote stays one.
@@ -34,9 +38,11 @@ import type { ResolvedConfig, UserConfig } from "vite";
 
 import {
   markdownPages,
+  frontMatterMeta,
+  indexOrder,
   pageFile,
-  pageHeader,
   pageUrl,
+  pager,
   render,
   sectionTree,
   siteIndex,
@@ -110,37 +116,32 @@ describe("the Markdown pages", () => {
     assert.throws(() => render("a.md", "---\nname: 1\n---\n", source), /a\.md's front matter name/);
   });
 
-  test("show the front matter in the page header, its keys and values in order, escaped", () => {
+  test("write the front matter as head meta, its keys and values in order, escaped", () => {
     const { data } = render(
       "a.md",
-      "---\nz: last <b>\nname: A & B\ncount: 2\nempty:\nlist: [x, <y>]\nmap: { k: v, n: [1, 2] }\n---\n",
+      '---\nz: last <b> "q"\nname: A & B\ncount: 2\nempty:\nlist: [x, <y>]\nmap: { k: v, n: [1, 2] }\n---\n',
       source,
     );
     assert.equal(
-      pageHeader(data),
-      "<sl-page-header><dl>" +
-        "<dt>z</dt><dd>last &lt;b&gt;</dd>" +
-        "<dt>name</dt><dd>A &amp; B</dd>" +
-        "<dt>count</dt><dd>2</dd>" +
-        "<dt>empty</dt><dd></dd>" +
-        "<dt>list</dt><dd>x, &lt;y&gt;</dd>" +
-        "<dt>map</dt><dd>k: v, n: 1, 2</dd>" +
-        "</dl></sl-page-header>\n",
+      frontMatterMeta(data),
+      '<meta name="z" content="last &lt;b&gt; &quot;q&quot;" />\n' +
+        '<meta name="name" content="A &amp; B" />\n' +
+        '<meta name="count" content="2" />\n' +
+        '<meta name="empty" content="" />\n' +
+        '<meta name="list" content="x, &lt;y&gt;" />\n' +
+        '<meta name="map" content="k: v, n: 1, 2" />\n',
     );
-    assert.equal(
-      pageHeader(render("a.md", "---\n---\n# T\n", source).data),
-      "<sl-page-header></sl-page-header>\n",
-    );
+    assert.equal(frontMatterMeta(render("a.md", "---\n---\n# T\n", source).data), "");
   });
 
-  test("title a file with no front matter by its first h1, with an empty header", () => {
+  test("title a file with no front matter by its first h1, with no meta", () => {
     const { data, title, html } = render(
       "a.md",
       "Intro.\n\n## Not this\n\n# The *first* `h1` [link](a.md)\n\n# Second\n",
       source,
     );
     assert.equal(data, null);
-    assert.equal(pageHeader(data), "<sl-page-header></sl-page-header>\n");
+    assert.equal(frontMatterMeta(data), "");
     assert.equal(title, "The first h1 link");
     assert.ok(html.startsWith("<p>Intro.</p>"), html);
     // Front matter without a name falls back to the h1 too.
@@ -165,7 +166,7 @@ describe("the Markdown pages", () => {
     assert.deepEqual(ids(render("a.md", body, source).html), want);
   });
 
-  test("list the h2s in the section tree, their h3s nested, by the ids the headings carry", () => {
+  test("list the h2s in the Contents drawer's section tree, their h3s nested, by their ids", () => {
     const { html, headings } = render(
       "a.md",
       file(
@@ -177,13 +178,13 @@ describe("the Markdown pages", () => {
     const tree = sectionTree(headings);
     assert.equal(
       tree,
-      '<sl-section-tree dock="70rem"><ul>' +
+      '<sl-drawer id="contents" label="Contents" dock="70rem"><sl-section-tree><ul>' +
         '<li><a href="#before">Before</a></li>' +
         '<li><a href="#caf%C3%A9--cr%C3%A8me">Café &amp; crème</a>' +
         '<ul><li><a href="#a-b">A b</a></li><li><a href="#c">C</a></li></ul></li>' +
         '<li><a href="#same">Same</a></li>' +
         '<li><a href="#same-1">Same</a></li>' +
-        "</ul></sl-section-tree>",
+        "</ul></sl-section-tree></sl-drawer>",
     );
     // Every href names an id a heading of the page carries.
     const ids = new Set([...html.matchAll(/<h[23] id="([^"]*)"/g)].map((m) => m[1]));
@@ -228,6 +229,74 @@ describe("the Markdown pages", () => {
       "dir/sub/c.html",
       "z.html",
     ]);
+  });
+
+  test("order the pages as the site index lists them, top to bottom", () => {
+    const files = [
+      "z.md",
+      "dir/sub/c.md",
+      "a.md",
+      "dir/b.md",
+      "README.md",
+      "bare/d.md",
+      "dir/README.md",
+    ];
+    const order = indexOrder(files);
+    assert.deepEqual(order, [
+      "README.md",
+      "a.md",
+      "bare/d.md",
+      "dir/README.md",
+      "dir/b.md",
+      "dir/sub/c.md",
+      "z.md",
+    ]);
+    // The order the site index's own links read, so the two can't drift.
+    const titles = new Map(files.map((path) => [path, path]));
+    assert.deepEqual(
+      hrefs(siteIndex(titles, "README.md")),
+      order.map((path) => pageUrl("README.md", path)),
+    );
+  });
+
+  test("link each page's neighbours in its pagers, top and bottom, no wrap at either end", () => {
+    const titles = new Map([
+      ["README.md", "The <site>"],
+      ["a.md", "A & B"],
+      ["dir/b.md", "B"],
+    ]);
+    const order = indexOrder(titles.keys());
+    assert.equal(
+      pager(order, titles, "a.md", "top"),
+      '<nav class="pager" aria-label="Previous and next page">' +
+        '<a class="pager-prev" href="./" rel="prev" data-keys="h">' +
+        '<svg data-icon="octicon/arrow-left-16"></svg>' +
+        '<span class="pager-text"><span class="pager-word">Previous</span> ' +
+        '<span class="pager-title">The &lt;site&gt;</span></span>' +
+        '<span class="pager-key" aria-hidden="true"><kbd>H</kbd></span></a>' +
+        '<a class="pager-next" href="dir/b.html" rel="next" data-keys="l">' +
+        '<span class="pager-text"><span class="pager-word">Next</span> ' +
+        '<span class="pager-title">B</span></span>' +
+        '<span class="pager-key" aria-hidden="true"><kbd>L</kbd></span>' +
+        '<svg data-icon="octicon/arrow-right-16"></svg></a>' +
+        "</nav>",
+    );
+    // The bottom pager is the top one under its own name.
+    assert.equal(
+      pager(order, titles, "a.md", "bottom"),
+      pager(order, titles, "a.md", "top").replace(
+        'aria-label="Previous and next page"',
+        'aria-label="Previous and next page, end of page"',
+      ),
+    );
+    // The first page links no previous, the last no next.
+    assert.deepEqual(hrefs(pager(order, titles, "README.md", "top")), ["a.html"]);
+    assert.doesNotMatch(pager(order, titles, "README.md", "top"), /data-keys="h"/);
+    assert.deepEqual(hrefs(pager(order, titles, "dir/b.md", "top")), ["../a.html"]);
+    assert.doesNotMatch(pager(order, titles, "dir/b.md", "top"), /data-keys="l"/);
+    // The only page, and a file the order doesn't list, have none.
+    assert.equal(pager(["README.md"], titles, "README.md", "top"), "");
+    assert.equal(pager(order, titles, "hand.md", "top"), "");
   });
 
   test("wrap every body table in a region a keyboard focuses, named by its header", () => {
@@ -402,5 +471,48 @@ describe("the Markdown pages of several trees", () => {
       }),
     );
     assert.throws(() => config({ root }), /two trees share the directory org/);
+  });
+});
+
+describe("the Markdown pages' front matter meta", () => {
+  const ref = "0123456789abcdef0123456789abcdef01234567";
+  const shell =
+    '<!doctype html><head><meta charset="utf-8" /><meta name="viewport" content="x" />' +
+    "<title></title></head><body><main></main></body>";
+
+  /** The page the plugin loads for content/a.md, a scratch site's one copied file, of text. */
+  async function load(text: string): Promise<string> {
+    const root = scratch({ "content/a.md": text, "index.html": shell });
+    const plugin = markdownPages({
+      dir: "content",
+      repository: "https://github.com/owner/repo",
+      ref,
+      syntax: [],
+    });
+    const { config, configResolved } = hooks(plugin);
+    const input = config({ root }).build?.rolldownOptions?.input as string[];
+    configResolved(input);
+    const buildStart = plugin.buildStart as unknown as (this: unknown) => Promise<void>;
+    await buildStart.call({ emitFile: () => "" });
+    const loadHook = plugin.load as unknown as (this: unknown, id: string) => string;
+    return loadHook.call({}, input[0]);
+  }
+
+  test("writes each key's meta after the title, in the head", async () => {
+    const page = await load("---\nname: A\nstatus: draft\n---\n\nBody.\n");
+    assert.ok(
+      page.includes(
+        '<title>A</title>\n<meta name="name" content="A" />\n' +
+          '<meta name="status" content="draft" />\n</head>',
+      ),
+      page,
+    );
+  });
+
+  test("fails on a key naming a meta the shell already writes, in any case", async () => {
+    await assert.rejects(
+      load("---\nname: A\nViewport: width=10\n---\n"),
+      /markdown-pages: a\.md's front matter key Viewport names a meta index\.html already writes/,
+    );
   });
 });

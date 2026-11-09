@@ -1,7 +1,9 @@
 <!doctype html>
 <!-- The trees fixture's hand page at a path under the base other than its own, briefs/, as the
-     root's hand orientation page is: written as HTML, with the section tree over its own headings,
-     which the shell checks hold under the base by its URL. Its header is the index's; it links the
+     root's hand orientation page is: written as HTML, with the section tree over its own headings
+     in its Contents drawer, which its script closes as a link in it is followed, and the header's
+     Contents button, which its script wires to the drawer, all of which the shell checks hold under
+     the base by its URL. Its header is the index's and that button; it links the
      orientation brief's rendered page, and the rendered page's alert is written here as the
      renderer writes one, so site.css draws it the same. -->
 <html lang="en">
@@ -10,45 +12,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Orientation, by hand</title>
     <link rel="stylesheet" href="@jaimestill/spike-html-apps-foundation/page-full.css" />
+    <link rel="stylesheet" href="@jaimestill/spike-html-hosting-components/glyph-button.css" />
     <link rel="stylesheet" href="@jaimestill/spike-html-hosting-sdk/site.css" />
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/register-full.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/preferences.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-apps-foundation/keys.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/site-nav.js"></script>
     <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/section-tree.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/drawer.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/shortcuts.js"></script>
+    <script type="module" blocking="render" src="@jaimestill/spike-html-hosting-components/settings.js"></script>
+    <script type="module" blocking="render">
+      // The Contents drawer closes as a link in it is followed, and the header's Contents button
+      // opens it and says through aria-expanded whether it is open, as the rendered pages' shell
+      // has each drawer and its button.
+      const contents = document.getElementById("contents");
+      contents.addEventListener("click", (event) => {
+        if (event.target instanceof Element && event.target.closest("a[href]")) contents.close();
+      });
+      const opener = document.querySelector('[aria-controls="contents"]');
+      opener.addEventListener("click", () => contents.show());
+      const expanded = () => opener.setAttribute("aria-expanded", String(contents.open));
+      contents.addEventListener("open", expanded);
+      contents.addEventListener("close", expanded);
+    </script>
   </head>
   <body>
     <header>
       <sl-site-nav></sl-site-nav>
-      <button
-        type="button"
-        commandfor="help"
-        command="show-modal"
-        aria-label="Help"
-        data-keys="?"
-      >
-        <svg data-icon="octicon/question-16"></svg>
-        <span aria-hidden="true"><kbd>?</kbd></span>
-      </button>
-      <button
-        type="button"
-        commandfor="theme"
-        command="--open"
-        aria-label="Theme"
-        data-keys="t"
-      >
-        <svg data-icon="octicon/gear-16"></svg>
-        <span aria-hidden="true"><kbd>T</kbd></span>
-      </button>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="glyph-button contents-opener"
+          aria-controls="contents"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-label="Contents"
+          data-keys="c"
+          interestfor="contents-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/list-ordered-16"></svg>
+          <span aria-hidden="true"><kbd>C</kbd></span>
+        </button>
+        <div id="contents-hint" class="glyph-hint" popover="hint" aria-hidden="true">Contents</div>
+        <button
+          type="button"
+          class="glyph-button"
+          commandfor="help"
+          command="show-modal"
+          aria-label="Help"
+          data-keys="?"
+          interestfor="help-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/question-16"></svg>
+          <span aria-hidden="true"><kbd>?</kbd></span>
+        </button>
+        <div id="help-hint" class="glyph-hint" popover="hint" aria-hidden="true">Help</div>
+        <button
+          type="button"
+          class="glyph-button"
+          commandfor="settings"
+          command="show-modal"
+          aria-label="Settings"
+          data-keys="s"
+          interestfor="settings-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/gear-16"></svg>
+          <span aria-hidden="true"><kbd>S</kbd></span>
+        </button>
+        <div id="settings-hint" class="glyph-hint" popover="hint" aria-hidden="true">Settings</div>
+      </div>
     </header>
-    <div class="section-tree">
-      <sl-section-tree dock="70rem">
-        <ul>
-          <li><a href="#the-org">The org</a></li>
-          <li><a href="#the-briefs">The briefs</a></li>
-        </ul>
-      </sl-section-tree>
-    </div>
     <main>
       <h1>Orientation, by hand</h1>
       <div class="markdown-alert markdown-alert-important">
@@ -60,22 +97,51 @@
       <h2 id="the-briefs">The briefs</h2>
       <p>A brief by hand adds what Markdown can't hold.</p>
     </main>
-    <sl-theme-menu id="theme"></sl-theme-menu>
+    <sl-drawer id="contents" label="Contents" dock="70rem">
+      <sl-section-tree>
+        <ul>
+          <li><a href="#the-org">The org</a></li>
+          <li><a href="#the-briefs">The briefs</a></li>
+        </ul>
+      </sl-section-tree>
+    </sl-drawer>
     <dialog id="help" aria-labelledby="help-title">
-      <h2 id="help-title">Keyboard shortcuts</h2>
-      <div data-keys-list></div>
-      <footer>
+      <header class="dialog-header">
+        <h2 id="help-title">Keyboard shortcuts</h2>
         <button
           type="button"
+          class="glyph-button"
           commandfor="help"
           command="close"
           aria-label="Close"
-          data-keys="?"
+          interestfor="help-close-hint"
+          aria-description=""
         >
           <svg data-icon="octicon/x-16"></svg>
-          <span aria-hidden="true"><kbd>?</kbd></span>
+          <span aria-hidden="true"><kbd>Esc</kbd></span>
         </button>
-      </footer>
+        <div id="help-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+      </header>
+      <sl-shortcuts></sl-shortcuts>
+    </dialog>
+    <dialog id="settings" aria-labelledby="settings-title">
+      <header class="dialog-header">
+        <h2 id="settings-title">Settings</h2>
+        <button
+          type="button"
+          class="glyph-button"
+          commandfor="settings"
+          command="close"
+          aria-label="Close"
+          interestfor="settings-close-hint"
+          aria-description=""
+        >
+          <svg data-icon="octicon/x-16"></svg>
+          <span aria-hidden="true"><kbd>Esc</kbd></span>
+        </button>
+        <div id="settings-close-hint" class="glyph-hint" popover="hint" aria-hidden="true">Close</div>
+      </header>
+      <sl-settings></sl-settings>
     </dialog>
   </body>
 </html>

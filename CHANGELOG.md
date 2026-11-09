@@ -6,6 +6,161 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-09
+
+The shell's design pass, on spike-html-hosting-components `v0.5.0`: one header row of glyph
+buttons, Pages, Contents, Help, and Settings; the section tree in a Contents drawer; Help and
+Settings as the components' shortcut dialogs; a pager on each copied page; and front matter as head
+metadata. A site must pin the components at `v0.5.0`, whose `shortcuts.js`, `settings.js`, and
+`glyph-button.css` its shell loads, and take the template's `index.html` again, or the shell checks
+fail on it. Breaking, for a site and its readers:
+
+- The page header is gone: `sl-page-header`, its `dl`, and `./markdown-pages.js`'s `pageHeader`.
+  A page's front matter is head meta, and nothing of it shows on the page.
+- H and L move to the previous and next page, through the pager; J and K, the components' own,
+  move to the next and previous section, where H and L did.
+- The sticky section bar below 70rem is gone: the section tree is in the Contents drawer, a docked
+  column from 70rem and, below it, a modal the Contents button and C open.
+- Theme under T and the foundation's theme menu are gone: Settings under S opens
+  `dialog#settings`, holding the components' `sl-settings`, whose every step is stored at once.
+  The keys help is Help, `dialog#help`, holding `sl-shortcuts`.
+- The shell's required markup and scripts: the header's `header-actions` group, its four glyph
+  buttons each with its interest hint, the Contents drawer the build writes, both shortcut dialogs
+  with their header rows, the components' six modules and `glyph-button.css`, and the shell's
+  script wiring each drawer's opener.
+- `./browser.js`'s `opensThemeMenu` and `staysUnsaved` are replaced by `opensSettings` and
+  `storesAtOnce`, and the shell checks hold every page to the new header, dialogs, and keys.
+- `./screenshots.js` captures at 390x844, 1120x700, and 1376x860 in place of 1280x800 and 390x844,
+  each state named by its width in place of `wide` and `narrow`, and the theme menu state is
+  Settings open, beside a new Help open: `index-1120`, `index-help-1120`, `index-settings-1120`.
+
+### Added
+
+- `./browser.js`'s `opensSettings`, in place of `opensThemeMenu`: the Settings button and S open
+  `dialog#settings`, whose `sl-settings` renders, its shadow root adopting the build's constructed
+  sheets, the foundation's `theme-menu.css` among them, with no stylesheet fetched; Escape closes
+  it.
+- `./browser.js`'s `storesAtOnce`, in place of `staysUnsaved`: a step of the settings' color row
+  is stored at once, kept as the dialog closes, and applied after a reload.
+- `./browser.js`'s `placesSectionTree`, a shell check, which the crawl runs too: a page's section
+  tree is in its Contents drawer, `sl-drawer#contents` docked from 70rem. At 70rem and 1600px the
+  tree is a docked column beside main, where J marks and moves to the first section and K back to
+  the top, and the header's Contents button is hidden; at 390px and a pixel under 70rem the drawer
+  is closed, the Contents button shown and opening it by its click and by C, its `aria-expanded`
+  in step, and once open, a followed link in it closes it and marks its section. A page with no
+  tree has no Contents drawer and shows no Contents button.
+- `./browser.js`'s `followsShortcutDialogs`, a shell check, which the crawl runs too: every dialog
+  a keyed `show-modal` opener opens, a `button[data-keys][commandfor][command=show-modal]`,
+  follows the components' shortcut dialog pattern. A page fails, naming the dialog and what it
+  lacks, where the dialog has no name from a heading inside it by `aria-labelledby`, no Close, a
+  glyph button with `command="close"` for it showing `<kbd>Esc</kbd>`, no header row, a
+  `header.dialog-header` holding both the heading and the Close, or where its opener doesn't show
+  its key in a `kbd`, has no `aria-label`, or has no interest hint holding that name.
+- `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 40rem,
+  1120px, and 1376px the header's `header-actions` group holds its rendered buttons on one line;
+  at 390px, below 40rem, the site nav keeps its links on one line and the group is on its own row
+  below it, its inline start within a pixel of the nav's, and from 40rem the group is on the site
+  nav's first line, at the header's inline end; at 390px nothing scrolls sideways.
+- `./browser.js`'s `hasTargetSize`, a shell check, which the crawl runs too: every glyph button
+  the page renders, its own and those in the components' shadow roots, the Contents button and
+  each open dialog's Close among them, is at least 24 CSS px a side (WCAG 2.5.8), at each capture
+  width, in every space and every type profile the foundation's registry lists, each space with
+  each type, the dialogs a keyed opener opens shown in turn. A smaller one fails it, naming the
+  page, the width, the space, the type, and the button. It sets the root's `data-space` and
+  `data-type`, never the stored settings, and puts both back after.
+- `./screenshots.js`'s `WIDTHS`, the capture widths, which the target size check measures at.
+- `./markdown-pages.js`'s `frontMatterMeta`, a page's front matter as head meta, which
+  `markdownPages` writes: a `<meta name="<key>" content="<value>">` per key after the title, in
+  source order, the value as `frontMatterText` gives it, both escaped. A key naming a meta the
+  shell already writes, as `viewport`, in any case, fails the build, naming the file and the key.
+- A pager at the top and the foot of each copied page's main, `./markdown-pages.js`'s `pager`,
+  with `pagerLabels` and `indexOrder`, the site index's order: a `nav` named "Previous and next
+  page", and "Previous and next page, end of page" at the foot, linking the pages before and after
+  it in that order, with no wrap. Each link shows its arrow glyph, its word, the page's title, and
+  its key hint, binds H or L, and is named by its visible text, `Previous <title>` or
+  `Next <title>`, its arrow and key hint aria-hidden; Help lists H and L once each. A hand page
+  has none. `site.css` draws it as a quiet row of plain links, titles wrapping; below 40rem each link
+  shows only its arrow and word, "← Previous" and "Next →", its title visually hidden but still in
+  its name, and its key hint, `.pager-key`, not rendered.
+- The crawl checks each copied page's head meta, in order, with no page header, no visible list of
+  the keys, and no `key: value` line in its text; and its pagers against its site index, following
+  each link and pressing H and L, each landing on its page; at 390px each link shows only its
+  arrow and word, its name still `<word> <title>`, the two links on one row at the pager's inline
+  start and end. A hand page has no pager and binds neither key.
+
+### Changed
+
+- spike-html-hosting-components `v0.5.0`, from `v0.4.0`: the template's pin and the SDK's own dev
+  dependency.
+- The template's header is the site nav and one group of buttons at its inline end,
+  `<div class="header-actions">`: Pages under P, `list-unordered-16`; Contents under C,
+  `list-ordered-16`; Help under ?, `question-16`; and Settings under S, `gear-16`, in place of
+  Theme under T. Each is a glyph button of the class `glyph-button`, showing its glyph and its key
+  hint and named by its `aria-label`, with an empty `aria-description` and an interest hint, a
+  `glyph-hint` popover holding its name, as spike-html-hosting-components' README gives the
+  header. Pages and Contents control their drawers by `aria-controls`; Help and Settings send
+  `show-modal` to their shortcut dialogs. The shell links the components' `glyph-button.css`
+  between the foundation's entry and `site.css`.
+- The template's shell holds the components' two shortcut dialogs in place of the theme menu and
+  the keys help: `dialog#help`, headed "Keyboard shortcuts", holds `sl-shortcuts`, and
+  `dialog#settings`, headed "Settings", holds `sl-settings`. Each opens with its header row, a
+  `<header class="dialog-header">` holding its heading, which names it through `aria-labelledby`,
+  and its Close, a glyph button showing `x-16` and `<kbd>Esc</kbd>`, with no `data-keys`; Help's
+  Close no longer binds ?, and, the first control in Help, takes focus as it opens. The shell
+  loads the components' six modules, `shortcuts.js` and `settings.js` among them.
+- The section tree is in the Contents drawer: `markdownPages` writes it, with no `dock` of its
+  own, in `<sl-drawer id="contents" label="Contents" dock="70rem">` after main, before the Pages
+  drawer, in place of the `div.section-tree` before main. `site.css` docks the drawer in the end
+  column from 70rem, held in view as the Pages drawer is, and below 70rem it is a closed modal, in
+  place of the sticky bar; `body:has(> #contents)` holds the end column to 16rem between the
+  docks. The section tree's keys are J and K, the components' own.
+- The shell's script closes each drawer, Pages and Contents, as a link in it is followed, and
+  wires each drawer's opener in the header by its `aria-controls`, opening the drawer on its click
+  and keeping its `aria-expanded` in step, as the components' README gives it.
+- `site.css` lays the header out as the nav and the `header-actions` group, which never wraps:
+  from 40rem one row, the nav taking the rest of it and wrapping its own links, the group on the
+  nav's first line; below 40rem two, the nav on a row of its own and the group on the next, at its
+  inline start, aligned with the nav. It drops its own row for the shell's buttons, which
+  `glyph-button.css` lays out, and its Pages and Contents button rules sit outside its layer,
+  after `glyph-button.css`, whose unlayered `display` would otherwise win: each button shows only
+  below its drawer's dock, 86rem for Pages and 70rem for Contents, once its drawer is defined.
+- `site.css` gives `dialog#settings` the foundation theme menu's width,
+  `min(100% - 2 * var(--space-s), 56rem)`, the size the settings' rows and preview were laid out
+  for, and `dialog#help` its content's, `fit-content`, up to the same cap. It lays out each
+  `.dialog-header`, the heading at its inline start and the Close at its inline end, aligned on
+  their centers, with `--space-m` under it, more than the `--space-s` between the content's
+  sections.
+- `opensKeysHelp`, a pixel under 70rem, below both docks: ? opens Help, its Close focused, whose
+  `sl-shortcuts` lists exactly the page's bindings as the foundation's keys module holds them: P,
+  C where the page has a Contents drawer, ?, S, H and L where it has a pager, and J "Next section"
+  and K "Previous section" where it has a section tree; Escape closes it; the character-key
+  switch, now in Settings' `sl-settings`, turns them off and on again.
+- `showsGlyphs` checks the Settings button where it checked Theme, the Contents button, showing
+  `list-ordered-16` and C, and each shortcut dialog's Close, showing `x-16` and Esc.
+- The theme checks work through `sl-settings`: `stepsEachFacet` and `highlightsEachPalette` step
+  its rows in the Settings dialog, opened by S, and remove the choice they store after, since
+  every step is stored at once. `requestsUnderBase` opens Settings and Help and fails where the
+  foundation's `theme-menu.js` or `keys-help.js` is requested.
+- `holdsBetweenDocks`, `startsUnderHeader`, and `keepsNavigationWords` read the section tree in
+  its Contents drawer: no bar sits between the header and main, and each docked drawer, named by
+  its id, is at least 16rem wide.
+- `./screenshots.js`'s `description` captures every page whole at `WIDTHS`, 390x844, 1120x700,
+  and 1376x860, a phone's width and the layout's two docks, 70rem and 86rem, in place of 1280x800
+  and 390x844, and the index also with Help open and with Settings open at each: nine states for
+  the index, each named by its width, as `index-help-1120`. Settings open is reached by the
+  Settings button's click and ready once `sl-settings` renders; Help open, once `sl-shortcuts`
+  renders its rows. `leavesNoCapture` asserts the nine by those names.
+- typescript-eslint `8.72.2`, from `8.72.1`; vite `8.3.7`, from `8.3.6`, the peer range's floor
+  and the template's pin with it; and rolldown `1.2.18`, from `1.2.16`, the version Vite `8.3.7`
+  resolves. The SDK's and the template's chrome-headless-shell is `157.0.8103.50`.
+
+### Removed
+
+- `./markdown-pages.js`'s `pageHeader` and the page header, `sl-page-header` and its `dl`, which
+  spike-html-hosting-components no longer has; the shell no longer loads `page-header.js`.
+- `./browser.js`'s `opensThemeMenu` and `staysUnsaved`, replaced by `opensSettings` and
+  `storesAtOnce`.
+
 ## [0.5.0] - 2026-11-06
 
 Glyphs from the icons layer, spike-html-hosting-icons, filled into every page at build, and the
@@ -261,7 +416,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.0...v0.3.1

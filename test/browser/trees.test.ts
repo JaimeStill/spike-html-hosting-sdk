@@ -6,10 +6,10 @@
 // brief's rendered page, whose alerts are callouts. Taking the hand page's URL for the base fails
 // the request check, its assets being under the base and not under the page, which is why the
 // checks take the two apart. Each page runs only its own scripts, though one chunk holds them all
-// (render-blocking.ts): a hand page, with no Pages drawer, throws nothing, where the shell's
-// drawer wiring would. The crawl, from the hand index, checks every copied page of both
-// trees and loads each hand page it reaches without failing on it, and with a copied page answered
-// 404 it fails, naming the page. The capture file describes the hand pages and every tree's pages
+// (render-blocking.ts): a hand page throws nothing and defines no element of the shell's alone, as
+// its site index. The crawl, from the hand index, checks every copied page of both trees and loads
+// each hand page it reaches without failing on it, and with a copied page answered 404 it fails,
+// naming the page. The capture file describes the hand pages and every tree's pages
 // at their paths under the base. The hand pages and the rendered pages' shell hold glyph markers
 // in their buttons, which the build fills with the icons layer's svgs, none left, and the shell
 // checks' glyph check holds each button to its glyph.
@@ -79,7 +79,8 @@ describe("the trees fixture under its base", () => {
         await page.goto(`${server.origin}${path}`);
         await page.evaluate(SETTLED);
         assert.deepEqual(thrown, []);
-        assert.equal(await page.evaluate(`!!customElements.get("sl-drawer")`), false);
+        // The site index's module is the rendered pages' shell's alone.
+        assert.equal(await page.evaluate(`!!customElements.get("sl-site-index")`), false);
       } finally {
         await page.close();
       }
