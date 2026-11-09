@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.5.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.5.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,7 +40,7 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.5.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.0 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.5.0 \
