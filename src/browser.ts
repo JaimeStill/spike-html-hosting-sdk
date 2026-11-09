@@ -21,15 +21,17 @@
 // reading width, centered; at 1200px, between the layout's docks, main is centered on a page with
 // no section tree, and the tree is docked beside it on a page with one; a page's section tree is in
 // its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
-// and K move through its sections, marking each, and H and L move to none, and below the dock, at
+// and K move through its sections, marking each, and below the dock, at
 // 390px and a px under it, a closed drawer, whose show() opens it and in which following a link
 // closes it and marks the link's section, and a page with no tree has no Contents drawer; at
 // 390px, between the docks, and at 1600px, main starts directly under the header, the gap from
 // the header's bottom never below zero and no more than on a page taller than the viewport,
 // however short the page; ? opens Help, whose sl-shortcuts lists exactly the page's bindings as
 // the foundation's keys module holds them, the shell's P, ?, S, and the tree's J and K among
-// them, no H or L naming a section, Escape closes it, and the character-key switch in Settings
-// turns them off, so J moves to no section and P opens no drawer, and on again; every dialog a
+// them, and, where the page has a pager, its H and L, each once, named as its previous and next
+// page, and neither on a page with none, Escape closes it, and the character-key switch in
+// Settings turns them off, so J moves to no section, P opens no drawer, and H and L move to no
+// page, and on again; every dialog a
 // keyed show-modal opener opens follows the components' shortcut dialog pattern, named by a heading
 // inside it, closed by a Close glyph button showing Esc, its opener showing its key and named, with
 // an interest hint showing the name; in a 390px viewport each header button, Pages where the
@@ -65,7 +67,11 @@
 // first h1's text. Its Pages button is hidden at 1600px,
 // where the site index is docked, and at 390px is shown and opens the Pages drawer as a modal by
 // its click and by P, its aria-expanded true while the drawer is open and false once Escape closes
-// it. Each page's head holds a meta per front matter key, named by the key, in source order, its
+// it. Each page has a pager at main's top and at its foot, each a nav named apart, linking the
+// pages before and after it in its site index's order, none past either end, each link showing
+// its arrow glyph, filled, its word, the page's title, and its key hint, binding H or L, and named
+// "Previous page: <title>" or "Next page: <title>"; each link, followed, lands on its page, and H
+// and L, pressed, on the previous and the next. Each page's head holds a meta per front matter key, named by the key, in source order, its
 // content the value as frontMatterText gives it, and none for a source with no front matter; no
 // page header, no front matter table, and no visible list of its keys remains, and no key's
 // "key: value" line is the page's text. Each page's
@@ -75,7 +81,8 @@
 // from the index reaches is crawled from once the links run out, and returned, for the test's
 // diagnostics. A page reached that no record names is a hand page the site also builds, a hand
 // index at the base or a hand page elsewhere: it loads with a 2xx, every request under the base and
-// none failed, its ids are the targets of the fragments linking it, and its links are followed, but
+// none failed, it has no pager and binds neither H nor L, its ids are the targets of the fragments
+// linking it, and its links are followed, but
 // the copied pages' checks are left to the shell checks, which a site runs on each hand page by its
 // URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
@@ -91,6 +98,8 @@ import { join } from "node:path";
 
 import { SETTLED, until } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import type { Page } from "@jaimestill/spike-html-apps-tooling/browser.js";
+import arrowLeftIcon from "@jaimestill/spike-html-hosting-icons/octicon/arrow-left-16";
+import arrowRightIcon from "@jaimestill/spike-html-hosting-icons/octicon/arrow-right-16";
 import gearIcon from "@jaimestill/spike-html-hosting-icons/octicon/gear-16";
 import listUnorderedIcon from "@jaimestill/spike-html-hosting-icons/octicon/list-unordered-16";
 import questionIcon from "@jaimestill/spike-html-hosting-icons/octicon/question-16";
@@ -98,7 +107,7 @@ import xIcon from "@jaimestill/spike-html-hosting-icons/octicon/x-16";
 import { parse } from "yaml";
 
 import { copiedFiles } from "./content.ts";
-import { docks, frontMatterText, pageUrl } from "./markdown-pages.ts";
+import { docks, frontMatterText, pageUrl, pagerLabels } from "./markdown-pages.ts";
 
 /** A check on a fresh page of the site whose URL under the base, as served() gives it, is site:
  * the page at url, a URL under site, site itself, its index, when none is given. */
@@ -555,8 +564,8 @@ async function atWidth(page: Page, width: number): Promise<void> {
  * sl-drawer#contents labeled "Contents" and docked from the layout's tree dock, the tree with no
  * dock of its own. At its dock and at 1600px the drawer is docked, the tree rendered as a column
  * beside main, at its end, and, under reduced motion so each move is instant, J marks the first
- * section and scrolls to it, H and L move to no section and scroll nowhere, and K returns to the
- * page's top, no section marked. At a phone's width and a px below the dock the drawer is closed,
+ * section and scrolls to it, and K returns to the page's top, no section marked; H and L are the
+ * pager's, which move to another page, so the check presses neither. At a phone's width and a px below the dock the drawer is closed,
  * the tree not rendered; its show() opens it as a modal with the tree rendered, and following the
  * tree's last link closes it, its fragment the URL's and its section marked. A page with no tree
  * has no Contents drawer. The fragment and the emulated motion are put back after.
@@ -608,16 +617,6 @@ async function assertContents(page: Page, url: string): Promise<void> {
         contents.first,
         `${url}: at ${width}px J marks the first section`,
       );
-      const at: number = await page.evaluate(scrolled);
-      for (const key of ["h", "l"]) {
-        await press(page, key);
-        await page.evaluate(SETTLED);
-        assert.deepEqual(
-          { marked: await page.evaluate(MARKED), at: await page.evaluate(scrolled) },
-          { marked: contents.first, at },
-          `${url}: at ${width}px ${key.toUpperCase()} moves to no section`,
-        );
-      }
       await press(page, "k");
       await page.evaluate(SETTLED);
       assert.deepEqual(
@@ -768,6 +767,18 @@ const HEADER_KEYS = `[...document.querySelectorAll("header [data-keys]")].map((c
 
 /** A row of Help's shortcuts list, as HELP_ROWS reads it. */
 type HelpRow = { keys: string; action: string; off: boolean };
+
+/** The rows Help lists for the loaded page's pager, as HELP_ROWS reads them: H for the top pager's
+ * previous link and L for its next, where it has them, each its word, "page:", and its title, as
+ * the pager shows it; none with no pager. The bottom pager binds the same keys, which keys lists
+ * once, under the first in document order. */
+const PAGER_ROWS = `[...document.querySelectorAll("main > nav.pager:first-child a[data-keys]")]
+  .map((a) => ({
+    keys: a.dataset.keys.toUpperCase(),
+    action: a.querySelector(".pager-word")?.textContent + " page: " +
+      a.querySelector(".pager-title")?.textContent,
+    off: false,
+  }))`;
 
 /** The href of the section tree's link marked as the section in view, or null. */
 const MARKED = `document.querySelector("sl-section-tree a[aria-current]")?.getAttribute("href") ?? null`;
@@ -1149,9 +1160,11 @@ async function turnCharacterKeys(page: Page, url: string): Promise<HelpRow[]> {
  * whose sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them
  * (PAGE_BINDINGS), each once, among them the shell's: P, the Pages button's, where the shell has
  * one, shown as the drawer isn't docked; ?, the Help button's; S, the Settings button's; and,
- * where the page has a section tree, J and K, its next and previous section, and neither H nor L
- * names a section. Escape closes Help. Turning the character-key switch in the Settings dialog off
- * marks each of them off in Help, and J then marks no other section and P opens no drawer; turning
+ * where the page has a section tree, J and K, its next and previous section; and, where the page
+ * has a pager, H and L, each once, named "Previous page: <title>" and "Next page: <title>" by the
+ * top pager's links, where it has them, and neither on a page with none. Escape closes Help.
+ * Turning the character-key switch in the Settings dialog off marks each of them off in Help, and
+ * J then marks no other section, P opens no drawer, and H and L leave the page where it is; turning
  * it on again, J moves to another section. The reader's keys settings are cleared after, so no
  * other check runs with the keys off. Every control in the header that binds a key shows it in a
  * kbd, upper-cased as Help's rows show it.
@@ -1176,6 +1189,7 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     await page.evaluate(SETTLED);
     const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
     const pages: boolean = await page.evaluate(`${PAGES}.shown`);
+    const pager: HelpRow[] = await page.evaluate(PAGER_ROWS);
     const rows: HelpRow[] = await page.evaluate(HELP_ROWS);
     const bindings: HelpRow[] = await page.evaluate(PAGE_BINDINGS);
     assert.deepEqual(
@@ -1206,9 +1220,10 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
         " missing",
     );
     assert.deepEqual(
-      rows.filter(({ keys, action }) => /^[HL]$/.test(keys) && / section$/.test(action)),
-      [],
-      `${url}: neither H nor L moves to a section`,
+      rows.filter(({ keys }) => /^[HL]$/.test(keys)),
+      pager,
+      `${url}: Help lists H and L as its pager's previous and next page, once each, and none ` +
+        "on a page with no pager",
     );
     await press(page, "Escape");
     await until(page, `!${HELP}`).catch(() => assert.fail(`${url}: Escape closes Help`));
@@ -1219,10 +1234,18 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       `${url}: the switch in Settings turns every character key off`,
     );
     const marked: string | null = await page.evaluate(MARKED);
+    const at: string = await page.evaluate(`location.href`);
     await press(page, "j");
     await press(page, "p");
+    await press(page, "h");
+    await press(page, "l");
     await page.evaluate(SETTLED);
     assert.equal(await page.evaluate(MARKED), marked, `${url}: with the keys off, J doesn't move`);
+    assert.equal(
+      await page.evaluate(`location.href`),
+      at,
+      `${url}: with the keys off, neither H nor L moves to another page`,
+    );
     assert.equal(
       await page.evaluate(`${PAGES}.modal`),
       false,
@@ -1380,8 +1403,8 @@ export const holdsBetweenDocks: Check = async (page, site, url = site) => {
 };
 
 /** On a page with a section tree, the tree is in the Contents drawer: a column docked beside main
- * from the layout's tree dock, J and K moving through its sections and H and L through none, and
- * below it a closed drawer, which following a link in it closes. A page with none has no drawer. */
+ * from the layout's tree dock, J and K moving through its sections, and below it a closed drawer,
+ * which following a link in it closes. A page with none has no drawer. */
 export const placesSectionTree: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertContents(page, url);
@@ -1632,6 +1655,164 @@ export const shell: Record<string, Check> = {
   "a change in the settings is stored at once and applies after a reload": storesAtOnce,
 };
 
+/** A link of the site index or of a pager, as the crawl reads it: its href, resolved, and the title
+ * it shows. */
+type Linked = { href: string; title: string };
+
+/** The loaded page's pagers, each nav.pager: where it is, main's first element child, its last, or
+ * elsewhere; its name; each link's rel, href, resolved, name, data-keys, word, title, the key
+ * hints in its aria-hidden kbd elements, and its svg's markup; and each link's height; with the icons the
+ * arrows are filled from, as the page's parser serializes them, to compare. */
+const PAGERS = `(() => {
+  const main = document.querySelector("main");
+  const parse = (svg) => {
+    const template = document.createElement("template");
+    template.innerHTML = svg;
+    return template.content.firstElementChild.outerHTML;
+  };
+  return {
+    icons: { prev: parse(${JSON.stringify(arrowLeftIcon)}), next: parse(${JSON.stringify(arrowRightIcon)}) },
+    pagers: [...document.querySelectorAll("nav.pager")].map((nav) => ({
+      at: nav === main?.firstElementChild ? "top" : nav === main?.lastElementChild ? "bottom" : "elsewhere",
+      name: nav.getAttribute("aria-label"),
+      links: [...nav.querySelectorAll("a")].map((a) => ({
+        rel: a.rel,
+        href: a.href,
+        name: a.getAttribute("aria-label"),
+        keys: a.dataset.keys ?? null,
+        word: a.querySelector(".pager-word")?.textContent ?? null,
+        title: a.querySelector(".pager-title")?.textContent ?? null,
+        hints: [...a.querySelectorAll('[aria-hidden="true"] kbd')].map((kbd) => kbd.textContent),
+        glyph: a.querySelector("svg")?.outerHTML ?? null,
+      })),
+      heights: [...nav.querySelectorAll("a")].map((a) => a.getBoundingClientRect().height),
+    })),
+  };
+})()`;
+
+/** The pager link the selector, under main, names. */
+const pagerLink = (selector: string): string =>
+  `document.querySelector(${JSON.stringify(`main > ${selector}`)})`;
+
+/**
+ * Asserts the loaded copied page's pagers in a 1600px viewport, against its site index, index, its
+ * links in document order, the order the pagers step through: two, main's first element child,
+ * named pagerLabels.top, and its last, named pagerLabels.bottom; each linking the page before it
+ * in index, rel prev, and the page after it, rel next, none past either end, each link showing the
+ * arrow its icons module gives, filled, its word, the page's title as the index shows it, and its
+ * key hint, H or L, binding that key, named "<word> page: <title>", and at least 24px tall. A page
+ * with neither neighbour has no pager. Each link, followed by a click, lands on its page, and H and
+ * L, pressed, on the previous and the next. The page is loaded again after.
+ */
+async function assertPagers(page: Page, url: string, index: Linked[]): Promise<void> {
+  type Link = {
+    rel: string;
+    href: string;
+    name: string | null;
+    keys: string | null;
+    word: string | null;
+    title: string | null;
+    hints: string[];
+    glyph: string | null;
+  };
+  type Pager = { at: string; name: string | null; links: Link[]; heights: number[] };
+  await wide(page);
+  const place = index.findIndex(({ href }) => href === url);
+  assert.ok(place >= 0, `${url}: its site index lists it`);
+  const neighbours = [
+    { rel: "prev", word: "Previous", key: "h", linked: index[place - 1] },
+    { rel: "next", word: "Next", key: "l", linked: index[place + 1] },
+  ].filter((neighbour): neighbour is typeof neighbour & { linked: Linked } => !!neighbour.linked);
+  const { icons, pagers }: { icons: Record<string, string>; pagers: Pager[] } =
+    await page.evaluate(PAGERS);
+  for (const { at, links, heights } of pagers) {
+    links.forEach(({ rel }, i) =>
+      assert.ok(
+        heights[i] >= 24,
+        `${url}: the ${at} pager's ${rel} link is at least 24px tall, ${heights[i]}px`,
+      ),
+    );
+  }
+  const links = neighbours.map(({ rel, word, key, linked }) => ({
+    rel,
+    href: linked.href,
+    name: `${word} page: ${linked.title}`,
+    keys: key,
+    word,
+    title: linked.title,
+    hints: [key.toUpperCase()],
+    glyph: icons[rel],
+  }));
+  assert.deepEqual(
+    pagers.map(({ at, name, links }) => ({ at, name, links })),
+    links.length === 0
+      ? []
+      : [
+          { at: "top", name: pagerLabels.top, links },
+          { at: "bottom", name: pagerLabels.bottom, links },
+        ],
+    `${url}: a pager at main's top and foot links the pages before and after it in the site index`,
+  );
+  try {
+    for (const where of ["first-child", "last-child"]) {
+      for (const { rel, href } of links) {
+        const selector = `nav.pager:${where} a[rel=${rel}]`;
+        await page.evaluate(
+          `${pagerLink(selector)}.scrollIntoView({ block: "center", behavior: "instant" })`,
+        );
+        const landed = await landing(page, () =>
+          clickOn(page, pagerLink(selector), selector).catch((error: Error) =>
+            assert.fail(`${url}: ${error.message}`),
+          ),
+        );
+        assert.equal(landed, href, `${url}: following ${selector} lands on ${href}`);
+        await page.goto(url);
+      }
+    }
+    for (const { keys, href } of links) {
+      await page.evaluate(SETTLED);
+      const landed = await landing(page, () => press(page, keys));
+      assert.equal(landed, href, `${url}: ${keys.toUpperCase()} moves to ${href}`);
+      await page.goto(url);
+    }
+  } finally {
+    if ((await page.evaluate(`location.href`)) !== url) await page.goto(url);
+  }
+}
+
+/** How long, in ms, a pager link or key is given to land on its page, as until() waits. */
+const LANDING = 10_000;
+
+/** Runs act, which should navigate the page, and resolves to the URL of the page it lands on once
+ * that page fires its load event, or to null when none loads within LANDING. The load listener is
+ * set before act, so a load can't pass unseen, and a navigation's own load, never an earlier one,
+ * is what the next goto() waits past. */
+async function landing(page: Page, act: () => Promise<void>): Promise<string | null> {
+  let timer: NodeJS.Timeout | undefined;
+  const loaded = new Promise<boolean>((resolve) => {
+    page.on("Page.loadEventFired", () => resolve(true));
+    timer = setTimeout(() => resolve(false), LANDING);
+  });
+  try {
+    await act();
+    return (await loaded) ? await page.evaluate(`location.href`) : null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** The loaded hand page has no pager and binds neither H nor L. */
+async function assertNoPager(page: Page, url: string): Promise<void> {
+  assert.deepEqual(
+    await page.evaluate(`({
+      pagers: document.querySelectorAll("nav.pager").length,
+      keys: document.querySelectorAll('[data-keys="h"], [data-keys="l"]').length,
+    })`),
+    { pagers: 0, keys: 0 },
+    `${url}: a hand page has no pager and binds neither H nor L`,
+  );
+}
+
 /** Each copied file's page of the site at root, every tree's, by its path under the base (x.md at
  * x.html, dir/README.md at dir/, a single tree's root README.md at the base itself, each of
  * several trees' under its directory), to its source's front matter, null when it has none, read
@@ -1703,6 +1884,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     if (!pages.has(path)) {
       // A hand page: what it links is followed, and its ids are what links to it reach.
       hand.push(path);
+      await assertNoPager(page, url);
       await visit(url);
       continue;
     }
@@ -1717,7 +1899,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
       meta: string[][];
       lists: string[][];
       tables: number;
-      index: string[];
+      index: Linked[];
       drawer: boolean;
       text: string;
     } = await page.evaluate(`(() => {
@@ -1734,7 +1916,8 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
           .map((dl) => [...dl.querySelectorAll(":scope > dt, :scope > div > dt")]
             .map((dt) => dt.textContent.trim())),
         tables: document.querySelectorAll("table.front-matter").length,
-        index: [...document.querySelectorAll("sl-site-index a[href]")].map((a) => a.href),
+        index: [...document.querySelectorAll("sl-site-index a[href]")]
+          .map((a) => ({ href: a.href, title: a.textContent })),
         drawer: document.querySelectorAll("sl-drawer#pages > sl-site-index").length === 1,
         text: document.body.innerText,
       };
@@ -1751,6 +1934,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     await assertGlyphs(page, url);
     await assertTargetSize(page, url);
     await assertHeaderRow(page, url);
+    await assertPagers(page, url, shown.index);
     await wide(page);
     const name = data?.name;
     assert.equal(shown.title, typeof name === "string" ? name : shown.h1, `${url}'s title`);
@@ -1775,7 +1959,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
       assert.ok(!shown.text.includes(line), `${url}: ${line} isn't the page's text`);
     }
     assert.deepEqual(
-      shown.index.toSorted(),
+      shown.index.map(({ href }) => href).toSorted(),
       [...pages.keys()].map((path) => `${site}${path}`).sort(),
       `${url}: its site index links every copied page, each once`,
     );

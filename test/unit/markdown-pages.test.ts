@@ -8,7 +8,10 @@
 // carry GitHub's ids, counted per page, and the section tree lists the h2s and their h3s by those
 // ids, in the Contents drawer docked from the layout's tree dock. The site index nests
 // every page by directory, each directory labeled by its index page or its name, and marks none
-// current, in the Pages drawer docked from the layout's index dock. Each body table is in a named
+// current, in the Pages drawer docked from the layout's index dock. The pages' order is the site
+// index's, top to bottom, and each page's two pagers, named apart, link its neighbours in it, each
+// link its arrow glyph, word, title, key hint, and binding, with none past either end and none for
+// the only page or a page the order doesn't list. Each body table is in a named
 // region a keyboard focuses. Each GitHub alert is marked-alert's callout, its kind's name visible
 // text and its octicon the icons layer's, aria-hidden and focusable="false", pinned per kind, a
 // link in it placed as any other; a plain blockquote stays one.
@@ -36,8 +39,10 @@ import type { ResolvedConfig, UserConfig } from "vite";
 import {
   markdownPages,
   frontMatterMeta,
+  indexOrder,
   pageFile,
   pageUrl,
+  pager,
   render,
   sectionTree,
   siteIndex,
@@ -224,6 +229,76 @@ describe("the Markdown pages", () => {
       "dir/sub/c.html",
       "z.html",
     ]);
+  });
+
+  test("order the pages as the site index lists them, top to bottom", () => {
+    const files = [
+      "z.md",
+      "dir/sub/c.md",
+      "a.md",
+      "dir/b.md",
+      "README.md",
+      "bare/d.md",
+      "dir/README.md",
+    ];
+    const order = indexOrder(files);
+    assert.deepEqual(order, [
+      "README.md",
+      "a.md",
+      "bare/d.md",
+      "dir/README.md",
+      "dir/b.md",
+      "dir/sub/c.md",
+      "z.md",
+    ]);
+    // The order the site index's own links read, so the two can't drift.
+    const titles = new Map(files.map((path) => [path, path]));
+    assert.deepEqual(
+      hrefs(siteIndex(titles, "README.md")),
+      order.map((path) => pageUrl("README.md", path)),
+    );
+  });
+
+  test("link each page's neighbours in its pagers, top and bottom, no wrap at either end", () => {
+    const titles = new Map([
+      ["README.md", "The <site>"],
+      ["a.md", "A & B"],
+      ["dir/b.md", "B"],
+    ]);
+    const order = indexOrder(titles.keys());
+    assert.equal(
+      pager(order, titles, "a.md", "top"),
+      '<nav class="pager" aria-label="Previous and next page">' +
+        '<a class="pager-prev" href="./" rel="prev" data-keys="h" ' +
+        'aria-label="Previous page: The &lt;site&gt;">' +
+        '<svg data-icon="octicon/arrow-left-16"></svg>' +
+        '<span class="pager-text"><span class="pager-word">Previous</span> ' +
+        '<span class="pager-title">The &lt;site&gt;</span></span>' +
+        '<span aria-hidden="true"><kbd>H</kbd></span></a>' +
+        '<a class="pager-next" href="dir/b.html" rel="next" data-keys="l" ' +
+        'aria-label="Next page: B">' +
+        '<span class="pager-text"><span class="pager-word">Next</span> ' +
+        '<span class="pager-title">B</span></span>' +
+        '<span aria-hidden="true"><kbd>L</kbd></span>' +
+        '<svg data-icon="octicon/arrow-right-16"></svg></a>' +
+        "</nav>",
+    );
+    // The bottom pager is the top one under its own name.
+    assert.equal(
+      pager(order, titles, "a.md", "bottom"),
+      pager(order, titles, "a.md", "top").replace(
+        'aria-label="Previous and next page"',
+        'aria-label="Previous and next page, end of page"',
+      ),
+    );
+    // The first page links no previous, the last no next.
+    assert.deepEqual(hrefs(pager(order, titles, "README.md", "top")), ["a.html"]);
+    assert.doesNotMatch(pager(order, titles, "README.md", "top"), /data-keys="h"/);
+    assert.deepEqual(hrefs(pager(order, titles, "dir/b.md", "top")), ["../a.html"]);
+    assert.doesNotMatch(pager(order, titles, "dir/b.md", "top"), /data-keys="l"/);
+    // The only page, and a file the order doesn't list, have none.
+    assert.equal(pager(["README.md"], titles, "README.md", "top"), "");
+    assert.equal(pager(order, titles, "hand.md", "top"), "");
   });
 
   test("wrap every body table in a region a keyboard focuses, named by its header", () => {

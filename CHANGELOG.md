@@ -29,11 +29,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   is stored at once, kept as the dialog closes, and applied after a reload.
 - `./browser.js`'s `placesSectionTree`, a shell check, which the crawl runs too: a page's section
   tree is in its Contents drawer, `sl-drawer#contents` docked from 70rem. At 70rem and 1600px the
-  tree is a docked column beside main, where J marks and moves to the first section, K back to
-  the top, and H and L move to no section; at 390px and a pixel under 70rem the drawer is closed,
+  tree is a docked column beside main, where J marks and moves to the first section and K back to
+  the top; at 390px and a pixel under 70rem the drawer is closed,
   and once open, a followed link in it closes it and marks its section. A page with no tree has
   no Contents drawer.
 - `./markdown-pages.js`'s `frontMatterMeta`, a page's front matter as head meta.
+- A pager at the top and the foot of each copied page's main, `./markdown-pages.js`'s `pager`: a
+  `nav` named "Previous and next page", and "Previous and next page, end of page" at the foot,
+  linking the pages before and after it in the site index's order, `indexOrder`, with no wrap.
+  Each link shows its arrow glyph, its word, the page's title, and its key hint, binds H or L,
+  and is named "Previous page: <title>" or "Next page: <title>", which Help lists once each. A
+  hand page has none. `site.css` draws it as a quiet row of plain links, titles wrapping.
+- The crawl checks each copied page's pagers against its site index, follows each link, and
+  presses H and L, each landing on its page; a hand page has no pager and binds neither key.
+  `opensKeysHelp` expects H and L where the page has a pager, and none where it has none, and the
+  switch in Settings turns them off.
 
 ### Changed
 

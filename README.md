@@ -230,15 +230,17 @@ The shell checks, each named in `shell`, assert these:
 - A page's section tree is in its Contents drawer, `sl-drawer#contents` labeled "Contents" and
   docked from 70rem, the tree with no `dock` of its own; a page with no tree has no such drawer. At
   70rem and at 1600px the drawer is docked, the tree a column beside main, where J marks and moves
-  to the first section, K back to the page's top, and H and L move to no section. At 390px and a
+  to the first section and K back to the page's top. At 390px and a
   pixel under 70rem the drawer is closed and the tree hidden; opened by its `show()`, a modal, it
   closes as a link in it is followed, and the link's section is marked.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into it, and no further below it than on a page taller than the viewport.
 - ? opens Help, whose `sl-shortcuts` lists exactly the page's bindings, as the foundation's keys
-  module holds them, the shell's P, ?, S, and the tree's J and K among them, none of H or L naming
-  a section, and Escape closes it. The character-key switch in Settings turns them off, so J and P
-  do nothing, and on again. Every header control that binds a key shows it in a `kbd`.
+  module holds them, the shell's P, ?, S, and the tree's J and K among them, and, where the page
+  has a pager, H and L once each, named by the top pager's links, "Previous page: <title>" and
+  "Next page: <title>", and neither where it has none; Escape closes it. The character-key switch
+  in Settings turns them off, so J, P, H, and L do nothing, and on again. Every header control that
+  binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
   components' shortcut dialog pattern: it is named by a heading inside it through
   `aria-labelledby`, and has a Close, a glyph button with `command="close"` for it showing
@@ -277,14 +279,17 @@ content="<value>">` per front matter key, in order, the value as `frontMatterTex
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
 text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
 no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
-P, its `aria-expanded` following the drawer open and closed; and every in-site link reaches a built
+P, its `aria-expanded` following the drawer open and closed; its two pagers, at main's top and
+foot, each named, link the pages before and after it in its site index's order, none past either
+end, each link its arrow, its word, the page's title, its key hint, and its binding, H or L, and
+each link followed, and H and L pressed, lands on its page; and every in-site link reaches a built
 page, and its fragment's element. Since each page's index links every other, the crawl reaches every
 page from the index. It checks a page for every Markdown file `content.json` records, every tree's,
 crawling from one no link reaches once the links run out. A page it reaches that no record names is
 a hand page the site builds, as a root-style site's index is: it loads with a 2xx, every request
-under the base and none failed, its ids the targets of the fragments linking it, and its links
-followed, but the copied pages' checks are left to the shell checks, which the site runs on it by
-its URL; `Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
+under the base and none failed, it has no pager and binds neither H nor L, its ids the targets of
+the fragments linking it, and its links followed, but the copied pages' checks are left to the
+shell checks, which the site runs on it by its URL; `Crawled.hand` lists each, by its path under the base, in the order the crawl reached it.
 
 A site's `scripts/screenshots.config.ts` exports the description, its pages each a built path
 under `dist/`, which the tooling's `spike-html-apps-screenshots` runs; a page's path is its
@@ -423,8 +428,8 @@ for (const path of ["", "briefs/orientation.html", "org/briefs/orientation.html"
 `markdownPages` writes each page's front matter into its head, and its navigation as the light-DOM
 markup of spike-html-hosting-components' elements, so with no script the page renders it as its
 own, and each element, once its module defines it, styles and marks it. The front matter's meta
-follows the title; main holds the body alone; then come the section tree in the Contents drawer
-and the site index in the Pages drawer:
+follows the title; main holds the body between its two pagers; then come the section tree in the
+Contents drawer and the site index in the Pages drawer:
 
 ```html
 <title>A page</title>
@@ -432,8 +437,10 @@ and the site index in the Pages drawer:
 <meta name="tags" content="one, two" />
 …
 <main>
+<nav class="pager" aria-label="Previous and next page"><a class="pager-prev" href="./" rel="prev" data-keys="h" aria-label="Previous page: The site"><svg data-icon="octicon/arrow-left-16"></svg><span class="pager-text"><span class="pager-word">Previous</span> <span class="pager-title">The site</span></span><span aria-hidden="true"><kbd>H</kbd></span></a><a class="pager-next" …>…</a></nav>
 <h1 id="a-page">A page</h1>
 …
+<nav class="pager" aria-label="Previous and next page, end of page">…</nav>
 </main>
 <sl-drawer id="contents" label="Contents" dock="70rem"><sl-section-tree><ul><li><a href="#usage">Usage</a><ul><li><a href="#options">Options</a></li></ul></li></ul></sl-section-tree></sl-drawer>
 <sl-drawer class="site-index" label="Pages" id="pages" dock="86rem"><sl-site-index><ul><li><a href="./">The site</a></li><li><a href="guide/">Guide</a><ul>…</ul></li></ul></sl-site-index></sl-drawer>
@@ -455,6 +462,17 @@ and the site index in the Pages drawer:
   or a span of its name when it has none, over a nested list of its pages and directories, by name.
   Each link is relative to the page, as its body's are, so it resolves under any base. It sits in
   `sl-drawer`, labeled "Pages", its id `pages`, which the shell's Pages button controls.
+- Each pager is a `nav`, the top one named "Previous and next page" and the bottom one "Previous
+  and next page, end of page", so a landmark list tells them apart. It links the pages before and
+  after the page in the site index's order, the order its links read top to bottom, which
+  `indexOrder` gives both: the first page has no Previous, the last no Next, and nothing wraps; the
+  only page has no pager. Each link shows its arrow, `arrow-left-16` or `arrow-right-16`, filled at
+  build, on its outer side, its word, the page's title, and its key hint, and binds H or L by
+  `data-keys`, so keys.js clicks it; its `aria-label`, "Previous page: <title>" or "Next page:
+  <title>", is the name Help lists. Both pagers bind the same keys: keys.js fires and lists the
+  first in document order, the top one's, once. A hand page has no pager. `site.css` draws it as
+  a quiet row of plain links, Previous at the inline start and Next at the inline end, each title
+  in the secondary text color wrapping in its half of the row.
 
 Each drawer's `dock` is the layout's, `docks` exported: `docks.tree`, 70rem, and `docks.index`,
 86rem. The renderer writes no `aria-current`: the components mark the section in view and the page
@@ -538,7 +556,8 @@ native modal dialog named by its heading through `aria-labelledby`, holding what
 needs, and closed by its Close, a glyph button with `command="close"` showing `<kbd>Esc</kbd>`, or
 by Escape. Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds
 `sl-shortcuts` alone: it lists every binding the page has outside the dialog, the Pages button's
-P, the Help button's ?, the Settings button's S, and the section tree's J and K, each named by its
+P, the Help button's ?, the Settings button's S, the section tree's J and K, and the pager's H and
+L, each named by its
 element's `aria-label` or its registered label. Settings, under S, opens `dialog#settings`, headed
 "Settings", which holds `sl-settings`: the theme, a row each for color, scheme, space, and type
 beside a preview, and the keyboard, among it the switch that turns the character keys off (WCAG

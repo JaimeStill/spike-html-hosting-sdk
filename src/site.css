@@ -34,6 +34,9 @@
  * inline end, Pages, Help, and Settings, on its first line at every width; the components'
  * glyph-button.css lays out each button. The shell's two shortcut dialogs, Help and Settings, take
  * the foundation's theme menu width, the viewport less --space-s on each side, up to 56rem. A
+ * Each rendered page's two pagers, at main's top and foot, are a quiet row of plain links, the
+ * previous page's at the inline start and the next's at the inline end, each title wrapping in its
+ * half of the row. A
  * GitHub alert, as the renderer writes it through marked-alert, is a callout: a rule at its start
  * and its title, the kind's octicon and its name, in its kind's color, the foundation's palette
  * color GitHub gives it: note blue, tip green, important purple, warning yellow, and caution red.
@@ -151,6 +154,73 @@
       flex-direction: column;
       max-block-size: calc(100svh - 2 * var(--space-m));
     }
+  }
+
+  /* Each page's pagers, at the top of main and at its foot: a compact row in the UI font, a step
+     smaller than the body, the previous page's link at the inline start and the next page's at the
+     inline end, each in its own half, so a long title wraps in its half and never scrolls the row
+     sideways. A link keeps the plain link look, quieter than a glyph button, which would read as a
+     control beside the article: no border or surface, its word in the link color, the title after
+     it in the secondary text color, its key hint, and its arrow on its outer side. The block
+     padding brings the link to the 24px target size. The bottom pager is set off from the article
+     above it by a rule; the top one by space alone, above the page's heading. */
+  .pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-m);
+    font-family: var(--font-ui);
+    font-size: var(--text-s);
+    line-height: var(--leading-ui);
+  }
+
+  main > .pager:first-child {
+    margin-block-end: var(--space-m);
+  }
+
+  main > .pager:last-child {
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-s);
+    border-block-start: var(--line-s) solid var(--border);
+  }
+
+  .pager a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-inline-size: 0;
+    padding-block: var(--space-3xs);
+    text-decoration: none;
+  }
+
+  .pager a:hover .pager-word {
+    text-decoration: underline;
+  }
+
+  .pager-prev {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .pager-next {
+    grid-column: 2;
+    justify-self: end;
+    text-align: end;
+  }
+
+  .pager-text {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .pager-title {
+    color: var(--fg-2);
+  }
+
+  .pager svg {
+    flex: none;
+    inline-size: 1em;
+    block-size: 1em;
+    fill: currentColor;
   }
 
   sl-site-index a[aria-current="page"] {

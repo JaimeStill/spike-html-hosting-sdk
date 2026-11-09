@@ -31,7 +31,11 @@
 // showing the Help button's glyph, the glyph check fails, naming the page and the button. With the glyph buttons' padding and border dropped and their text small, the target size
 // check fails, naming the width, the space, and the button; with the header's group wrapping its
 // buttons, or the header wrapping the group under the nav, the header row check fails, naming the
-// width; and with the header too wide for a phone, it fails naming the sideways scroll.
+// width; and with the header too wide for a phone, it fails naming the sideways scroll. With the
+// bottom pager removed, a pager's links swapped, a pager link that follows nowhere, or every L
+// binding removed, the crawl fails, naming the page; with the top pager's L dropped, so keys lists
+// the bottom one's, or a handler that follows the previous link on H whatever the switch in
+// Settings says, the keys help check fails on a paged page, naming it.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -693,4 +697,83 @@ describe("the fixture site with its header's row broken", () => {
       }
     });
   }
+});
+
+describe("the fixture site with its pagers wrong", () => {
+  for (const [change, script, message] of [
+    [
+      "the bottom pager removed",
+      `document.querySelector("main > nav.pager:last-child")?.remove();`,
+      /\/fixture-site\/: a pager at main's top and foot links the pages before and after it/,
+    ],
+    [
+      "a pager's links swapped",
+      `for (const nav of document.querySelectorAll("nav.pager")) nav.append(nav.firstElementChild);`,
+      /\/fixture-site\/a\.html: a pager at main's top and foot links the pages before and after it/,
+    ],
+    [
+      "the top pager's previous link following nowhere",
+      `document.querySelector("main > nav.pager:first-child a[rel=prev]")?.addEventListener("click", (event) => event.preventDefault());`,
+      /\/fixture-site\/a\.html: following nav\.pager:first-child a\[rel=prev\] lands on/,
+    ],
+    [
+      "every pager's L binding removed",
+      `for (const a of document.querySelectorAll("a[data-keys=l]")) a.removeAttribute("data-keys");`,
+      /\/fixture-site\/: a pager at main's top and foot links the pages before and after it/,
+    ],
+  ] as const) {
+    test(`${change} fails the crawl, naming the page`, async () => {
+      const page = await withChange(script);
+      try {
+        await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
+
+  test("the top pager's binding dropped fails the keys help check on a paged page", async () => {
+    // The top pager's L dropped, so keys lists the bottom pager's in its place.
+    const page = await withChange(
+      `document.querySelector("main > nav.pager:first-child a[data-keys=l]")?.removeAttribute("data-keys");`,
+    );
+    try {
+      await assert.rejects(
+        opensKeysHelp(page, server.origin, `${server.origin}a.html`),
+        (error: Error) => {
+          assert.match(
+            error.message,
+            /\/fixture-site\/a\.html: Help lists H and L as its pager's previous and next page/,
+          );
+          return true;
+        },
+      );
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("H moving to another page with the keys off fails the keys help check", async () => {
+    // A handler that follows the previous link on H whatever the switch in Settings says.
+    const page = await withChange(
+      `document.addEventListener("keydown", (event) => { if (event.key === "h") document.querySelector("a[rel=prev]")?.click(); });`,
+    );
+    try {
+      await assert.rejects(
+        opensKeysHelp(page, server.origin, `${server.origin}a.html`),
+        (error: Error) => {
+          assert.match(
+            error.message,
+            /\/fixture-site\/a\.html: with the keys off, neither H nor L moves/,
+          );
+          return true;
+        },
+      );
+    } finally {
+      await page.close();
+    }
+  });
 });

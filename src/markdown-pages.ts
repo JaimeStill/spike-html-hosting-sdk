@@ -46,6 +46,14 @@
 // drawers come after main so the reading order, and a keyboard's, is the page's body first. The
 // renderer writes no aria-current: the components mark the current section and page at runtime,
 // and the site nav, which takes no content, is the shell's to place, with the header's buttons.
+// Each page's main opens and closes with a pager, a nav landmark linking the pages before and after
+// it in the site index's order, the order its links read top to bottom, which one function gives
+// both (indexOrder): the first page has no previous link, the last no next, and nothing wraps. Each
+// link shows an arrow glyph, its word, Previous or Next, its page's title, and its key hint, H or
+// L, which its data-keys binds, so the foundation's keys module clicks it; the two pagers' links
+// bind the same keys, and the module, first in document order, fires and lists the top one's. Each
+// pager is named apart from the other, so a landmark list tells them apart. A hand page, in no
+// index, has no pager and binds neither key.
 // Each body table is wrapped in a div.table-region, a region named by its header cells that a
 // keyboard focuses, as Shiki's tabindex makes each code block, which scrolls the table sideways in
 // a viewport narrower than it.
@@ -390,16 +398,20 @@ interface Directory {
   dirs: Map<string, Directory>;
 }
 
-/** The page of the copied file from's site index in the Pages drawer: an sl-drawer docked from
- * docks.index, labeled "Pages", its id pages, which the shell's Pages button controls, holding an
- * sl-site-index slotting a list of every page, titles giving each copied file's title, nested by
- * directory: a page an li of its link, its text the page's title; a directory an li of its index
- * page's link, or a span of its name when it has none, then a nested list of its pages and
- * directories, by name. The root's index page is the top-level list's first entry. Each link is
- * relative to from's page, as its body's are, so it resolves under any base. */
-export function siteIndex(titles: ReadonlyMap<string, string>, from: string): string {
+/** An entry of the site index's lists: a copied file's page, or a directory, labeled by its index
+ * page's file or, with none, by its name, its pages and directories nested under it. */
+interface IndexEntry {
+  file?: string;
+  name: string;
+  nested: IndexEntry[];
+}
+
+/** The site index's top-level list over the copied files: the root's index page first, then the
+ * root's pages and directories by name, each directory's in turn by name under it. The one order
+ * both the site index and the pager read. */
+function indexEntries(files: Iterable<string>): IndexEntry[] {
   const root: Directory = { pages: [], dirs: new Map() };
-  for (const file of titles.keys()) {
+  for (const file of files) {
     const parts = file.split("/");
     let dir = root;
     for (const name of parts.slice(0, -1)) {
@@ -410,42 +422,121 @@ export function siteIndex(titles: ReadonlyMap<string, string>, from: string): st
     if (parts.at(-1) === "README.md") dir.index = file;
     else dir.pages.push(file);
   }
-  const link = (file: string): string =>
-    `<a href="${attribute(pageUrl(from, file))}">${escape(titles.get(file) ?? file)}</a>`;
-  const entries = (dir: Directory): string[] =>
+  const entries = (dir: Directory): IndexEntry[] =>
     [
-      ...dir.pages.map((file) => [posix.basename(file), `<li>${link(file)}</li>`]),
-      ...[...dir.dirs].map(([name, child]) => {
-        const label =
-          child.index === undefined ? `<span>${escape(name)}</span>` : link(child.index);
-        const nested = entries(child);
-        return [name, `<li>${label}${nested.length > 0 ? `<ul>${nested.join("")}</ul>` : ""}</li>`];
-      }),
-    ]
-      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-      .map(([, item]) => item);
-  const top = [
-    ...(root.index === undefined ? [] : [`<li>${link(root.index)}</li>`]),
+      ...dir.pages.map((file) => ({ file, name: posix.basename(file), nested: [] })),
+      ...[...dir.dirs].map(([name, child]) => ({
+        ...(child.index === undefined ? {} : { file: child.index }),
+        name,
+        nested: entries(child),
+      })),
+    ].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return [
+    ...(root.index === undefined ? [] : [{ file: root.index, name: "", nested: [] }]),
     ...entries(root),
   ];
+}
+
+/** Every copied file in the site index's order, the order its links read top to bottom: each
+ * entry's page, then the pages nested under it. The pager steps through it. */
+export function indexOrder(files: Iterable<string>): string[] {
+  const flat = (entries: IndexEntry[]): string[] =>
+    entries.flatMap(({ file, nested }) => [...(file === undefined ? [] : [file]), ...flat(nested)]);
+  return flat(indexEntries(files));
+}
+
+/** The page of the copied file from's site index in the Pages drawer: an sl-drawer docked from
+ * docks.index, labeled "Pages", its id pages, which the shell's Pages button controls, holding an
+ * sl-site-index slotting a list of every page, titles giving each copied file's title, nested by
+ * directory: a page an li of its link, its text the page's title; a directory an li of its index
+ * page's link, or a span of its name when it has none, then a nested list of its pages and
+ * directories, by name. The root's index page is the top-level list's first entry. Each link is
+ * relative to from's page, as its body's are, so it resolves under any base. */
+export function siteIndex(titles: ReadonlyMap<string, string>, from: string): string {
+  const link = (file: string): string =>
+    `<a href="${attribute(pageUrl(from, file))}">${escape(titles.get(file) ?? file)}</a>`;
+  const items = (entries: IndexEntry[]): string =>
+    entries
+      .map(({ file, name, nested }) => {
+        const label = file === undefined ? `<span>${escape(name)}</span>` : link(file);
+        return `<li>${label}${nested.length > 0 ? `<ul>${items(nested)}</ul>` : ""}</li>`;
+      })
+      .join("");
   return (
     `<sl-drawer class="site-index" label="Pages" id="pages" dock="${docks.index}">` +
-    `<sl-site-index><ul>${top.join("")}</ul></sl-site-index></sl-drawer>`
+    `<sl-site-index><ul>${items(indexEntries(titles.keys()))}</ul></sl-site-index></sl-drawer>`
   );
 }
 
+/** The accessible names of a page's two pagers, at the top of its main and at its foot, each a
+ * nav landmark, so a landmark list tells them apart. */
+export const pagerLabels = {
+  top: "Previous and next page",
+  bottom: "Previous and next page, end of page",
+} as const;
+
+/** One of the copied file from's pagers, where in its main given: a nav, named by pagerLabels,
+ * linking from's neighbours in order, the site index's order, the page before it at the inline
+ * start and the page after it at the inline end. Each link shows the word Previous or Next, the
+ * neighbour's title, from titles, and its key hint, H or L, aria-hidden, with an arrow glyph
+ * marker, which the build fills, on its outer side, before a previous link's text and after a
+ * next link's hint, so each arrow points off the row's edge; it binds that key by data-keys,
+ * which the foundation's keys module clicks; its name, its aria-label, is "Previous page: <title>"
+ * or "Next page: <title>", which Help lists.
+ * Each link is relative to from's page, as the site index's are, and carries rel prev or next.
+ * The first page has no previous link and the last no next, and nothing wraps; a page with
+ * neither, the only one, has no pager, nor does a file order doesn't list. */
+export function pager(
+  order: readonly string[],
+  titles: ReadonlyMap<string, string>,
+  from: string,
+  where: keyof typeof pagerLabels,
+): string {
+  const at = order.indexOf(from);
+  if (at < 0) return "";
+  const link = (file: string | undefined, rel: "prev" | "next"): string => {
+    if (file === undefined) return "";
+    const [word, key, icon] =
+      rel === "prev" ? ["Previous", "h", "arrow-left-16"] : ["Next", "l", "arrow-right-16"];
+    const title = titles.get(file) ?? file;
+    const glyph = `<svg data-icon="octicon/${icon}"></svg>`;
+    return (
+      `<a class="pager-${rel}" href="${attribute(pageUrl(from, file))}" rel="${rel}" ` +
+      `data-keys="${key}" aria-label="${attribute(`${word} page: ${title}`)}">` +
+      (rel === "prev" ? glyph : "") +
+      `<span class="pager-text"><span class="pager-word">${word}</span> ` +
+      `<span class="pager-title">${escape(title)}</span></span>` +
+      `<span aria-hidden="true"><kbd>${key.toUpperCase()}</kbd></span>` +
+      (rel === "next" ? glyph : "") +
+      `</a>`
+    );
+  };
+  const links = link(order[at - 1], "prev") + link(order[at + 1], "next");
+  if (links === "") return "";
+  return `<nav class="pager" aria-label="${attribute(pagerLabels[where])}">${links}</nav>`;
+}
+
 /** Fills the shell with a rendered page: its title, and its front matter's meta after it; its body
- * in <main>; then its section tree, when it has one, in the Contents drawer, and the site index,
- * index, in the Pages drawer. */
-function fill(shell: string, { data, title, html, headings }: Rendered, index: string): string {
+ * in <main>, between its pagers, top and bottom, when it has them; then its section tree, when it
+ * has one, in the Contents drawer, and the site index, index, in the Pages drawer. */
+function fill(
+  shell: string,
+  { data, title, html, headings }: Rendered,
+  index: string,
+  pagers: { top: string; bottom: string },
+): string {
   const tree = sectionTree(headings);
   const drawers = `${tree === "" ? "" : `${tree}\n`}${index}`;
+  const line = (markup: string): string => (markup === "" ? "" : `${markup}\n`);
   return shell
     .replace(
       /<title>[^<]*<\/title>/,
       () => `<title>${escape(title)}</title>\n${frontMatterMeta(data)}`,
     )
-    .replace("<main></main>", () => `<main>\n${html}</main>\n${drawers}`);
+    .replace(
+      "<main></main>",
+      () => `<main>\n${line(pagers.top)}${html}${line(pagers.bottom)}</main>\n${drawers}`,
+    );
 }
 
 /** A copied file the plugin builds: its path under the copied root, its path in its tree's source,
@@ -473,6 +564,8 @@ export function markdownPages(options: Options): Plugin {
    * site index lists. */
   const rendered = new Map<string, Rendered>();
   const titles = new Map<string, string>();
+  /** Every copied file in the site index's order, which each page's pagers step through. */
+  let order: string[] = [];
   /** The syntax stylesheet's URL, under the base, when the build highlights. */
   let stylesheet: string | undefined;
   let base = "/";
@@ -569,6 +662,7 @@ export function markdownPages(options: Options): Plugin {
         rendered.set(file, page);
         titles.set(file, page.title);
       }
+      order = indexOrder(titles.keys());
       if (syntax) {
         const css = syntax.stylesheet();
         const hash = createHash("sha256").update(css).digest("base64url").slice(0, 8);
@@ -606,7 +700,10 @@ export function markdownPages(options: Options): Plugin {
           );
         }
       }
-      return fill(shell, page, siteIndex(titles, file));
+      return fill(shell, page, siteIndex(titles, file), {
+        top: pager(order, titles, file, "top"),
+        bottom: pager(order, titles, file, "bottom"),
+      });
     },
     // After Vite's own transform of the page, so the link, to an asset the build emits, is
     // written as it is and never resolved as a source. Every page the build writes passes here,
