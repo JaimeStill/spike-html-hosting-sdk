@@ -42,16 +42,17 @@
 // and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
 // its aria-label; every rendered glyph button, the page's and its components' in their shadow
 // roots, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
-// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the
-// regular and the compact space profiles; the header's buttons, its header-actions group, share one
-// line at the capture widths, 390px, 1120px, and 1376px, and at 40rem: at 390px, below 40rem, the
-// site nav keeps its links on one line and the group is on its own row below it, at the nav's
-// inline start, and from 40rem the group is on the site nav's first line, at the header's inline
-// end; nothing scrolls sideways at 390px; and at a phone's width, a px below and at each of the
-// layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word breaks
-// across lines and every docked side column is at least 16rem wide. A check that changes the
-// reader's stored theme or keys settings removes them after. shell lists them by name, for a site
-// to make a test of each.
+// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at the capture widths, 390px,
+// 1120px, and 1376px, in every space and every type profile the foundation's registry lists, each
+// space with each type; the header's buttons, its header-actions group, share one line at the
+// capture widths and at 40rem: at 390px, below 40rem, the site nav keeps its links on one line and
+// the group is on its own row below it, at the nav's inline start, and from 40rem the group is on
+// the site nav's first line, at the header's inline end; nothing scrolls sideways at 390px; and at
+// a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and
+// at 1400px, no navigation link's word breaks across lines and every docked side column is at
+// least 16rem wide. A check that changes the reader's stored theme or keys settings removes them
+// after; one that sets a facet's attribute on the root puts it back. shell lists them by name, for
+// a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
@@ -114,6 +115,7 @@ import { parse } from "yaml";
 
 import { copiedFiles } from "./content.ts";
 import { docks, frontMatterText, pageUrl, pagerLabels } from "./markdown-pages.ts";
+import { WIDTHS } from "./screenshots.ts";
 
 /** A check on a fresh page of the site whose URL under the base, as served() gives it, is site:
  * the page at url, a URL under site, site itself, its index, when none is given. */
@@ -1063,9 +1065,10 @@ const OPENED_DIALOGS = `[...new Set([...document.querySelectorAll(
 /** WCAG 2.5.8's minimum target size, in CSS px a side. */
 const TARGET = 24;
 
-/** The space profiles the target size is checked in: the default, regular, and compact, whose
- * tighter --space-* steps make the smallest glyph button. */
-const SPACES = ["regular", "compact"];
+/** The foundation registry's profiles of the facet, in registration order, read from its store at
+ * the well-known global key every copy of registry.js shares, as profiles(facet) gives them. */
+const registered = (facet: "color" | "space" | "type"): string =>
+  `[...(globalThis[Symbol.for("spike-html-apps-foundation.registry")]?.${facet} ?? [])]`;
 
 /** Each glyph button the loaded page renders, the page's and those in its components' shadow
  * roots, each as its name, its aria-label or its text, and its box's width and height. */
@@ -1084,13 +1087,21 @@ const TARGETS = `(() => {
   return found;
 })()`;
 
-/** Asserts every glyph button the loaded page renders, at 390px, where the Pages button shows, and
- * the Contents button on a page with a Contents drawer, and at 1600px, where both drawers are
- * docked, is at least 24 CSS px a side, in the regular and the compact space profiles; and, with
- * each dialog a keyed show-modal opener opens shown as a modal in turn, each glyph button it
- * renders too, its Close among them, then closed. The root's own data-space is put back after. */
+/** Asserts every glyph button the loaded page renders, at each capture width (screenshots.ts's
+ * WIDTHS), 390px, where the Pages button shows, and the Contents button on a page with a Contents
+ * drawer, 1120px, where the section tree docks, and 1376px, where the site index docks too, is at
+ * least 24 CSS px a side, in every space and every type profile the foundation's registry lists,
+ * each space with each type; and, with each dialog a keyed show-modal opener opens shown as a
+ * modal in turn, each glyph button it renders too, its Close among them, then closed. The check
+ * sets the root's data-space and data-type, never the stored settings, and puts both back after. */
 async function assertTargetSize(page: Page, url: string): Promise<void> {
-  const space: string | null = await page.evaluate(attribute("data-space"));
+  const facets = ["data-space", "data-type"] as const;
+  const kept: (string | null)[] = [];
+  for (const name of facets) kept.push(await page.evaluate(attribute(name)));
+  const spaces: string[] = await page.evaluate(registered("space"));
+  const types: string[] = await page.evaluate(registered("type"));
+  assert.ok(spaces.length > 0, `${url}: the foundation's registry lists a space profile`);
+  assert.ok(types.length > 0, `${url}: the foundation's registry lists a type profile`);
   const dialogs: string[] = await page.evaluate(OPENED_DIALOGS);
   const contents: boolean = await page.evaluate(`!!document.getElementById("contents")`);
   /** Asserts the size of each glyph button rendered, in the dialog with the id when one is open. */
@@ -1113,37 +1124,46 @@ async function assertTargetSize(page: Page, url: string): Promise<void> {
     for (const target of targets) {
       assert.ok(
         target.width >= TARGET - 0.5 && target.height >= TARGET - 0.5,
-        `${url}: at ${width}px in the ${profile} space${where} the ${target.name} button is ` +
+        `${url}: at ${width}px in ${profile}${where} the ${target.name} button is ` +
           `${target.width}px by ${target.height}px, under ${TARGET}px a side`,
       );
     }
   };
+  /** Sets the root's attribute to the value, or removes it for null. */
+  const set = (name: string, value: string | null): Promise<unknown> =>
+    page.evaluate(
+      value === null
+        ? `document.documentElement.removeAttribute("${name}")`
+        : `document.documentElement.setAttribute("${name}", ${JSON.stringify(value)})`,
+    );
   try {
-    for (const [width, viewport] of [
-      [390, narrow],
-      [1600, wide],
-    ] as const) {
-      await viewport(page);
-      for (const profile of SPACES) {
-        await page.evaluate(`document.documentElement.setAttribute("data-space", "${profile}")`);
-        await measure(width, profile);
-        for (const id of dialogs) {
-          const dialog = `document.getElementById(${JSON.stringify(id)})`;
-          await page.evaluate(`${dialog}.showModal()`);
-          try {
-            await measure(width, profile, id);
-          } finally {
-            await page.evaluate(`${dialog}.close()`);
+    for (const { width, height } of WIDTHS) {
+      await page.cdp("Emulation.setDeviceMetricsOverride", {
+        width,
+        height,
+        deviceScaleFactor: 1,
+        mobile: false,
+      });
+      for (const space of spaces) {
+        for (const type of types) {
+          await set("data-space", space);
+          await set("data-type", type);
+          const profile = `the ${space} space and the ${type} type`;
+          await measure(width, profile);
+          for (const id of dialogs) {
+            const dialog = `document.getElementById(${JSON.stringify(id)})`;
+            await page.evaluate(`${dialog}.showModal()`);
+            try {
+              await measure(width, profile, id);
+            } finally {
+              await page.evaluate(`${dialog}.close()`);
+            }
           }
         }
       }
     }
   } finally {
-    await page.evaluate(
-      space === null
-        ? `document.documentElement.removeAttribute("data-space")`
-        : `document.documentElement.setAttribute("data-space", ${JSON.stringify(space)})`,
-    );
+    for (const [index, name] of facets.entries()) await set(name, kept[index]);
   }
 }
 
@@ -1588,8 +1608,8 @@ export const showsGlyphs: Check = async (page, site, url = site) => {
 };
 
 /** Every glyph button the page renders, and each shortcut dialog's, its Close among them, with the
- * dialog open, is at least 24 CSS px a side, at 390px and at 1600px, in the regular and the
- * compact space profiles. */
+ * dialog open, is at least 24 CSS px a side, at each capture width, 390px, 1120px, and 1376px, in
+ * every space and every type profile the foundation's registry lists. */
 export const hasTargetSize: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertTargetSize(page, url);
@@ -1645,7 +1665,7 @@ export const storesAtOnce: Check = async (page, site, url = site) => {
 
 /** The foundation registry's color profiles, in registration order, read from its store at the
  * well-known global key every copy of registry.js shares, as profiles("color") gives them. */
-const PALETTES = `[...(globalThis[Symbol.for("spike-html-apps-foundation.registry")]?.color ?? [])]`;
+const PALETTES = registered("color");
 
 /** Each highlighted token on the page, in palette's syntax theme: its text, the color it renders,
  * and the color its --shiki-<palette> variable resolves to where it stands, read through a probe
@@ -1796,7 +1816,8 @@ export const shell: Record<string, Check> = {
     followsShortcutDialogs,
   "each header button and each dialog's Close show their glyph and key hint, named, no word":
     showsGlyphs,
-  "every glyph button is at least 24px a side, in the regular and the compact space": hasTargetSize,
+  "every glyph button is at least 24px a side, at each capture width, in every space and type":
+    hasTargetSize,
   "the header's buttons share one line, under the nav at its start below 40rem, at the end after":
     keepsHeaderRow,
   "nothing scrolls sideways at 390px": fitsNarrowWidth,

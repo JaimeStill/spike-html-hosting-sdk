@@ -95,6 +95,7 @@ const modules: Record<string, string[]> = {
   ],
   "./css-module-scripts.js": ["cssModuleScripts"],
   "./screenshots.js": [
+    "WIDTHS",
     "capture",
     "contentPages",
     "description",

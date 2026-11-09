@@ -10,8 +10,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 - `./browser.js`'s `hasTargetSize`, a shell check, which the crawl runs on every copied page too:
   every glyph button the page renders, its own and those in the components' shadow roots, is at
-  least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
-  space. A smaller one fails it, naming the page, the width, the space, and the button.
+  least 24 CSS px a side (WCAG 2.5.8), at each capture width, 390px, 1120px, and 1376px, in every
+  space and every type profile the foundation's registry lists, each space with each type, the
+  dialogs a keyed opener opens shown in turn. A smaller one fails it, naming the page, the width,
+  the space, the type, and the button. It sets the root's `data-space` and `data-type`, never the
+  stored settings, and puts both back after.
+- `./screenshots.js`'s `WIDTHS`, the capture widths, which the target size check measures at.
 - `./browser.js`'s `keepsHeaderRow`, a shell check, which the crawl runs too: at 390px, 40rem,
   1120px, and 1376px the header's `header-actions` group holds its rendered buttons on one line;
   at 390px, below 40rem, the site nav keeps its links on one line and the group is on its own row

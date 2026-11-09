@@ -57,8 +57,9 @@ import { base, command, served } from "./served.ts";
 
 // The widths each page is captured at: a phone's, below the settings' 48rem breakpoint; 70rem,
 // where the section tree docks; and 86rem, where the site index docks too, the three-column
-// layout (markdown-pages.ts's docks, at the 16px rem).
-const WIDTHS: Viewport[] = [
+// layout (markdown-pages.ts's docks, at the 16px rem). browser.ts's target size check measures at
+// each.
+export const WIDTHS: Viewport[] = [
   { width: 390, height: 844 },
   { width: 1120, height: 700 },
   { width: 1376, height: 860 },

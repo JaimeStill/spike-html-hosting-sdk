@@ -256,9 +256,10 @@ The shell checks, each named in `shell`, assert these:
   icons module's own, and its key hint in a `kbd`, Esc for a Close, both rendered, and no word,
   named by its `aria-label`: Pages, Contents, Help, Settings, and Close.
 - Every glyph button the page renders, its own and those in the components' shadow roots, is at
-  least 24 CSS px a side (WCAG 2.5.8), at 390px and at 1600px, in the regular and the compact
-  space, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
-  dialog open, its own, its Close among them.
+  least 24 CSS px a side (WCAG 2.5.8), at each capture width, 390px, 1120px, and 1376px, in every
+  space and every type profile the foundation's registry lists, each space with each type, the
+  Contents button at 390px on a page with a Contents drawer, and with each shortcut dialog open,
+  its own, its Close among them.
 - At 390px, 40rem, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one
   line. At 390px, below 40rem, the site nav keeps its links on one line and the group is on its own
   row below it, its inline start within a pixel of the nav's; from 40rem the group is on the site
