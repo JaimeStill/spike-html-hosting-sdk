@@ -17,28 +17,27 @@
 // where the capture run's wait for each element's definition would hang; every request the page
 // makes, with Settings and Help opened, resolves under the base, none fails, and the foundation's
 // theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts stand in for, are never
-// requested, a data: or blob: URL aside, which loads nothing from the network, as Chrome's
-// built-in media controls load their icons; in a 1600px viewport the site's layout holds main to a
-// reading width, centered; at
-// 1200px, between the layout's docks, main is centered on a page with no section tree, and the tree
-// is docked beside it on a page with one; a page's section tree is in its Contents drawer, docked
-// as a column beside main from the tree's dock and at 1600px, where J and K move through its
-// sections, marking each, and the header's Contents button is hidden, and below the dock, at 390px
-// and a px under it, a closed drawer, which the Contents button, shown there, opens by its click
-// and by C, its aria-expanded in step, and whose show() opens it and in which following a link
-// closes it and marks the link's section, and a page with no tree has no Contents drawer and shows
-// no Contents button; at 390px, between the docks, and at 1600px, main starts directly under the
-// header, the gap from the header's bottom never below zero and no more than on a page taller than
-// the viewport, however short the page; below both docks, ? opens Help, its Close focused, whose
-// sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them, the
-// shell's P, C where the page has a Contents drawer, ?, S, and the tree's J and K among them, and,
-// where the page has a pager, its H and L, each once, named as its previous and next page, and
-// neither on a page with none, Escape closes it, and the character-key switch in Settings turns
-// them off, so J moves to no section, P and C open no drawer, and H and L move to no page, and on
-// again; every dialog a keyed show-modal opener opens follows the components' shortcut dialog
-// pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the heading
-// and the Close in its header row, a header.dialog-header, its opener showing its key and named,
-// with an interest hint showing the name; in a 390px viewport each header button, Pages and
+// requested, a data: or blob: URL aside, which loads nothing from the network, as Chrome's built-in
+// media controls load their icons; in a 1600px viewport the site's layout holds main to a reading
+// width, centered; at 1200px, between the layout's docks, main is centered on a page with no
+// section tree, and the tree is docked beside it on a page with one; a page's section tree is in
+// its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
+// and K move through its sections, marking each, and the header's Contents button is hidden, and
+// below the dock, at 390px and a px under it, a closed drawer, which the Contents button, shown
+// there, opens by its click and by C, its aria-expanded in step, and whose show() opens it and in
+// which following a link closes it and marks the link's section, and a page with no tree has no
+// Contents drawer and shows no Contents button; at 390px, between the docks, and at 1600px, main
+// starts directly under the header, the gap from the header's bottom never below zero and no more
+// than on a page taller than the viewport, however short the page; below both docks, ? opens Help,
+// its Close focused, whose sl-shortcuts lists exactly the page's bindings as the foundation's keys
+// module holds them, the shell's P, C where the page has a Contents drawer, ?, S, and the tree's J
+// and K among them, and, where the page has a pager, its H and L, each once, named as its previous
+// and next page, and neither on a page with none, Escape closes it, and the character-key switch in
+// Settings turns them off, so J moves to no section, P and C open no drawer, and H and L move to no
+// page, and on again; every dialog a keyed show-modal opener opens follows the components' shortcut
+// dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
+// heading and the Close in its header row, a header.dialog-header, its opener showing its key and
+// named, with an interest hint showing the name; in a 390px viewport each header button, Pages and
 // Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
 // one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
 // and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
@@ -50,11 +49,11 @@
 // capture widths and at 40rem: at 390px, below 40rem, the site nav keeps its links on one line and
 // the group is on its own row below it, at the nav's inline start, and from 40rem the group is on
 // the site nav's first line, at the header's inline end; nothing scrolls sideways at 390px; and at
-// a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and
-// at 1400px, no navigation link's word breaks across lines and every docked side column is at
-// least 16rem wide. A check that changes the reader's stored theme or keys settings removes them
-// after; one that sets a facet's attribute on the root puts it back. shell lists them by name, for
-// a site to make a test of each.
+// a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and at
+// 1400px, no navigation link's word breaks across lines and every docked side column is at least
+// 16rem wide. A check that changes the reader's stored theme or keys settings removes them after;
+// one that sets a facet's attribute on the root puts it back. shell lists them by name, for a site
+// to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
