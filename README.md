@@ -284,8 +284,10 @@ on it defined, every request under the base and none failed, main at its centere
 1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
 under the header, its section tree in its Contents drawer, its Help and the switch in Settings, its
 shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks have
-them, and its title its source's front matter name or first h1. Its head holds a `<meta name="<key>"
-content="<value>">` per front matter key, in order, the value as `frontMatterText` gives it, with no
+them, and its title its source's front matter name or first h1. Its head holds, right after its
+title, a `<meta name="<key>" content="<value>">` per front matter key, in order, the value as
+`frontMatterText` gives it, and no other named meta in that run, so a page with no front matter
+carries none; with no
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
 text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
 no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
@@ -906,7 +908,9 @@ exports alone:
 Each file that takes comments ends its provenance with the line the scaffold fills,
 `From spike-html-hosting-sdk (vX.Y.Z): template/<path>`. The template's files hold the
 scaffold's two tokens, the repository's name and the version, so the SDK's own lint, format,
-and type check skip `template/`; the scaffold test checks a scaffolded copy with its own check.
+and type check skip `template/`; the scaffold test checks a scaffolded copy with its own check,
+and reads every provenance line against the shell: each button a line names is one the shell's
+`index.html` has, and each key it names one those buttons bind.
 
 ## Keeping pace
 
