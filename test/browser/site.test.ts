@@ -39,7 +39,10 @@
 // that follows nowhere, every L binding removed, or, below 40rem, a pager's title shown or out of
 // its name or its key hint shown, the crawl fails, naming the page; with the top pager's L dropped,
 // so keys lists the bottom one's, or a handler that follows the previous link on H whatever the
-// switch in Settings says, the keys help check fails on a paged page, naming it.
+// switch in Settings says, the keys help check fails on a paged page, naming it. With a meta
+// its source's front matter doesn't have after the title, where the build writes the front
+// matter's, on the index, which has none, or on a.html, past its own, the crawl fails, naming the
+// page.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -729,6 +732,45 @@ describe("the fixture site with its header's row broken", () => {
       const page = await withSheet(css);
       try {
         await assert.rejects(keepsHeaderRow(page, server.origin), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
+});
+
+describe("the fixture site with a front matter meta its source doesn't have", () => {
+  // A meta at the end of the run after the title, where the build writes the front matter's: on
+  // the index, whose source has none, and on a.html, past its own front matter's three, a key no
+  // other page has, so the check of each key's meta alone passes it.
+  for (const [change, path, message] of [
+    [
+      "the index, with no front matter, carrying one",
+      "/fixture-site/",
+      /\/fixture-site\/: its front matter meta, after its title, are its front matter's keys and no other/,
+    ],
+    [
+      "a.html carrying one past its front matter's",
+      "/fixture-site/a.html",
+      /\/fixture-site\/a\.html: its front matter meta, after its title, are its front matter's keys and no other/,
+    ],
+  ] as const) {
+    test(`${change} fails the crawl, naming the page`, async () => {
+      const page = await withChange(
+        `if (location.pathname === ${JSON.stringify(path)}) {
+          const meta = document.createElement("meta");
+          meta.name = "author";
+          meta.content = "nobody";
+          let at = document.querySelector("title");
+          while (at.nextElementSibling?.matches("meta[name]")) at = at.nextElementSibling;
+          at.after(meta);
+        }`,
+      );
+      try {
+        await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
           assert.match(error.message, message);
           return true;
         });

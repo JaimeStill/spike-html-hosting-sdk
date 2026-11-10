@@ -14,6 +14,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   they did. rolldown stays at `1.2.18`, the version Vite `8.3.7` pins with `~1.2.18`, though
   `1.3.1` is out.
 
+### Fixed
+
+- The crawl holds the run of named meta right after a page's title, where the build writes its
+  front matter's, to exactly its front matter's keys, in order. A page with no front matter that
+  carries one, or a page carrying one its front matter doesn't have, fails, naming the page; the
+  crawl checked only the meta its keys name, which passed both.
+
 ## [0.6.0] - 2026-11-09
 
 The shell's design pass, on spike-html-hosting-components `v0.5.0`: one header row of glyph

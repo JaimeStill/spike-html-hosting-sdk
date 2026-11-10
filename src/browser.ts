@@ -78,9 +78,10 @@
 // text, "Previous <title>" or "Next <title>", as the browser computes it; at 390px each link shows
 // only its arrow and word, its title and key hint not visible but the title still in its name, the
 // two links on one row at the pager's inline start and end; each link, followed, lands on its page,
-// and H and L, pressed at 390px, on the previous and the next. Each page's head holds a meta per
-// front matter key, named by the key, in source order, its content the value as frontMatterText
-// gives it, and none for a source with no front matter; no page header, no front matter table, and
+// and H and L, pressed at 390px, on the previous and the next. Each page's head holds right after
+// its title a meta per front matter key and no other, named by the key, in source order, its
+// content the value as frontMatterText gives it, so none for a source with no front matter, and
+// no meta elsewhere in the head takes a key's name; no page header, no front matter table, and
 // no visible list of its keys remains, and no key's "key: value" line is the page's text. Each
 // page's site index, in its Pages drawer, links every copied file's page, each once, and no other.
 // Every in-site link reaches a built page, and an element with its fragment's id when it has one.
@@ -2200,6 +2201,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
       h1: string | null;
       headers: number;
       meta: string[][];
+      written: string[][];
       lists: string[][];
       tables: number;
       index: Linked[];
@@ -2214,6 +2216,15 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
         meta: [...document.head.querySelectorAll("meta[name]")]
           .filter((meta) => keys.includes(meta.name))
           .map((meta) => [meta.name, meta.getAttribute("content")]),
+        written: (() => {
+          const written = [];
+          const title = document.head.querySelector("title");
+          let meta = title?.nextElementSibling;
+          for (; meta?.matches("meta[name]"); meta = meta.nextElementSibling) {
+            written.push([meta.name, meta.getAttribute("content")]);
+          }
+          return written;
+        })(),
         lists: [...document.querySelectorAll("dl")]
           .filter((dl) => dl.checkVisibility())
           .map((dl) => [...dl.querySelectorAll(":scope > dt, :scope > div > dt")]
@@ -2245,10 +2256,18 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     assert.equal(shown.headers, 0, `${url}: no page header`);
     assert.equal(shown.tables, 0, `${url}: no front matter table remains`);
     const entries = Object.entries(data ?? {});
+    const metas = entries.map(([key, value]) => [key, frontMatterText(value)]);
     assert.deepEqual(
       shown.meta,
-      entries.map(([key, value]) => [key, frontMatterText(value)]),
+      metas,
       `${url}: its head holds a meta per front matter key, in order, its content the value`,
+    );
+    // The build writes the front matter's meta right after the title, so the run of named meta
+    // there is the page's front matter meta: exactly its keys, and none for a page with none.
+    assert.deepEqual(
+      shown.written,
+      metas,
+      `${url}: its front matter meta, after its title, are its front matter's keys and no other`,
     );
     if (keys.length > 0) {
       assert.deepEqual(
