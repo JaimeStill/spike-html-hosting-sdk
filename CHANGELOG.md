@@ -6,13 +6,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-10
+
+Checks that hold what they claim, and currency for every mise environment. A site pinning it
+gains a crawl that holds a page's front matter meta to exactly its keys, a request check that
+passes a native `<video controls>`, and a currency report that reads each `mise.<env>.toml`. It
+still pins spike-html-hosting-components `v0.5.0` and spike-html-hosting-icons `v0.1.0`, and
+nothing a site holds breaks.
+
 ### Changed
 
-- marked `18.2.0`, from `18.1.3`: five parser fixes, to emphasis, text after a heading or code
-  block in a nested list item, hard line breaks in image alt text, and named extension renderers
-  returning zero, and the lexer state's `lastToken`. Every fixture site's copied pages render as
-  they did. rolldown stays at `1.2.18`, the version Vite `8.3.7` pins with `~1.2.18`, though
-  `1.3.1` is out.
+- marked `18.2.0`, from `18.1.3`: five parser fixes, two to emphasis, and one each to text after
+  a heading or code block in a nested list item, hard line breaks in image alt text, and named
+  extension renderers returning zero, and the lexer state's `lastToken`. Every fixture site's
+  copied pages render as they did. rolldown stays at `1.2.18`, the version Vite `8.3.7` pins with
+  `~1.2.18`, though `1.3.1` is out.
 
 ### Fixed
 
@@ -23,7 +31,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 - The template's `index.html` provenance line from spike-html-hosting `fba414c` names the Settings
   button that `keys.js` clicks on S, the shell's since `v0.6.0`, where it named the Theme button on
   T. The scaffold test reads every template provenance line against the shell: each button it
-  names one the shell's `index.html` has, and each key it names one those buttons bind.
+  names is one the shell's `index.html` has, and each key it names is one those buttons bind.
 - The request check and the crawl pass a page holding a native `<video controls>`. Chrome's
   built-in media controls load their icons as `data:image/svg+xml` URLs, which failed "every
   request resolves under the base"; a `data:` or `blob:` URL, which loads nothing from the network,
@@ -447,7 +455,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...v0.4.0
