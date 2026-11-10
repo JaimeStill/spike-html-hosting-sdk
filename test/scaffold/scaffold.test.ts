@@ -2,7 +2,8 @@
 // directory in TMPDIR, removed after, as `pnpm dlx` runs it, and the site it makes checked by its
 // own check. The site is the template's, its package name and its index's title the repository's
 // name, its .gitignore restored, the SDK pinned and both reusable workflows called at this
-// package's version's tag, each file that takes comments carrying its provenance line, and its
+// package's version's tag, each file that takes comments carrying its provenance line, every
+// provenance line naming only buttons its index's shell has, each on the key that button binds, its
 // copied tree the template's byte for byte, its README within 100 columns for a long name, its
 // pnpm-workspace.yaml turning off pnpm's wait before a release installs, and its closing line
 // naming git init before the install and the check. It refuses a dir that holds anything, and a
@@ -66,6 +67,28 @@ const scaffolded = (path: string): string => (path === "gitignore" ? ".gitignore
  * and the copied tree, which content.json holds byte for byte. */
 const unmarked = (path: string): boolean =>
   path.endsWith(".json") || path === "LICENSE" || path.startsWith("content/");
+
+/** A file's provenance lines, "Adapted from <repo> (<ref>): …" or "From …", each a sentence that
+ * may run over several comment lines, joined by spaces, each line's comment marker and indent
+ * dropped; each ends at the line that closes its sentence with a period, or that closes its
+ * comment. */
+function provenance(text: string): string[] {
+  const entries: string[] = [];
+  let entry: string[] | undefined;
+  for (const raw of text.split("\n")) {
+    const line = raw
+      .replace(/^\s*(?:<!--|\/\/|\/\*|\*|#)?\s*/, "")
+      .replace(/\s*(?:-->|\*\/).*$/, "");
+    if (/^(?:Adapted from|From) \S+ \([^)]*\):/.test(line)) entry = [];
+    if (entry === undefined) continue;
+    entry.push(line);
+    if (line.endsWith(".") || /-->|\*\//.test(raw)) {
+      entries.push(entry.join(" "));
+      entry = undefined;
+    }
+  }
+  return entries;
+}
 
 let scratch: string;
 let stubs: string;
@@ -179,6 +202,51 @@ describe("the scaffold", () => {
       const line = `From spike-html-hosting-sdk (v${version}): template/${path}`;
       assert.ok(text.includes(line), `${scaffolded(path)} names ${line}`);
     }
+  });
+
+  test("names in its provenance only the shell's buttons, each on the key it binds", () => {
+    // The shell's buttons, each by its aria-label, to the key its data-keys binds, upper-cased as
+    // its kbd shows it; a Close binds none.
+    const shell = new Map(
+      [...readFileSync(join(site, "index.html"), "utf8").matchAll(/<button\b[^>]*>/g)].flatMap(
+        ([tag]) => {
+          const label = /\baria-label="([^"]*)"/.exec(tag)?.[1];
+          const key = /\bdata-keys="([^"]*)"/.exec(tag)?.[1];
+          return label === undefined ? [] : [[label, key?.toUpperCase()] as const];
+        },
+      ),
+    );
+    assert.deepEqual(
+      [...shell].filter(([, key]) => key !== undefined),
+      [
+        ["Pages", "P"],
+        ["Contents", "C"],
+        ["Help", "?"],
+        ["Settings", "S"],
+      ],
+      "the shell's header buttons, each with its key",
+    );
+    let named = 0;
+    for (const path of listFiles(template).filter((path) => !unmarked(path))) {
+      for (const line of provenance(readFileSync(join(site, scaffolded(path)), "utf8"))) {
+        // "the Settings button", "the Pages and Contents openers": each a button the shell has.
+        const buttons = [
+          ...line.matchAll(/\b([A-Z][a-z]+)(?: and ([A-Z][a-z]+))? (?:button|opener)s?\b/g),
+        ].flatMap(([, first, second]) => (second === undefined ? [first] : [first, second]));
+        named += buttons.length;
+        for (const button of buttons) {
+          assert.ok(shell.has(button), `${path}: "${line}" names a ${button} button`);
+        }
+        // "clicks on S": a key the line names is one its buttons bind.
+        for (const [, key] of line.matchAll(/\bon ([A-Z?])(?=[\s.,;]|$)/g)) {
+          assert.ok(
+            buttons.some((button) => shell.get(button) === key),
+            `${path}: "${line}" names ${key}, which none of its buttons binds`,
+          );
+        }
+      }
+    }
+    assert.ok(named > 0, "a provenance line names a shell button");
   });
 
   test("fills every token, and leaves the copied tree and mise's own templates as they are", () => {

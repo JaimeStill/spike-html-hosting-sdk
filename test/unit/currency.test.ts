@@ -9,7 +9,10 @@
 // site prints nothing and exits 0. A site-shaped manifest, which declares no typescript-eslint as
 // the SDK depends on it, holds typescript to the range of the installed SDK's typescript-eslint,
 // here a stub SDK's package.json in node_modules: at the range's newest it prints nothing, and
-// behind it it's reported.
+// behind it it's reported. A mise.<env>.toml beside mise.toml is read with mise -E <env>: a tool
+// whose source is that file and trails is reported naming it, a mise.toml tool its run merges in
+// isn't reported again, and mise.local.toml, no environment, isn't read as one, which the stub's
+// failing on any other lookup holds; with its tools current it prints nothing.
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -154,6 +157,52 @@ describe("spike-html-hosting-currency", () => {
     assert.equal(stderr, "");
     assert.equal(stdout, "");
     assert.equal(status, 0);
+  });
+
+  describe("on a site with a mise.<env>.toml", () => {
+    /** The site's files, current but for its mise tools: mise.toml, mise.tapes.toml, which mise
+     * loads under MISE_ENV=tapes, and mise.local.toml, a local override. */
+    const site = (): Record<string, string> => ({
+      "mise.toml": "",
+      "mise.tapes.toml": "",
+      "mise.local.toml": "",
+      "package.json": manifest({}, { typescript: "6.0.4", "typescript-eslint": "8.72.1" }),
+    });
+    /** mise outdated's answer for a tool, its source the file given. */
+    const tool = (requested: string, bump: string, file: string) => ({
+      requested,
+      bump,
+      source: { type: "mise.toml", path: `/site/${file}` },
+    });
+    const answers = (tapes: Record<string, unknown>): Answers => ({
+      mise: {
+        "outdated --bump --local --json": "{}",
+        "-E tapes outdated --bump --local --json": JSON.stringify(tapes),
+      },
+      pnpm: typescript,
+      git: {},
+    });
+
+    test("reports its trailing tool, naming its file, and exits 1", () => {
+      const { status, stdout, stderr } = run(
+        site(),
+        answers({
+          "aqua:charmbracelet/vhs": tool("0.12.1", "0.13.0", "mise.tapes.toml"),
+          // mise.toml's, which its own run reports.
+          node: tool("26.13.0", "26.14.0", "mise.toml"),
+        }),
+      );
+      assert.equal(stderr, "");
+      assert.equal(stdout, "mise.tapes.toml: aqua:charmbracelet/vhs 0.12.1 -> 0.13.0\n");
+      assert.equal(status, 1);
+    });
+
+    test("prints nothing and exits 0 with its tools current", () => {
+      const { status, stdout, stderr } = run(site(), answers({}));
+      assert.equal(stderr, "");
+      assert.equal(stdout, "");
+      assert.equal(status, 0);
+    });
   });
 
   describe("on a site that declares no typescript-eslint", () => {

@@ -5,7 +5,10 @@
      Contents button, which its script wires to the drawer, all of which the shell checks hold under
      the base by its URL. Its header is the index's and that button; it links the
      orientation brief's rendered page, and the rendered page's alert is written here as the
-     renderer writes one, so site.css draws it the same. -->
+     renderer writes one, so site.css draws it the same. Its native <video controls>, of
+     clip.webm, a 487-byte VP9 still that the build emits under the base, draws Chrome's built-in
+     media controls, whose icons load as data: URLs, which the request check and the crawl pass
+     while holding every network request to the base. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -96,6 +99,7 @@
       <p>The org holds the sites, each from its own repository.</p>
       <h2 id="the-briefs">The briefs</h2>
       <p>A brief by hand adds what Markdown can't hold.</p>
+      <video controls muted width="320" height="180" src="./clip.webm"></video>
     </main>
     <sl-drawer id="contents" label="Contents" dock="70rem">
       <sl-section-tree>

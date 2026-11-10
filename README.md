@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.1 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.1 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,7 +40,7 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.1 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.5.0 \
@@ -223,7 +223,9 @@ The shell checks, each named in `shell`, assert these:
   which names its element's tag.
 - Every request, with Settings and Help opened, resolves under the base, and none fails; the
   foundation's `theme-menu.js` and `keys-help.js`, which `sl-settings` and `sl-shortcuts` stand in
-  for, are never requested.
+  for, are never requested. A `data:` or `blob:` URL loads nothing from the network and is held to
+  no base, so a native `<video controls>`, whose built-in controls load their icons as `data:`
+  URLs, passes; the crawl holds each page's requests the same way.
 - Main holds its centered reading width at 1600px.
 - At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
   beside it on a page with one.
@@ -335,7 +337,9 @@ and reusable workflow call behind its latest, typescript against the newest vers
 typescript-eslint's peer range accepts, and exits 1; with everything current it prints nothing
 and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
-repository's highest plain `vX.Y.Z` tag.
+repository's highest plain `vX.Y.Z` tag. Each `mise.<env>.toml` at the site's root, as a
+`mise.tapes.toml` that `MISE_ENV=tapes` loads, is read with `mise -E <env>`, and its own trailing
+tools are reported under its name; `mise.local.toml` is no environment and isn't read as one.
 
 ### Several copied trees
 

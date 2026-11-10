@@ -17,26 +17,27 @@
 // where the capture run's wait for each element's definition would hang; every request the page
 // makes, with Settings and Help opened, resolves under the base, none fails, and the foundation's
 // theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts stand in for, are never
-// requested; in a 1600px viewport the site's layout holds main to a reading width, centered; at
-// 1200px, between the layout's docks, main is centered on a page with no section tree, and the tree
-// is docked beside it on a page with one; a page's section tree is in its Contents drawer, docked
-// as a column beside main from the tree's dock and at 1600px, where J and K move through its
-// sections, marking each, and the header's Contents button is hidden, and below the dock, at 390px
-// and a px under it, a closed drawer, which the Contents button, shown there, opens by its click
-// and by C, its aria-expanded in step, and whose show() opens it and in which following a link
-// closes it and marks the link's section, and a page with no tree has no Contents drawer and shows
-// no Contents button; at 390px, between the docks, and at 1600px, main starts directly under the
-// header, the gap from the header's bottom never below zero and no more than on a page taller than
-// the viewport, however short the page; below both docks, ? opens Help, its Close focused, whose
-// sl-shortcuts lists exactly the page's bindings as the foundation's keys module holds them, the
-// shell's P, C where the page has a Contents drawer, ?, S, and the tree's J and K among them, and,
-// where the page has a pager, its H and L, each once, named as its previous and next page, and
-// neither on a page with none, Escape closes it, and the character-key switch in Settings turns
-// them off, so J moves to no section, P and C open no drawer, and H and L move to no page, and on
-// again; every dialog a keyed show-modal opener opens follows the components' shortcut dialog
-// pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the heading
-// and the Close in its header row, a header.dialog-header, its opener showing its key and named,
-// with an interest hint showing the name; in a 390px viewport each header button, Pages and
+// requested, a data: or blob: URL aside, which loads nothing from the network, as Chrome's built-in
+// media controls load their icons; in a 1600px viewport the site's layout holds main to a reading
+// width, centered; at 1200px, between the layout's docks, main is centered on a page with no
+// section tree, and the tree is docked beside it on a page with one; a page's section tree is in
+// its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
+// and K move through its sections, marking each, and the header's Contents button is hidden, and
+// below the dock, at 390px and a px under it, a closed drawer, which the Contents button, shown
+// there, opens by its click and by C, its aria-expanded in step, and whose show() opens it and in
+// which following a link closes it and marks the link's section, and a page with no tree has no
+// Contents drawer and shows no Contents button; at 390px, between the docks, and at 1600px, main
+// starts directly under the header, the gap from the header's bottom never below zero and no more
+// than on a page taller than the viewport, however short the page; below both docks, ? opens Help,
+// its Close focused, whose sl-shortcuts lists exactly the page's bindings as the foundation's keys
+// module holds them, the shell's P, C where the page has a Contents drawer, ?, S, and the tree's J
+// and K among them, and, where the page has a pager, its H and L, each once, named as its previous
+// and next page, and neither on a page with none, Escape closes it, and the character-key switch in
+// Settings turns them off, so J moves to no section, P and C open no drawer, and H and L move to no
+// page, and on again; every dialog a keyed show-modal opener opens follows the components' shortcut
+// dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
+// heading and the Close in its header row, a header.dialog-header, its opener showing its key and
+// named, with an interest hint showing the name; in a 390px viewport each header button, Pages and
 // Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
 // one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
 // and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
@@ -48,11 +49,11 @@
 // capture widths and at 40rem: at 390px, below 40rem, the site nav keeps its links on one line and
 // the group is on its own row below it, at the nav's inline start, and from 40rem the group is on
 // the site nav's first line, at the header's inline end; nothing scrolls sideways at 390px; and at
-// a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and
-// at 1400px, no navigation link's word breaks across lines and every docked side column is at
-// least 16rem wide. A check that changes the reader's stored theme or keys settings removes them
-// after; one that sets a facet's attribute on the root puts it back. shell lists them by name, for
-// a site to make a test of each.
+// a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and at
+// 1400px, no navigation link's word breaks across lines and every docked side column is at least
+// 16rem wide. A check that changes the reader's stored theme or keys settings removes them after;
+// one that sets a facet's attribute on the root puts it back. shell lists them by name, for a site
+// to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
@@ -78,9 +79,10 @@
 // text, "Previous <title>" or "Next <title>", as the browser computes it; at 390px each link shows
 // only its arrow and word, its title and key hint not visible but the title still in its name, the
 // two links on one row at the pager's inline start and end; each link, followed, lands on its page,
-// and H and L, pressed at 390px, on the previous and the next. Each page's head holds a meta per
-// front matter key, named by the key, in source order, its content the value as frontMatterText
-// gives it, and none for a source with no front matter; no page header, no front matter table, and
+// and H and L, pressed at 390px, on the previous and the next. Each page's head holds right after
+// its title a meta per front matter key and no other, named by the key, in source order, its
+// content the value as frontMatterText gives it, so none for a source with no front matter, and
+// no meta elsewhere in the head takes a key's name; no page header, no front matter table, and
 // no visible list of its keys remains, and no key's "key: value" line is the page's text. Each
 // page's site index, in its Pages drawer, links every copied file's page, each once, and no other.
 // Every in-site link reaches a built page, and an element with its fragment's id when it has one.
@@ -273,8 +275,14 @@ async function record(page: Page): Promise<() => Log> {
   };
 }
 
+/** The URLs a request names that load nothing from the network: a data: URL holds its content,
+ * as Chrome's built-in media controls load their icons, and a blob: URL names the page's own
+ * memory. */
+const LOCAL = /^(data|blob):/;
+
 /** Asserts a page's log: the page itself loaded with a 2xx, no request failed or answered an
- * error, and every request resolved under the base, site. */
+ * error, and every request resolved under the base, site, but a data: or blob: URL, which loads
+ * nothing from the network. */
 function assertLoaded(url: string, site: string, { requests, responses, failures }: Log): void {
   const status = responses.find((response) => response.url === url)?.status;
   assert.ok(status !== undefined && status >= 200 && status < 300, `${url} loaded with ${status}`);
@@ -285,7 +293,7 @@ function assertLoaded(url: string, site: string, { requests, responses, failures
     `${url}: no request answered an error`,
   );
   assert.deepEqual(
-    requests.filter((request) => !request.startsWith(site)),
+    requests.filter((request) => !LOCAL.test(request) && !request.startsWith(site)),
     [],
     `${url}: every request resolves under the base`,
   );
@@ -2200,6 +2208,7 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
       h1: string | null;
       headers: number;
       meta: string[][];
+      written: string[][];
       lists: string[][];
       tables: number;
       index: Linked[];
@@ -2214,6 +2223,15 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
         meta: [...document.head.querySelectorAll("meta[name]")]
           .filter((meta) => keys.includes(meta.name))
           .map((meta) => [meta.name, meta.getAttribute("content")]),
+        written: (() => {
+          const written = [];
+          const title = document.head.querySelector("title");
+          let meta = title?.nextElementSibling;
+          for (; meta?.matches("meta[name]"); meta = meta.nextElementSibling) {
+            written.push([meta.name, meta.getAttribute("content")]);
+          }
+          return written;
+        })(),
         lists: [...document.querySelectorAll("dl")]
           .filter((dl) => dl.checkVisibility())
           .map((dl) => [...dl.querySelectorAll(":scope > dt, :scope > div > dt")]
@@ -2245,10 +2263,18 @@ export async function crawl(page: Page, site: string, root: string): Promise<Cra
     assert.equal(shown.headers, 0, `${url}: no page header`);
     assert.equal(shown.tables, 0, `${url}: no front matter table remains`);
     const entries = Object.entries(data ?? {});
+    const metas = entries.map(([key, value]) => [key, frontMatterText(value)]);
     assert.deepEqual(
       shown.meta,
-      entries.map(([key, value]) => [key, frontMatterText(value)]),
+      metas,
       `${url}: its head holds a meta per front matter key, in order, its content the value`,
+    );
+    // The build writes the front matter's meta right after the title, so the run of named meta
+    // there is the page's front matter meta: exactly its keys, and none for a page with none.
+    assert.deepEqual(
+      shown.written,
+      metas,
+      `${url}: its front matter meta, after its title, are its front matter's keys and no other`,
     );
     if (keys.length > 0) {
       assert.deepEqual(

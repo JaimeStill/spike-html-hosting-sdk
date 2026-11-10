@@ -6,6 +6,45 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-10
+
+Checks that hold what they claim, and currency for every mise environment. A site pinning it
+gains a crawl that holds a page's front matter meta to exactly its keys, a request check that
+passes a native `<video controls>`, and a currency report that reads each `mise.<env>.toml`. It
+still pins spike-html-hosting-components `v0.5.0` and spike-html-hosting-icons `v0.1.0`, and
+nothing a site holds breaks.
+
+### Changed
+
+- marked `18.2.0`, from `18.1.3`: five parser fixes, two to emphasis, and one each to text after
+  a heading or code block in a nested list item, hard line breaks in image alt text, and named
+  extension renderers returning zero, and the lexer state's `lastToken`. Every fixture site's
+  copied pages render as they did. rolldown stays at `1.2.18`, the version Vite `8.3.7` pins with
+  `~1.2.18`, though `1.3.1` is out.
+
+### Fixed
+
+- The crawl holds the run of named meta right after a page's title, where the build writes its
+  front matter's, to exactly its front matter's keys, in order. A page with no front matter that
+  carries one, or a page carrying one its front matter doesn't have, fails, naming the page; the
+  crawl checked only the meta its keys name, which passed both.
+- The template's `index.html` provenance line from spike-html-hosting `fba414c` names the Settings
+  button that `keys.js` clicks on S, the shell's since `v0.6.0`, where it named the Theme button on
+  T. The scaffold test reads every template provenance line against the shell: each button it
+  names is one the shell's `index.html` has, and each key it names is one those buttons bind.
+- The request check and the crawl pass a page holding a native `<video controls>`. Chrome's
+  built-in media controls load their icons as `data:image/svg+xml` URLs, which failed "every
+  request resolves under the base"; a `data:` or `blob:` URL, which loads nothing from the network,
+  is now held to no base, and every network request still is. The trees fixture's hand page holds
+  such a video, of a clip the build emits under the base, and the crawl still fails naming a page
+  with an image from off the base.
+- The currency bin reports the trailing tools of each `mise.<env>.toml` at the site's root, as a
+  `mise.tapes.toml` that `MISE_ENV=tapes` loads, each line naming its file; it read only the
+  default config, `mise.toml`, so a pin there went unchecked. Each is read with `mise -E <env>`,
+  and only the tools whose source is that file are reported. `mise.local.toml` and a
+  `mise.<env>.local.toml` are local overrides and aren't read as environments, and a `MISE_ENV`
+  the caller set no longer merges its file's tools into `mise.toml`'s.
+
 ## [0.6.0] - 2026-11-09
 
 The shell's design pass, on spike-html-hosting-components `v0.5.0`: one header row of glyph
@@ -416,7 +455,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.3.1...v0.4.0

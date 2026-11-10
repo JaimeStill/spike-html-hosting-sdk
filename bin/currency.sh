@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 # spike-html-hosting-currency, the SDK's currency bin, outside the check: reports every pin of the
-# site in the current directory that trails its latest release, its mise.toml tools, its
-# package.json pins, and its .github/workflows/ action and reusable workflow pins, as
+# site in the current directory that trails its latest release, its mise.toml tools and those of
+# each mise.<env>.toml beside it, its package.json pins, and its .github/workflows/ action and
+# reusable workflow pins, as
 # `<file>: ITEM PIN -> LATEST`, one line each, and exits nonzero when it reports any; with
 # everything current it prints nothing and exits 0. It reads the network and writes nothing. A site
 # runs it from its mise run currency task, which runs in the site's root.
+#
+# A mise.<env>.toml, as mise.tapes.toml, is a config mise loads only under MISE_ENV=<env>: each is
+# read with mise -E <env>, which merges it over mise.toml, and only the tools whose source is that
+# file are reported, under its name, as mise.toml's are already reported under its own.
+# mise.local.toml and a mise.<env>.local.toml are local overrides, not environments, and are not
+# read as one.
 #
 # A package.json pin is a version, compared against the registry's latest, or a github: tag,
 # github:<owner>/<repo>#vX.Y.Z (the foundation and the tooling), compared against the repository's
@@ -27,6 +34,10 @@
 # typescript-eslint's pin read from dependencies or devDependencies.
 set -euo pipefail
 
+# mise.toml's tools are read with no environment: a MISE_ENV the caller set would merge its file's
+# tools into them, under mise.toml's name.
+unset MISE_ENV
+
 stale=0
 report() {
   echo "$1"
@@ -37,14 +48,33 @@ report() {
 # Errors only: mise warns on every run that npm's GitHub release has no assets as it falls back to
 # another source for npm's latest, which would break the silence of a current tree. JSON is read
 # with node, a mise pin, not jq.
-outdated=$(MISE_LOG_LEVEL=error mise outdated --bump --local --json)
-lines=$(node -e '
-  const out = JSON.parse(process.argv[1]);
-  for (const [tool, v] of Object.entries(out)) console.log(tool + " " + v.requested + " -> " + v.bump);
-' "$outdated")
-while read -r line; do
-  [[ -z "$line" ]] || report "mise.toml: $line"
-done <<<"$lines"
+# tools FILE [ENV]: reports each tool behind its latest under FILE's name: with no ENV, every tool
+# mise.toml's run reads; with ENV, those of mise -E ENV's run whose source is FILE.
+tools() {
+  local outdated lines line
+  outdated=$(MISE_LOG_LEVEL=error mise ${2:+-E "$2"} outdated --bump --local --json)
+  lines=$(node -e '
+    const { basename } = require("node:path");
+    const [json, file] = process.argv.slice(1);
+    for (const [tool, v] of Object.entries(JSON.parse(json))) {
+      if (file && basename(v.source?.path ?? "") !== file) continue;
+      console.log(tool + " " + v.requested + " -> " + v.bump);
+    }
+  ' "$outdated" "${2:+$1}")
+  while read -r line; do
+    [[ -z "$line" ]] || report "$1: $line"
+  done <<<"$lines"
+}
+tools mise.toml
+
+# Each mise.<env>.toml at the root, by its environment, the name between the dots.
+shopt -s nullglob
+for file in mise.*.toml; do
+  env=${file#mise.}
+  env=${env%.toml}
+  [[ $env == local || $env == *.* ]] || tools "$file" "$env"
+done
+shopt -u nullglob
 
 # behind A B: whether version A sorts strictly below version B, by version sort.
 behind() {
