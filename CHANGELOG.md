@@ -6,6 +6,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+### Changed
+
+- marked `18.2.0`, from `18.1.3`: five parser fixes, to emphasis, text after a heading or code
+  block in a nested list item, hard line breaks in image alt text, and named extension renderers
+  returning zero, and the lexer state's `lastToken`. Every fixture site's copied pages render as
+  they did. rolldown stays at `1.2.18`, the version Vite `8.3.7` pins with `~1.2.18`, though
+  `1.3.1` is out.
+
 ## [0.6.0] - 2026-11-09
 
 The shell's design pass, on spike-html-hosting-components `v0.5.0`: one header row of glyph
