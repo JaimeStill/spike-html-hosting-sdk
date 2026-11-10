@@ -17,7 +17,9 @@
 // where the capture run's wait for each element's definition would hang; every request the page
 // makes, with Settings and Help opened, resolves under the base, none fails, and the foundation's
 // theme-menu.js and keys-help.js, which sl-settings and sl-shortcuts stand in for, are never
-// requested; in a 1600px viewport the site's layout holds main to a reading width, centered; at
+// requested, a data: or blob: URL aside, which loads nothing from the network, as Chrome's
+// built-in media controls load their icons; in a 1600px viewport the site's layout holds main to a
+// reading width, centered; at
 // 1200px, between the layout's docks, main is centered on a page with no section tree, and the tree
 // is docked beside it on a page with one; a page's section tree is in its Contents drawer, docked
 // as a column beside main from the tree's dock and at 1600px, where J and K move through its
@@ -274,8 +276,14 @@ async function record(page: Page): Promise<() => Log> {
   };
 }
 
+/** The URLs a request names that load nothing from the network: a data: URL holds its content,
+ * as Chrome's built-in media controls load their icons, and a blob: URL names the page's own
+ * memory. */
+const LOCAL = /^(data|blob):/;
+
 /** Asserts a page's log: the page itself loaded with a 2xx, no request failed or answered an
- * error, and every request resolved under the base, site. */
+ * error, and every request resolved under the base, site, but a data: or blob: URL, which loads
+ * nothing from the network. */
 function assertLoaded(url: string, site: string, { requests, responses, failures }: Log): void {
   const status = responses.find((response) => response.url === url)?.status;
   assert.ok(status !== undefined && status >= 200 && status < 300, `${url} loaded with ${status}`);
@@ -286,7 +294,7 @@ function assertLoaded(url: string, site: string, { requests, responses, failures
     `${url}: no request answered an error`,
   );
   assert.deepEqual(
-    requests.filter((request) => !request.startsWith(site)),
+    requests.filter((request) => !LOCAL.test(request) && !request.startsWith(site)),
     [],
     `${url}: every request resolves under the base`,
   );

@@ -24,6 +24,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   button that `keys.js` clicks on S, the shell's since `v0.6.0`, where it named the Theme button on
   T. The scaffold test reads every template provenance line against the shell: each button it
   names one the shell's `index.html` has, and each key it names one those buttons bind.
+- The request check and the crawl pass a page holding a native `<video controls>`. Chrome's
+  built-in media controls load their icons as `data:image/svg+xml` URLs, which failed "every
+  request resolves under the base"; a `data:` or `blob:` URL, which loads nothing from the network,
+  is now held to no base, and every network request still is. The trees fixture's hand page holds
+  such a video, of a clip the build emits under the base, and the crawl still fails naming a page
+  with an image from off the base.
 
 ## [0.6.0] - 2026-11-09
 

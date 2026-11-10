@@ -50,6 +50,9 @@ export default defineConfig({
   build: {
     outDir: "dist",
     target: "es2024",
+    // The hand page's clip is emitted as a file under the base, as a site's video is, and never
+    // inlined as a data: URL, which would leave the request check no network request of it.
+    assetsInlineLimit: (file) => (file.endsWith(".webm") ? false : undefined),
     // The hand pages, which no shell fills: Vite builds index.html by default only with no input
     // given, and the plugin gives its pages.
     rolldownOptions: { input: [`${root}index.html`, `${root}briefs/orientation.html`] },

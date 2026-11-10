@@ -9,10 +9,13 @@
 // (render-blocking.ts): a hand page throws nothing and defines no element of the shell's alone, as
 // its site index. The crawl, from the hand index, checks every copied page of both trees and loads
 // each hand page it reaches without failing on it, and with a copied page answered 404 it fails,
-// naming the page. The capture file describes the hand pages and every tree's pages
-// at their paths under the base. The hand pages and the rendered pages' shell hold glyph markers
-// in their buttons, which the build fills with the icons layer's svgs, none left, and the shell
-// checks' glyph check holds each button to its glyph.
+// naming the page. The hand page at briefs/ holds a native <video controls> of a clip under the
+// base, whose built-in controls load their icons as data: URLs: the request check and the crawl
+// pass on it, and with an image from off the base on that page, the crawl fails, naming it. The
+// capture file describes the hand pages and every tree's pages at their paths under the base. The
+// hand pages and the rendered pages' shell hold glyph markers in their buttons, which the build
+// fills with the icons layer's svgs, none left, and the shell checks' glyph check holds each button
+// to its glyph.
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -136,6 +139,50 @@ describe("the trees fixture under its base", () => {
     try {
       await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
         assert.match(error.message, /\/fixture-trees\/org\/briefs\/next\.html loaded with 404/);
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("an off-base request on a hand page fails the crawl, naming the page", async () => {
+    const page = await browser.open("about:blank");
+    const off = new URL("/elsewhere.svg", server.origin).href;
+    // The hand page, its video's data: icons passing, with an image from off the base, answered
+    // 200 so that only the base check fails on it.
+    const built = readFileSync(join(root, "dist/briefs/orientation.html"), "utf8");
+    const pages: Record<string, string> = {
+      [`${server.origin}briefs/orientation.html`]: built.replace(
+        "</main>",
+        `<img src="${off}" alt="" width="1" height="1" /></main>`,
+      ),
+      [off]: '<svg xmlns="http://www.w3.org/2000/svg"/>',
+    };
+    page.on(
+      "Fetch.requestPaused",
+      ({ requestId, request }: { requestId: string; request: { url: string } }) => {
+        const body = Buffer.from(pages[request.url]).toString("base64");
+        const type = request.url.endsWith(".svg") ? "image/svg+xml" : "text/html";
+        void page.cdp("Fetch.fulfillRequest", {
+          requestId,
+          responseCode: 200,
+          responseHeaders: [{ name: "Content-Type", value: type }],
+          body,
+        });
+      },
+    );
+    await page.cdp("Fetch.enable", {
+      patterns: Object.keys(pages).map((urlPattern) => ({ urlPattern })),
+    });
+    try {
+      await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-trees\/briefs\/orientation\.html: every request resolves under the base/,
+        );
+        assert.match(error.message, /elsewhere\.svg/);
+        assert.doesNotMatch(error.message, /data:/);
         return true;
       });
     } finally {

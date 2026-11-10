@@ -223,7 +223,9 @@ The shell checks, each named in `shell`, assert these:
   which names its element's tag.
 - Every request, with Settings and Help opened, resolves under the base, and none fails; the
   foundation's `theme-menu.js` and `keys-help.js`, which `sl-settings` and `sl-shortcuts` stand in
-  for, are never requested.
+  for, are never requested. A `data:` or `blob:` URL loads nothing from the network and is held to
+  no base, so a native `<video controls>`, whose built-in controls load their icons as `data:`
+  URLs, passes; the crawl holds each page's requests the same way.
 - Main holds its centered reading width at 1600px.
 - At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
   beside it on a page with one.
