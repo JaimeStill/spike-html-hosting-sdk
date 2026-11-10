@@ -20,6 +20,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   front matter's, to exactly its front matter's keys, in order. A page with no front matter that
   carries one, or a page carrying one its front matter doesn't have, fails, naming the page; the
   crawl checked only the meta its keys name, which passed both.
+- The template's `index.html` provenance line from spike-html-hosting `fba414c` names the Settings
+  button that `keys.js` clicks on S, the shell's since `v0.6.0`, where it named the Theme button on
+  T. The scaffold test reads every template provenance line against the shell: each button it
+  names one the shell's `index.html` has, and each key it names one those buttons bind.
 
 ## [0.6.0] - 2026-11-09
 
