@@ -337,7 +337,9 @@ and reusable workflow call behind its latest, typescript against the newest vers
 typescript-eslint's peer range accepts, and exits 1; with everything current it prints nothing
 and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
-repository's highest plain `vX.Y.Z` tag.
+repository's highest plain `vX.Y.Z` tag. Each `mise.<env>.toml` at the site's root, as a
+`mise.tapes.toml` that `MISE_ENV=tapes` loads, is read with `mise -E <env>`, and its own trailing
+tools are reported under its name; `mise.local.toml` is no environment and isn't read as one.
 
 ### Several copied trees
 

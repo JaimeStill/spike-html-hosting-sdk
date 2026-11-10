@@ -30,6 +30,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   is now held to no base, and every network request still is. The trees fixture's hand page holds
   such a video, of a clip the build emits under the base, and the crawl still fails naming a page
   with an image from off the base.
+- The currency bin reports the trailing tools of each `mise.<env>.toml` at the site's root, as a
+  `mise.tapes.toml` that `MISE_ENV=tapes` loads, each line naming its file; it read only the
+  default config, `mise.toml`, so a pin there went unchecked. Each is read with `mise -E <env>`,
+  and only the tools whose source is that file are reported. `mise.local.toml` and a
+  `mise.<env>.local.toml` are local overrides and aren't read as environments, and a `MISE_ENV`
+  the caller set no longer merges its file's tools into `mise.toml`'s.
 
 ## [0.6.0] - 2026-11-09
 
