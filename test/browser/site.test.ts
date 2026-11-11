@@ -23,9 +23,12 @@
 // removed, the Settings button's binding removed, a row of Help's list removed, the Settings
 // button's kbd removed, as the Theme button's markup before v0.3.1 had it, or a handler that opens
 // the Pages drawer on P whatever the switch in Settings says, the keys help check fails, naming the
-// page and the assertion. With a shortcut dialog's heading name, its Close's Esc, its opener's kbd,
-// or its opener's hint wrong, or its Close moved to a trailing footer or its heading out of its
-// header row, the shortcut dialog check fails, naming the dialog and what it lacks; with Help
+// page and the assertion; so does Help's title without tabindex="-1" and autofocus, as the
+// template had it before v0.6.2, Close focused or its hint shown as Help opens, a link between the
+// title and Close, which Tab reaches first, or focus moved elsewhere as Help closes. With a
+// shortcut dialog's heading name, its Close's Esc, its opener's kbd, or its opener's hint wrong,
+// or its Close moved to a trailing footer or its heading out of its header row, the shortcut
+// dialog check fails, naming the dialog and what it lacks; with Help
 // holding a [data-keys-list], which loads the foundation's keys-help.js, the request check fails.
 // With the Help button's glyph removed, the Settings button's word shown beside its glyph, or
 // Help's Close showing the Help button's glyph, the glyph check fails, naming the page and the
@@ -525,6 +528,62 @@ describe("the fixture site with its keys help wrong", () => {
       await page.close();
     }
   });
+
+  for (const { change, script, message } of [
+    {
+      // Help's title as the template had it before v0.6.2, when Close took focus as Help opened.
+      change: "Help's title without tabindex and autofocus",
+      script: `const title = document.querySelector("dialog#help h2#help-title");
+        title.removeAttribute("tabindex");
+        title.removeAttribute("autofocus");`,
+      message:
+        /\/fixture-site\/: Help's title heading, h2#help-title, has tabindex="-1" and autofocus/,
+    },
+    {
+      change: "Close focused as Help opens",
+      script: `const help = document.querySelector("dialog#help");
+        help.addEventListener("toggle", (event) => {
+          if (event.newState === "open") help.querySelector("button[command=close]").focus();
+        });`,
+      message: /\/fixture-site\/: Help opens with its title heading focused/,
+    },
+    {
+      // Shown a little after the open, inside the check's wait past the interest delay.
+      change: "Close's hint shown after Help opens",
+      script: `const help = document.querySelector("dialog#help");
+        help.addEventListener("toggle", (event) => {
+          if (event.newState !== "open") return;
+          setTimeout(() => document.getElementById("help-close-hint").showPopover(), 300);
+        });`,
+      message: /\/fixture-site\/: Help opens with its Close's hint closed/,
+    },
+    {
+      change: "a link between Help's title and its Close",
+      script: `const link = document.createElement("a");
+        link.href = "#";
+        link.textContent = "Shortcuts";
+        document.querySelector("dialog#help h2#help-title").after(link);`,
+      message: /\/fixture-site\/: Tab moves focus from Help's title to its Close/,
+    },
+    {
+      change: "focus moved to the Settings button as Help closes",
+      script: `document.querySelector("dialog#help").addEventListener("close", () =>
+          document.querySelector("header [commandfor=settings]").focus());`,
+      message: /\/fixture-site\/: Escape returns focus to where it was before Help opened/,
+    },
+  ]) {
+    test(`${change} fails the keys help check`, async () => {
+      const page = await withChange(script);
+      try {
+        await assert.rejects(opensKeysHelp(page, server.origin), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
 
   test("P opening the drawer with the keys off fails the keys help check", async () => {
     // A handler that opens the Pages drawer on P whatever the reader's switch says.

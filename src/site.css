@@ -123,6 +123,13 @@
     margin-block: 0;
   }
 
+  /* Help's title takes focus as Help opens, by its tabindex="-1" and autofocus, so that Close's
+     hint doesn't show; the heading isn't a control, and Tab never reaches it, so it draws none of
+     the focus outline the foundation's :focus-visible rule gives it as Help opens from ?. */
+  dialog#help h2#help-title[tabindex="-1"]:focus {
+    outline: none;
+  }
+
   /* Body text breaks a word too long for the column; the components' navigation never does. */
   main {
     max-inline-size: 80ch;
