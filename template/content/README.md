@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.2 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.0 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.2 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,7 +40,7 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.2 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.5.0 \
@@ -223,7 +223,9 @@ The shell checks, each named in `shell`, assert these:
   which names its element's tag.
 - Every request, with Settings and Help opened, resolves under the base, and none fails; the
   foundation's `theme-menu.js` and `keys-help.js`, which `sl-settings` and `sl-shortcuts` stand in
-  for, are never requested.
+  for, are never requested. A `data:` or `blob:` URL loads nothing from the network and is held to
+  no base, so a native `<video controls>`, whose built-in controls load their icons as `data:`
+  URLs, passes; the crawl holds each page's requests the same way.
 - Main holds its centered reading width at 1600px.
 - At 1200px, between the docks, main is centered on a page with no section tree, and the tree docks
   beside it on a page with one.
@@ -237,11 +239,13 @@ The shell checks, each named in `shell`, assert these:
   the link's section is marked. A page with no tree shows no Contents button.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into it, and no further below it than on a page taller than the viewport.
-- A pixel under 70rem, below both docks, ? opens Help, its Close focused, whose `sl-shortcuts`
-  lists exactly the page's bindings, as the foundation's keys module holds them, the shell's P, C
-  where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
-  page has a pager, H and L once each, named by the top pager's links' text, `Previous <title>`
-  and `Next <title>`, and neither where it has none; Escape closes it. The character-key
+- A pixel under 70rem, below both docks, ? opens Help, its title heading focused, by its
+  `tabindex="-1"` and `autofocus`, and Close's hint still closed a second later; Tab then moves
+  focus to Close. Its `sl-shortcuts` lists exactly the page's bindings, as the foundation's keys
+  module holds them, the shell's P, C where the page has a Contents drawer, ?, S, and the tree's J
+  and K among them, and, where the page has a pager, H and L once each, named by the top pager's
+  links' text, `Previous <title>` and `Next <title>`, and neither where it has none; Escape closes
+  it, returning focus to where it was. The character-key
   switch in Settings turns them off, so J, P, C, H, and L do nothing, and on again. Every header
   control that binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
@@ -282,8 +286,10 @@ on it defined, every request under the base and none failed, main at its centere
 1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
 under the header, its section tree in its Contents drawer, its Help and the switch in Settings, its
 shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks have
-them, and its title its source's front matter name or first h1. Its head holds a `<meta name="<key>"
-content="<value>">` per front matter key, in order, the value as `frontMatterText` gives it, with no
+them, and its title its source's front matter name or first h1. Its head holds, right after its
+title, a `<meta name="<key>" content="<value>">` per front matter key, in order, the value as
+`frontMatterText` gives it, and no other named meta in that run, so a page with no front matter
+carries none; with no
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
 text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
 no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
@@ -335,7 +341,9 @@ and reusable workflow call behind its latest, typescript against the newest vers
 typescript-eslint's peer range accepts, and exits 1; with everything current it prints nothing
 and exits 0. A reusable workflow call, as
 `JaimeStill/spike-html-hosting-sdk/.github/workflows/site-pages.yml@vX.Y.Z`, is compared with its
-repository's highest plain `vX.Y.Z` tag.
+repository's highest plain `vX.Y.Z` tag. Each `mise.<env>.toml` at the site's root, as a
+`mise.tapes.toml` that `MISE_ENV=tapes` loads, is read with `mise -E <env>`, and its own trailing
+tools are reported under its name; `mise.local.toml` is no environment and isn't read as one.
 
 ### Several copied trees
 
@@ -578,7 +586,10 @@ at the row's inline end, its Close, a glyph button with `command="close"` showin
 The content its operation needs follows the row, and Escape also closes the dialog.
 
 - Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds `sl-shortcuts`
-  alone, so its Close is the first control in it and takes focus as it opens. It lists every
+  alone. Its heading, `h2#help-title`, has `tabindex="-1"` and `autofocus`, so the heading takes
+  focus as Help opens, and a screen reader reads the dialog's name. Close, the first control in
+  it, shows its hint only when Tab reaches it or the pointer rests on it; `site.css` draws no focus
+  outline on the heading, which isn't a control. It lists every
   binding the page has outside the dialog, each named by its element's `aria-label` or its
   registered label: the Pages button's P, the Contents button's C, the Help button's ?, the
   Settings button's S, the section tree's J and K, and the pager's H and L.
@@ -695,7 +706,7 @@ components and the SDK both peer, at `v0.1.0`; a marker the build can't fill fai
 <main></main>
 <dialog id="help" aria-labelledby="help-title">
   <header class="dialog-header">
-    <h2 id="help-title">Keyboard shortcuts</h2>
+    <h2 id="help-title" tabindex="-1" autofocus>Keyboard shortcuts</h2>
     <button
       type="button"
       class="glyph-button"
@@ -902,7 +913,9 @@ exports alone:
 Each file that takes comments ends its provenance with the line the scaffold fills,
 `From spike-html-hosting-sdk (vX.Y.Z): template/<path>`. The template's files hold the
 scaffold's two tokens, the repository's name and the version, so the SDK's own lint, format,
-and type check skip `template/`; the scaffold test checks a scaffolded copy with its own check.
+and type check skip `template/`; the scaffold test checks a scaffolded copy with its own check,
+and reads every provenance line against the shell: each button a line names is one the shell's
+`index.html` has, and each key it names one those buttons bind.
 
 ## Keeping pace
 

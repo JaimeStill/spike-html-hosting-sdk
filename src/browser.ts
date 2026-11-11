@@ -29,12 +29,14 @@
 // Contents drawer and shows no Contents button; at 390px, between the docks, and at 1600px, main
 // starts directly under the header, the gap from the header's bottom never below zero and no more
 // than on a page taller than the viewport, however short the page; below both docks, ? opens Help,
-// its Close focused, whose sl-shortcuts lists exactly the page's bindings as the foundation's keys
-// module holds them, the shell's P, C where the page has a Contents drawer, ?, S, and the tree's J
-// and K among them, and, where the page has a pager, its H and L, each once, named as its previous
-// and next page, and neither on a page with none, Escape closes it, and the character-key switch in
-// Settings turns them off, so J moves to no section, P and C open no drawer, and H and L move to no
-// page, and on again; every dialog a keyed show-modal opener opens follows the components' shortcut
+// its title heading focused, by its tabindex="-1" and autofocus, and its Close's interest hint not
+// shown past the interest delay, Tab moving focus to its Close, whose sl-shortcuts lists exactly
+// the page's bindings as the foundation's keys module holds them, the shell's P, C where the page
+// has a Contents drawer, ?, S, and the tree's J and K among them, and, where the page has a pager,
+// its H and L, each once, named as its previous and next page, and neither on a page with none,
+// Escape closes it, returning focus to where it was, and the character-key switch in Settings turns
+// them off, so J moves to no section, P and C open no drawer, and H and L move to no page, and
+// on again; every dialog a keyed show-modal opener opens follows the components' shortcut
 // dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
 // heading and the Close in its header row, a header.dialog-header, its opener showing its key and
 // named, with an interest hint showing the name; in a 390px viewport each header button, Pages and
@@ -173,8 +175,12 @@ const click = (page: Page, selector: string): Promise<void> =>
 /** The protocol's Shift modifier bit. */
 const SHIFT = 8;
 
+/** The Windows virtual key codes of the named keys the checks press. */
+const KEY_CODES: Record<string, number> = { Escape: 27, Tab: 9 };
+
 /** Presses a key as a US keyboard types it: keyDown, with its text for a letter or ?, then keyUp;
- * ? is Shift and the slash key. */
+ * ? is Shift and the slash key, and Escape and Tab carry their key codes, which Tab's focus
+ * navigation reads. */
 async function press(page: Page, key: string): Promise<void> {
   const letter = /^[a-z]$/.test(key);
   const event = letter
@@ -185,7 +191,7 @@ async function press(page: Page, key: string): Promise<void> {
       }
     : key === "?"
       ? { key, code: "Slash", modifiers: SHIFT, windowsVirtualKeyCode: 191 }
-      : { key, code: key, windowsVirtualKeyCode: key === "Escape" ? 27 : 0 };
+      : { key, code: key, windowsVirtualKeyCode: KEY_CODES[key] ?? 0 };
   await page.cdp("Input.dispatchKeyEvent", {
     type: "keyDown",
     ...event,
@@ -781,6 +787,17 @@ async function assertUnderHeader(page: Page, url: string): Promise<void> {
 /** The Help dialog, a shortcut dialog, is open, modal. */
 const HELP = `!!document.querySelector("dialog#help")?.matches(":modal")`;
 
+/** Help's title heading, which takes focus as Help opens, by its tabindex="-1" and autofocus, so
+ * Close, the first control in Help, isn't focused, and its interest hint doesn't show. */
+const HELP_TITLE = `document.querySelector("dialog#help h2#help-title")`;
+
+/** Help's Close's interest hint is showing. */
+const HELP_CLOSE_HINT = `!!document.getElementById("help-close-hint")?.matches(":popover-open")`;
+
+/** Waits well past a focused control's interest delay, Chrome's half a second, by which Close's
+ * hint, focused as Help opened, had shown on the markup before the title took focus. */
+const PAST_INTEREST = `new Promise((resolve) => setTimeout(resolve, 1000))`;
+
 /** Help's shortcuts list, sl-shortcuts, as it renders in its shadow root: each row's keys, as its
  * kbd elements read, its action, the row's button's label, and whether it is marked off. */
 const HELP_ROWS = `[...(document.querySelector("dialog#help sl-shortcuts")?.shadowRoot
@@ -1316,14 +1333,17 @@ const KEYS_WIDTH = px(docks.tree) - 1;
 
 /**
  * Asserts the loaded page's keys help, below both docks (KEYS_WIDTH): ? opens Help, the shell's
- * dialog#help, its Close focused, the first control in it, and its sl-shortcuts lists exactly the
+ * dialog#help, its title heading focused, h2#help-title, which has tabindex="-1" and autofocus,
+ * so Close, the first control in it, isn't, and Close's interest hint stays closed past the
+ * interest delay (PAST_INTEREST); Tab then moves focus to Close. Its sl-shortcuts lists exactly the
  * page's bindings as the foundation's keys module holds them (PAGE_BINDINGS), each once, among
  * them the shell's: P, the Pages button's, where the shell has one, shown as its drawer isn't
  * docked; C, the Contents button's, wherever the page has a Contents drawer; ?, the Help
  * button's; S, the Settings button's; and, where the page has a section tree, J and K, its next
  * and previous section; and, where the page has a pager, H and L, each once, named
  * "Previous <title>" and "Next <title>" by the top pager's links' text, where it has them,
- * and neither on a page with none. Escape closes Help. Turning the character-key switch in the
+ * and neither on a page with none. Escape closes Help, returning focus to where it was before Help
+ * opened, main's first link, which the check focuses first, where it has one. Turning the character-key switch in the
  * Settings dialog off marks each of them off in Help, and J then marks no other section, P and C
  * open no drawer, and H and L leave the page where it is; turning it on again, J moves to another
  * section. The reader's keys settings are cleared after, so no
@@ -1339,6 +1359,10 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     `${url}: every header control that binds a key shows it in a kbd`,
   );
   try {
+    // Focus on main's first link, where it has one, so Escape has somewhere other than the body
+    // to return it to, and the element focused as Help opens, which Escape returns focus to.
+    await page.evaluate(`document.querySelector("main a[href]")?.focus({ preventScroll: true });
+      globalThis.helpOpenedFrom = document.activeElement;`);
     await press(page, "?");
     await until(page, HELP).catch(() => assert.fail(`${url}: ? opens Help`));
     await until(page, `${HELP_ROWS}.length > 0`).catch(() =>
@@ -1347,10 +1371,18 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
     // Past the dialog's toggle event, a task after the open, so the list is read as it stays.
     await page.evaluate(SETTLED);
     assert.ok(
-      await page.evaluate(
-        `!!document.activeElement?.matches("dialog#help > header.dialog-header > button[command=close]")`,
-      ),
-      `${url}: Help opens with its Close focused`,
+      await page.evaluate(`!!${HELP_TITLE}?.matches('[tabindex="-1"][autofocus]')`),
+      `${url}: Help's title heading, h2#help-title, has tabindex="-1" and autofocus`,
+    );
+    assert.ok(
+      await page.evaluate(`!!${HELP_TITLE} && document.activeElement === ${HELP_TITLE}`),
+      `${url}: Help opens with its title heading focused`,
+    );
+    await page.evaluate(PAST_INTEREST);
+    assert.equal(
+      await page.evaluate(HELP_CLOSE_HINT),
+      false,
+      `${url}: Help opens with its Close's hint closed`,
     );
     const tree: boolean = await page.evaluate(`!!document.querySelector("sl-section-tree")`);
     const pages: boolean = await page.evaluate(`${PAGES}.shown`);
@@ -1392,8 +1424,25 @@ async function assertKeysHelp(page: Page, url: string): Promise<void> {
       `${url}: Help lists H and L as its pager's previous and next page, once each, and none ` +
         "on a page with no pager",
     );
+    await press(page, "Tab");
+    assert.ok(
+      await page.evaluate(
+        `!!document.activeElement?.matches("dialog#help > header.dialog-header > button[command=close]")`,
+      ),
+      `${url}: Tab moves focus from Help's title to its Close`,
+    );
     await press(page, "Escape");
     await until(page, `!${HELP}`).catch(() => assert.fail(`${url}: Escape closes Help`));
+    // Past the dialog's close event, a task after the close, so focus is read as it stays.
+    await page.evaluate(SETTLED);
+    assert.ok(
+      await page.evaluate(`(() => {
+        const from = globalThis.helpOpenedFrom;
+        delete globalThis.helpOpenedFrom;
+        return document.activeElement === from;
+      })()`),
+      `${url}: Escape returns focus to where it was before Help opened`,
+    );
 
     assert.deepEqual(
       await turnCharacterKeys(page, url),
@@ -1591,8 +1640,9 @@ export const startsUnderHeader: Check = async (page, site, url = site) => {
   await assertUnderHeader(page, url);
 };
 
-/** ? opens Help, its Close focused, listing exactly the page's bindings, Escape closes it, and the
- * character-key switch in the Settings dialog turns them off and on again. */
+/** ? opens Help, its title heading focused and its Close's hint closed, Tab moving to Close, listing
+ * exactly the page's bindings, Escape closes it, returning focus, and the character-key switch in
+ * the Settings dialog turns them off and on again. */
 export const opensKeysHelp: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertKeysHelp(page, url);

@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.1 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.2 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.1 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.2 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,7 +40,7 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.1 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.2 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.5.0 \
@@ -239,11 +239,13 @@ The shell checks, each named in `shell`, assert these:
   the link's section is marked. A page with no tree shows no Contents button.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into it, and no further below it than on a page taller than the viewport.
-- A pixel under 70rem, below both docks, ? opens Help, its Close focused, whose `sl-shortcuts`
-  lists exactly the page's bindings, as the foundation's keys module holds them, the shell's P, C
-  where the page has a Contents drawer, ?, S, and the tree's J and K among them, and, where the
-  page has a pager, H and L once each, named by the top pager's links' text, `Previous <title>`
-  and `Next <title>`, and neither where it has none; Escape closes it. The character-key
+- A pixel under 70rem, below both docks, ? opens Help, its title heading focused, by its
+  `tabindex="-1"` and `autofocus`, and Close's hint still closed a second later; Tab then moves
+  focus to Close. Its `sl-shortcuts` lists exactly the page's bindings, as the foundation's keys
+  module holds them, the shell's P, C where the page has a Contents drawer, ?, S, and the tree's J
+  and K among them, and, where the page has a pager, H and L once each, named by the top pager's
+  links' text, `Previous <title>` and `Next <title>`, and neither where it has none; Escape closes
+  it, returning focus to where it was. The character-key
   switch in Settings turns them off, so J, P, C, H, and L do nothing, and on again. Every header
   control that binds a key shows it in a `kbd`.
 - Every dialog a keyed `show-modal` opener opens, a `button[data-keys][commandfor]`, follows the
@@ -584,7 +586,10 @@ at the row's inline end, its Close, a glyph button with `command="close"` showin
 The content its operation needs follows the row, and Escape also closes the dialog.
 
 - Help, under ?, opens `dialog#help`, headed "Keyboard shortcuts", which holds `sl-shortcuts`
-  alone, so its Close is the first control in it and takes focus as it opens. It lists every
+  alone. Its heading, `h2#help-title`, has `tabindex="-1"` and `autofocus`, so the heading takes
+  focus as Help opens, and a screen reader reads the dialog's name. Close, the first control in
+  it, shows its hint only when Tab reaches it or the pointer rests on it; `site.css` draws no focus
+  outline on the heading, which isn't a control. It lists every
   binding the page has outside the dialog, each named by its element's `aria-label` or its
   registered label: the Pages button's P, the Contents button's C, the Help button's ?, the
   Settings button's S, the section tree's J and K, and the pager's H and L.
@@ -701,7 +706,7 @@ components and the SDK both peer, at `v0.1.0`; a marker the build can't fill fai
 <main></main>
 <dialog id="help" aria-labelledby="help-title">
   <header class="dialog-header">
-    <h2 id="help-title">Keyboard shortcuts</h2>
+    <h2 id="help-title" tabindex="-1" autofocus>Keyboard shortcuts</h2>
     <button
       type="button"
       class="glyph-button"
