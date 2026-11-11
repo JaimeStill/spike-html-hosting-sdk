@@ -6,7 +6,32 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
-## [0.6.1] - 2026-11-10
+## [0.6.2] - 2026-11-11
+
+Help opens on its title, not its Close. A site pinning it takes the template's two attributes on
+Help's heading, `<h2 id="help-title" tabindex="-1" autofocus>`, or its keys help check fails,
+naming the heading; the rule that keeps the heading's focus outline off comes with the SDK's
+`site.css`, which the shell links from the package. It still pins spike-html-hosting-components
+`v0.5.0` and spike-html-hosting-icons `v0.1.0`.
+
+### Fixed
+
+- Help, opened by ?, focused its Close, the first control in it, and keyboard focus counts as
+  interest, so Close's "Close" hint showed as Help opened. The template's Help heading,
+  `h2#help-title`, has `tabindex="-1"` and `autofocus`, so the heading takes focus as Help opens
+  and a screen reader reads the dialog's name; Close shows its hint only when Tab reaches it or
+  the pointer rests on it, and Escape still closes Help. `autofocus` on the dialog itself, which
+  the HTML standard has focus the dialog, leaves Close focused in Chrome, so the heading carries
+  it. Settings is unchanged: `sl-settings` moves focus to its first row as it opens, before
+  Close's hint shows.
+- `site.css` draws no focus outline on Help's title as it takes focus: the heading isn't a
+  control, and Tab never reaches it, but the foundation's `:focus-visible` outline showed on it
+  when Help opened from ?.
+- The keys help check holds Help's focus: ? opens Help with its title heading focused, which
+  has `tabindex="-1"` and `autofocus`, and Close's hint still closed a second later, past the
+  interest delay; Tab moves focus to Close; and Escape returns focus to where it was before Help
+  opened, main's first link where it has one. It checked that Close was focused.
+
 
 Checks that hold what they claim, and currency for every mise environment. A site pinning it
 gains a crawl that holds a page's front matter meta to exactly its keys, a request check that
@@ -455,7 +480,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.4.0...v0.5.0
