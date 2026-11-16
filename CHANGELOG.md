@@ -14,6 +14,10 @@ site with no `content.json` passes the crawl and the content check, and a highli
 `code` names its language. It pins spike-html-apps-foundation `v0.3.1`, and still pins
 spike-html-hosting-components `v0.5.0` and spike-html-hosting-icons `v0.1.0`.
 
+Upgrading: the crawl, `fitsNarrowWidth`, and `keepsHeaderRow` now read every page at 390px with
+its text at 200% as well, so a page that fits 390px only at its own text size, with a long
+unbreakable string or wide inline content, fails its check on `0.6.3` until it reflows.
+
 ### Changed
 
 - spike-html-apps-foundation `v0.3.1`, from `v0.3.0`, the peer, the dev dependency, and the
