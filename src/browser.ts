@@ -93,11 +93,12 @@
 // Every in-site link reaches a built page, and an element with its fragment's id when it has one.
 // The crawl checks a page for every Markdown file content.json records, every tree's: a page no
 // link from the index reaches is crawled from once the links run out, and returned, for the test's
-// diagnostics. A page reached that no record names is a hand page the site also builds, a hand
-// index at the base or a hand page elsewhere: it loads with a 2xx, every request under the base and
-// none failed, it has no pager and binds neither H nor L, its ids are the targets of the fragments
-// linking it, and its links are followed, but the copied pages' checks are left to the shell
-// checks, which a site runs on each hand page by its URL; it is returned too.
+// diagnostics; a site with no content.json records none (content.ts). A page reached that no
+// record names is a hand page the site also builds, a hand index at the base or a hand page
+// elsewhere: it loads with a 2xx, every request under the base and none failed, it has no pager and
+// binds neither H nor L, its ids are the targets of the fragments linking it, and its links are
+// followed, but the copied pages' checks are left to the shell checks, which a site runs on each
+// hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over

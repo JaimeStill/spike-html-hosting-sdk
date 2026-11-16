@@ -6,7 +6,9 @@
 // directory, its repository's name with a leading dot dropped: the check finds nothing in a
 // faithful copy of two, and finds each mismatch naming the tree's directory or its repository, a
 // file outside every tree's directory, and two trees that share one; the site's copied files are
-// listed by their paths under content/, every tree's.
+// listed by their paths under content/, every tree's. A site with no content.json is read as one
+// with no tree: it lists no copied file, the check finds nothing with no content/, and finds each
+// file under content/ in no record.
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -171,6 +173,32 @@ describe("the content check on several trees", () => {
       "content/org/README.md is in no record",
       "content/org/a.md is in no record",
       "content/org/dir/b.md is in no record",
+    ]);
+  });
+});
+
+describe("a site with no content.json", () => {
+  /** A scratch site with no content.json, and tree's files under content/ when copied. */
+  function bare(copied: boolean): string {
+    const root = mkdtempSync(join(tmpdir(), "content-"));
+    scratches.push(root);
+    if (copied) copy(root, "source", "");
+    return root;
+  }
+
+  test("lists no copied file", () => {
+    assert.deepEqual(copiedFiles(bare(false)), []);
+  });
+
+  test("finds nothing with no content/", () => {
+    assert.deepEqual(checkContent(bare(false)), []);
+  });
+
+  test("finds each file under content/ in no record", () => {
+    assert.deepEqual(checkContent(bare(true)), [
+      "content/README.md is in no record",
+      "content/a.md is in no record",
+      "content/dir/b.md is in no record",
     ]);
   });
 });

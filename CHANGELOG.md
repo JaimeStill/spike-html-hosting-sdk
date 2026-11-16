@@ -38,6 +38,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   control, and Tab never reaches one. The shortcut dialog check holds it: each dialog whose header
   row has such a heading is opened by its key, its heading focused by script, and fails, naming
   the dialog and the outline, where the heading draws one.
+- The crawl and the content check read a site's `content.json` without checking it exists, so on
+  a site with none, as a site of hand pages alone has, each threw `ENOENT`. Both read such a site
+  as one with no tree: `copiedFiles` lists none, so the crawl checks every page it reaches as a
+  hand page, and `checkContent` finds nothing with no `content/`, and each file under one in no
+  record.
 
 ## [0.6.2] - 2026-11-11
 
