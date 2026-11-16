@@ -60,9 +60,9 @@
 
   /* The shell's header: from 40rem one row, the site nav at the start, taking the rest of the row
      and wrapping its own links, and the header-actions group at the end, never wrapping under the
-     nav, so the group stays on the header's first line; the first baseline holds the group to the nav's first
-     line however many lines the nav wraps to. A header with no site nav holds the group alone, at
-     its inline end at every width. */
+     nav, so the group stays on the header's first line; the first baseline holds the group to the
+     nav's first line however many lines the nav wraps to. A header with no site nav holds the group
+     alone, at its inline end at every width. */
   body > header {
     display: flex;
     align-items: baseline;

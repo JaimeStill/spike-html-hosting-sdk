@@ -40,23 +40,24 @@
 // dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
 // heading and the Close in its header row, a header.dialog-header, its opener showing its key and
 // named, with an interest hint showing the name, and its heading, where script may focus it by its
-// tabindex="-1", drawing no focus outline as it takes focus once its key opens it; in a 390px viewport each header button, Pages and
-// Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
-// one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
-// and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
-// its aria-label; every rendered glyph button, the page's and its components' in their shadow
-// roots, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
-// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at the capture widths, 390px,
-// 1120px, and 1376px, in every space and every type profile the foundation's registry lists, each
-// space with each type; the header's buttons, its header-actions group, share one line at the
-// capture widths and at 40rem: at 390px, below 40rem, the site nav keeps its links on one line and
-// the group is on its own row below it, at the nav's inline start, and from 40rem the group is on
-// the site nav's first line, at the header's inline end; nothing scrolls sideways at 390px, with
-// the text at its own size and at 200% (WCAG 1.4.10); and at a phone's width, a px below and at
-// each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation link's word
-// breaks across lines and every docked side column is at least 16rem wide. A check that changes the
-// reader's stored theme or keys settings removes them after; one that sets a facet's attribute on
-// the root puts it back. shell lists them by name, for a site to make a test of each.
+// tabindex="-1", drawing no focus outline as it takes focus once its key opens it; in a 390px
+// viewport each header button, Pages and Contents where the shell has them, Help, and Settings, and
+// each shortcut dialog's Close each show one glyph, the icons layer's svg for list-unordered-16,
+// list-ordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, Esc for a Close, both
+// rendered, and no word, each named by its aria-label; every rendered glyph button, the page's and
+// its components' in their shadow roots, the Contents button at 390px on a page with a Contents
+// drawer, and with each shortcut dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at
+// the capture widths, 390px, 1120px, and 1376px, in every space and every type profile the
+// foundation's registry lists, each space with each type; the header's buttons, its header-actions
+// group, share one line at the capture widths and at 40rem: at 390px, below 40rem, the site nav
+// keeps its links on one line and the group is on its own row below it, at the nav's inline start,
+// and from 40rem the group is on the site nav's first line, at the header's inline end; nothing
+// scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.10); and at a
+// phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and at
+// 1400px, no navigation link's word breaks across lines and every docked side column is at least
+// 16rem wide. A check that changes the reader's stored theme or keys settings removes them after;
+// one that sets a facet's attribute on the root puts it back. shell lists them by name, for a site
+// to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
