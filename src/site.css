@@ -137,10 +137,12 @@
     margin-block: 0;
   }
 
-  /* Help's title takes focus as Help opens, by its tabindex="-1" and autofocus, so that Close's
-     hint doesn't show; the heading isn't a control, and Tab never reaches it, so it draws none of
-     the focus outline the foundation's :focus-visible rule gives it as Help opens from ?. */
-  dialog#help h2#help-title[tabindex="-1"]:focus {
+  /* A shortcut dialog's heading that script focuses, by its tabindex="-1", as Help's title takes
+     focus as Help opens, by its autofocus, so that Close's hint doesn't show: the heading isn't a
+     control, and Tab never reaches it, so it draws none of the focus outline the foundation's
+     :focus-visible rule gives it as its dialog opens from its key. Any heading in any dialog's
+     header row, so a dialog a site adds, or whose heading it focuses, keeps it off too. */
+  .dialog-header > :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus {
     outline: none;
   }
 

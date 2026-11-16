@@ -39,7 +39,8 @@
 // on again; every dialog a keyed show-modal opener opens follows the components' shortcut
 // dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
 // heading and the Close in its header row, a header.dialog-header, its opener showing its key and
-// named, with an interest hint showing the name; in a 390px viewport each header button, Pages and
+// named, with an interest hint showing the name, and its heading, where script may focus it by its
+// tabindex="-1", drawing no focus outline as it takes focus once its key opens it; in a 390px viewport each header button, Pages and
 // Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
 // one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
 // and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
@@ -1098,6 +1099,56 @@ async function assertShortcutDialogs(page: Page, url: string): Promise<void> {
     .filter(({ lacks }) => lacks.length > 0)
     .map(({ id, keys, lacks }) => `#${id}, opened on ${keys}, lacks ${lacks.join("; ")}`);
   assert.deepEqual(failing, [], `${url}: the shortcut dialog ${failing.join(", and ")}`);
+  for (const { id, keys } of dialogs) await assertHeadingUnoutlined(page, url, id, keys);
+}
+
+/** The heading in the dialog's header row that script may focus, one with tabindex="-1", as Help's
+ * title takes focus as Help opens; null where the dialog has none. */
+const focusableHeading = (id: string): string =>
+  `document.getElementById(${JSON.stringify(id)})?.querySelector(
+    ':scope > header.dialog-header > :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]')`;
+
+/** Asserts the shortcut dialog's heading that script may focus, where it has one, draws no focus
+ * outline as it takes focus: the dialog opened by its key, so the reader's last input is the
+ * keyboard's and the heading, focused by script, matches :focus-visible, as Help's title does
+ * when ? opens it; then closed by Escape. The heading isn't a control and Tab never reaches it, so
+ * an outline would mark nothing the reader can act on. Fails naming the dialog and the outline. */
+async function assertHeadingUnoutlined(
+  page: Page,
+  url: string,
+  id: string,
+  keys: string,
+): Promise<void> {
+  const heading = focusableHeading(id);
+  if (!(await page.evaluate(`!!${heading}`))) return;
+  const open = `!!document.getElementById(${JSON.stringify(id)})?.matches(":modal")`;
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  await press(page, keys);
+  try {
+    await until(page, open).catch(() =>
+      assert.fail(`${url}: ${keys.toUpperCase()} opens the shortcut dialog #${id}`),
+    );
+    // The dialog's toggle event, at which its content may move focus, has run once settled.
+    await page.evaluate(SETTLED);
+    const outline: { visible: boolean; style: string; width: string } =
+      await page.evaluate(`(() => {
+      const heading = ${heading};
+      heading.focus();
+      const { outlineStyle, outlineWidth } = getComputedStyle(heading);
+      return { visible: heading.matches(":focus-visible"), style: outlineStyle, width: outlineWidth };
+    })()`);
+    assert.ok(
+      outline.style === "none" || parseFloat(outline.width) === 0,
+      `${url}: the shortcut dialog #${id}'s heading, focused by script as ${keys.toUpperCase()} ` +
+        `opens it, draws no focus outline, not ${outline.width} ${outline.style}` +
+        (outline.visible ? ", matching :focus-visible" : ""),
+    );
+  } finally {
+    await press(page, "Escape");
+    await until(page, `!${open}`).catch(() =>
+      assert.fail(`${url}: Escape closes the shortcut dialog #${id}`),
+    );
+  }
 }
 
 /** The ids of the dialogs the page's keyed show-modal openers open, each once. */
@@ -1670,7 +1721,9 @@ export const opensKeysHelp: Check = async (page, site, url = site) => {
 /** Each dialog a keyed show-modal opener opens follows the components' shortcut dialog pattern: a
  * name from a heading inside it, a Close showing Esc, the two in its header row, a
  * header.dialog-header, and an opener that shows its key and has a name its interest hint shows;
- * it fails naming each dialog and what it lacks. */
+ * it fails naming each dialog and what it lacks. A heading in its header row with tabindex="-1",
+ * which script may focus, draws no focus outline as it takes focus once its key opens the dialog;
+ * it fails naming the dialog and the outline. */
 export const followsShortcutDialogs: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertShortcutDialogs(page, url);

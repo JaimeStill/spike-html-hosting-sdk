@@ -30,6 +30,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   in a 390px viewport to no sideways scroll with its text at its own size and at 200%, the root's
   font size doubled for the reading and put back, and fail naming the text's size; the shell
   check's name is now "nothing scrolls sideways at 390px, with text at its size and at 200%".
+- `site.css`'s rule that keeps the focus outline off a heading script focuses named Help's title
+  alone, `dialog#help h2#help-title[tabindex="-1"]`, so Settings' heading, or any shortcut
+  dialog's a site's script focuses, drew the foundation's `:focus-visible` outline as its dialog
+  opened from its key. The rule now covers every heading with `tabindex="-1"` in a dialog's
+  header row, `.dialog-header > :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus`: none is a
+  control, and Tab never reaches one. The shortcut dialog check holds it: each dialog whose header
+  row has such a heading is opened by its key, its heading focused by script, and fails, naming
+  the dialog and the outline, where the heading draws one.
 
 ## [0.6.2] - 2026-11-11
 

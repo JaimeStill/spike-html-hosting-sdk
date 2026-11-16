@@ -28,8 +28,11 @@
 // title and Close, which Tab reaches first, or focus moved elsewhere as Help closes. With a
 // shortcut dialog's heading name, its Close's Esc, its opener's kbd, or its opener's hint wrong,
 // or its Close moved to a trailing footer or its heading out of its header row, the shortcut
-// dialog check fails, naming the dialog and what it lacks; with Help
-// holding a [data-keys-list], which loads the foundation's keys-help.js, the request check fails.
+// dialog check fails, naming the dialog and what it lacks, and with an outline on Help's title as
+// it takes focus, naming the dialog and the outline; with Settings' title given tabindex="-1", as
+// a shell whose script focuses it has it, the check passes, site.css drawing it no outline; with
+// Help holding a [data-keys-list], which loads the foundation's keys-help.js, the request check
+// fails.
 // With the Help button's glyph removed, the Settings button's word shown beside its glyph, or
 // Help's Close showing the Help button's glyph, the glyph check fails, naming the page and the
 // button. With the glyph buttons' padding and border dropped and their text small, the target size
@@ -674,6 +677,14 @@ describe("the fixture site with its shortcut dialogs wrong", () => {
       message: /\/fixture-site\/: the shortcut dialog #help, opened on \?, lacks its header row/,
     },
     {
+      change: "an outline on Help's title as it takes focus",
+      script: `const style = document.createElement("style");
+      style.textContent = "#help-title:focus { outline: 2px solid red; }";
+      document.head.append(style);`,
+      message:
+        /\/fixture-site\/: the shortcut dialog #help's heading, focused by script as \? opens it, draws no focus outline, not 2px solid/,
+    },
+    {
       change: "the Help button showing no key",
       script: `document.querySelector("header [commandfor=help] kbd").remove();`,
       message:
@@ -713,6 +724,20 @@ describe("the fixture site with its shortcut dialogs wrong", () => {
         );
         return true;
       });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with Settings' heading focusable by script", () => {
+  test("the shortcut dialog check passes, the heading drawing no focus outline", async () => {
+    // Settings' title given Help's tabindex="-1", as a shell whose script focuses it has it.
+    const page = await withChange(
+      `document.getElementById("settings-title").setAttribute("tabindex", "-1");`,
+    );
+    try {
+      await followsShortcutDialogs(page, server.origin);
     } finally {
       await page.close();
     }
