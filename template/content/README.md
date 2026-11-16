@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.3 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.4 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.3 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.4 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,10 +40,10 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.3 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.4 \
   github:JaimeStill/spike-html-apps-foundation#v0.3.1 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
-  github:JaimeStill/spike-html-hosting-components#v0.5.0 \
+  github:JaimeStill/spike-html-hosting-components#v0.5.1 \
   github:JaimeStill/spike-html-hosting-icons#v0.1.0 \
   vite eslint
 ```
@@ -238,8 +238,10 @@ The shell checks, each named in `shell`, assert these:
   to the first section and K back to the page's top, and the header's Contents button is hidden.
   At 390px and a pixel under 70rem the drawer is closed and the tree hidden; the Contents button,
   shown, opens it as a modal by its click and by C, its `aria-expanded` true while it is open and
-  false once Escape closes it; opened by its `show()`, it closes as a link in it is followed, and
-  the link's section is marked. A page with no tree shows no Contents button.
+  false once Escape closes it, and its heading takes focus as it opens, nothing else in it, its
+  Close above all, taking focus even in passing, the heading drawing no outline, and Close's hint
+  still closed a second after C opens it; opened by its `show()`, it closes as a link in it is
+  followed, and the link's section is marked. A page with no tree shows no Contents button.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into it, and no further below it than on a page taller than the viewport.
 - A pixel under 70rem, below both docks, ? opens Help, its title heading focused, by its
@@ -302,13 +304,14 @@ carries none; with no
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
 text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
 no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
-P, its `aria-expanded` following the drawer open and closed; its two pagers, at main's top and foot,
-each named, link the pages before and after it in its site index's order, none past either end, each
-link its arrow, its word, the page's title, its key hint, and its binding, H or L; at 390px each
-link only its arrow and word, its title and key hint not visible, its name still `<word> <title>`;
-and each link followed, and H and L pressed at 390px, lands on its page; and every in-site link
-reaches a built page, and its fragment's element. Since each page's index links every other, the
-crawl reaches every page from the index. It checks a page for every Markdown file `content.json`
+P, its `aria-expanded` following the drawer open and closed and its heading taking focus as it
+opens, nothing else in it, its Close above all, taking focus even in passing, and Close's hint still
+closed a second after P; its two pagers, at main's top and foot, each named, link the pages before and after it in its site index's order, none past either
+end, each link its arrow, its word, the page's title, its key hint, and its binding, H or L; at
+390px each link only its arrow and word, its title and key hint not visible, its name still
+`<word> <title>`; and each link followed, and H and L pressed at 390px, lands on its page; and
+every in-site link reaches a built page, and its fragment's element. Since each page's index links
+every other, the crawl reaches every page from the index. It checks a page for every Markdown file `content.json`
 records, every tree's, crawling from one no link reaches once the links run out; a site with no
 `content.json` records none, so every page it reaches is a hand page. A page it reaches that no
 record names is a hand page the site builds, as a root-style site's index is: it loads with a 2xx,
@@ -587,8 +590,10 @@ P and Contents on C, as it does Settings on S; `site.css` shows each only below 
 on a page with no such drawer, as a page with no section tree has no Contents drawer, it stays
 hidden and the navigation renders as the page's own; and the page's script opens each drawer on its
 button's click, keeps the button's `aria-expanded` in step with the drawer's `open` and `close`
-events, and closes each drawer as a link in it is followed. A drawer, open, is a modal: Escape, its
-Close button, or a followed link closes it.
+events, and closes each drawer as a link in it is followed. A drawer, open, is a modal: focus lands
+on its heading, `tabindex="-1"` and `autofocus` in the component, not on its Close, so the Close
+shows its hint only when Tab reaches it or the pointer rests on it, and the heading, no control,
+draws no focus outline; Escape, its Close button, or a followed link closes it.
 
 A site's shell carries two shortcut dialogs, following the components' README's shortcut dialog
 pattern. A key and its opener, a glyph button in the header with `commandfor` and
@@ -902,7 +907,7 @@ resolves it through `exports` and bundles it into the page's sheet:
 exports alone:
 
 - `package.json`, its name the repository's, the SDK at its tag, the peers, the components at
-  `v0.5.0`, and the icons layer at `v0.1.0`, each at its pin, with typescript, prettier, and
+  `v0.5.1`, and the icons layer at `v0.1.0`, each at its pin, with typescript, prettier, and
   `@types/node`; `mise.toml`, the toolchain and the tasks: install, check and its steps,
   screenshots, and currency, the SDK's bin; `scripts/preflight.sh`, which runs before node_modules
   exists, so the site holds its copy.
