@@ -6,6 +6,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+### Changed
+
+- eslint `10.15.0`, from `10.14.0`, and vite `8.3.8`, from `8.3.7`, each the dev dependency, the
+  peer range's floor, and the template's pin; prettier `3.10.1`, from `3.9.10`, the dev dependency
+  and the template's pin. The SDK's and the template's node is `26.13.1`, pnpm `12.21.0`, and
+  chrome-headless-shell `157.0.8103.78`. The SDK's workflows, the reusable `site-ci.yml` and
+  `site-pages.yml` among them, run `jdx/mise-action` at `v5.2.9`, from `v5.2.7`. rolldown stays
+  at `1.2.18`, the version Vite `8.3.8` pins with `~1.2.18`, though `1.3.2` is out.
+
 ## [0.6.2] - 2026-11-11
 
 Help opens on its title, not its Close. A site pinning it takes the template's two attributes on
