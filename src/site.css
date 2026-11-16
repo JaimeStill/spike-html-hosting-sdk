@@ -59,8 +59,8 @@
   }
 
   /* The shell's header: from 40rem one row, the site nav at the start, taking the rest of the row
-     and wrapping its own links, and the header-actions group at the end, never wrapping, so the
-     group stays on the header's first line; the first baseline holds the group to the nav's first
+     and wrapping its own links, and the header-actions group at the end, never wrapping under the
+     nav, so the group stays on the header's first line; the first baseline holds the group to the nav's first
      line however many lines the nav wraps to. A header with no site nav holds the group alone, at
      its inline end at every width. */
   body > header {
@@ -75,18 +75,23 @@
 
   /* The header's buttons, Pages, Contents, Help, and Settings, one group in a row, at the header's
      inline end by its auto start margin, which takes the room the site nav leaves, or the whole
-     row's with no nav. Each is a glyph button, which the components' glyph-button.css lays out. */
+     row's with no nav. The group shrinks to the room its row has, wrapping its buttons onto more
+     lines only where they don't fit on one, as with the text at 200% in a 390px viewport, so the
+     header never scrolls the page sideways (WCAG 1.4.10); its lines keep the group's inline end.
+     Each is a glyph button, which the components' glyph-button.css lays out. */
   .header-actions {
     display: flex;
-    flex: none;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: end;
     gap: var(--space-2xs);
     margin-inline-start: auto;
   }
 
   /* Below 40rem, two rows: the site nav takes the first whole, so its links keep one line, and the
      group the next, at its inline start, aligned with the nav above it, a step closer under the
-     nav than the row's own gap. With no site nav the group keeps its row's inline end. */
+     nav than the row's own gap; its buttons, wrapping, keep the nav's inline start. With no site
+     nav the group keeps its row's inline end. */
   @media (width < 40rem) {
     body > header {
       flex-wrap: wrap;
@@ -98,6 +103,7 @@
     }
 
     body > header:has(> sl-site-nav) > .header-actions {
+      justify-content: start;
       margin-inline-start: 0;
     }
   }

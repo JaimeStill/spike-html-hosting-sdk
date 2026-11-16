@@ -22,6 +22,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   group there only beside a site nav, which took the row's room, so with none it sat at the
   header's inline start. The group's auto start margin takes the room the nav leaves, or the whole
   row's, and below 40rem only a header with a nav sets it back to the nav's inline start.
+- The header's `.header-actions` group, `flex: none`, couldn't shrink: in a 390px viewport with
+  the text at 200%, its buttons ran past the header and the page scrolled sideways (WCAG 1.4.10,
+  reflow), with or without a site nav. The group now shrinks to its row and wraps its buttons
+  onto more lines where they don't fit on one, each line at the group's inline end, or at the
+  nav's inline start below 40rem. `fitsNarrowWidth`, `keepsHeaderRow`, and the crawl hold a page
+  in a 390px viewport to no sideways scroll with its text at its own size and at 200%, the root's
+  font size doubled for the reading and put back, and fail naming the text's size; the shell
+  check's name is now "nothing scrolls sideways at 390px, with text at its size and at 200%".
 
 ## [0.6.2] - 2026-11-11
 
