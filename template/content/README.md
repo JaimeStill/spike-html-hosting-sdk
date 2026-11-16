@@ -13,13 +13,13 @@ The scaffold bin makes a site from the template for a repository, in `<dir>`, `.
 default, which must be new or empty:
 
 ```sh
-pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.2 <repo> [dir]
+pnpm dlx github:JaimeStill/spike-html-hosting-sdk#v0.6.3 <repo> [dir]
 ```
 
 or, with npm, which fetches the package's `github:` peers only when told it may:
 
 ```sh
-npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.2 <repo> [dir]
+npm exec --allow-git=all -- github:JaimeStill/spike-html-hosting-sdk#v0.6.3 <repo> [dir]
 ```
 
 It copies the template, names the site's package and its index's title after `<repo>`, whose
@@ -40,8 +40,8 @@ A site made by hand installs the package from its tag, beside its peers and the 
 shell loads, each pinned exactly:
 
 ```sh
-pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.2 \
-  github:JaimeStill/spike-html-apps-foundation#v0.3.0 \
+pnpm add -D --save-exact github:JaimeStill/spike-html-hosting-sdk#v0.6.3 \
+  github:JaimeStill/spike-html-apps-foundation#v0.3.1 \
   github:JaimeStill/spike-html-apps-tooling#v0.3.0 \
   github:JaimeStill/spike-html-hosting-components#v0.5.0 \
   github:JaimeStill/spike-html-hosting-icons#v0.1.0 \
@@ -166,6 +166,9 @@ test("the copied tree is its record", () => {
 });
 ```
 
+A site with no `content.json`, as a site of hand pages alone has, copies no tree: `checkContent`
+finds nothing where it has no `content/`, and each file under one in no record.
+
 `tsconfig.json` and `tsconfig.test.json` extend the base and set their own module resolution,
 `checkJs`, and `include`:
 
@@ -253,7 +256,10 @@ The shell checks, each named in `shell`, assert these:
   `aria-labelledby`, and has a Close, a glyph button with `command="close"` for it showing
   `<kbd>Esc</kbd>`, the heading and the Close in its header row, a `header.dialog-header`, never a
   trailing Close; its opener shows its key in a `kbd`, has a name, its `aria-label`, and an
-  interest hint holding that name. It fails naming each dialog and what it lacks.
+  interest hint holding that name. It fails naming each dialog and what it lacks. A heading in its
+  header row with `tabindex="-1"`, which script may focus, as Help's title takes focus, draws no
+  focus outline as it takes focus once its key opens the dialog; it fails naming the dialog and
+  the outline.
 - At 390px, each header button, Pages and Contents where the shell has them, Help, and Settings,
   and, with each shortcut dialog open, its Close, shows one glyph, the icons layer's
   `list-unordered-16`, `list-ordered-16`, `question-16`, `gear-16`, and `x-16`, its markup the
@@ -267,8 +273,10 @@ The shell checks, each named in `shell`, assert these:
 - At 390px, 40rem, 1120px, and 1376px, the header's buttons, its `header-actions` group, share one
   line. At 390px, below 40rem, the site nav keeps its links on one line and the group is on its own
   row below it, its inline start within a pixel of the nav's; from 40rem the group is on the site
-  nav's first line, at the header's inline end.
-- Nothing scrolls sideways at 390px.
+  nav's first line, at the header's inline end. With no site nav, the group is at the header's
+  inline end at every width.
+- Nothing scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.4 and
+  1.4.10).
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
   word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
   column is at least 16rem wide.
@@ -283,11 +291,12 @@ A Markdown site also crawls its pages, `crawl(page, server.origin, root)`, which
 counted, the copied pages no link from the index reaches, and the hand pages it reached. Each copied
 file's page it reaches loads with a 2xx, its one module script render-blocking, every custom element
 on it defined, every request under the base and none failed, main at its centered reading width at
-1600px, nothing scrolling sideways at 390px, its navigation, its layout between the docks, its main
-under the header, its section tree in its Contents drawer, its Help and the switch in Settings, its
-shortcut dialogs, its glyph buttons and their size, and its header's row as the shell checks have
-them, and its title its source's front matter name or first h1. Its head holds, right after its
-title, a `<meta name="<key>" content="<value>">` per front matter key, in order, the value as
+1600px, nothing scrolling sideways at 390px, with its text at its own size and at 200%, its
+navigation, its layout between the docks, its main under the header, its section tree in its
+Contents drawer, its Help and the switch in Settings, its shortcut dialogs, its glyph buttons and
+their size, and its header's row as the shell checks have them, and its title its source's front
+matter name or first h1. Its head holds, right after its title, a
+`<meta name="<key>" content="<value>">` per front matter key, in order, the value as
 `frontMatterText` gives it, and no other named meta in that run, so a page with no front matter
 carries none; with no
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
@@ -300,10 +309,11 @@ link only its arrow and word, its title and key hint not visible, its name still
 and each link followed, and H and L pressed at 390px, lands on its page; and every in-site link
 reaches a built page, and its fragment's element. Since each page's index links every other, the
 crawl reaches every page from the index. It checks a page for every Markdown file `content.json`
-records, every tree's, crawling from one no link reaches once the links run out. A page it reaches
-that no record names is a hand page the site builds, as a root-style site's index is: it loads with
-a 2xx, every request under the base and none failed, it has no pager and binds neither H nor L, its
-ids the targets of the fragments linking it, and its links followed, but the copied pages' checks
+records, every tree's, crawling from one no link reaches once the links run out; a site with no
+`content.json` records none, so every page it reaches is a hand page. A page it reaches that no
+record names is a hand page the site builds, as a root-style site's index is: it loads with a 2xx,
+every request under the base and none failed, it has no pager and binds neither H nor L, its ids
+the targets of the fragments linking it, and its links followed, but the copied pages' checks
 are left to the shell checks, which the site runs on it by its URL; `Crawled.hand` lists each, by
 its path under the base, in the order the crawl reached it.
 
@@ -557,10 +567,12 @@ its scroll land on the page the drawer covered; the drawer leaves that to the pa
 Main's track may shrink, main breaks long words while the components' navigation never breaks
 inside one, and each table scrolls in its region, so no page is wider than a 390px viewport. The
 shell's header is the site nav and one group of buttons, `header-actions`, Pages, Contents, Help,
-and Settings, which never wraps. From 40rem it is one row, the nav taking the rest of the row and
-wrapping its own links, the group on the nav's first line at its inline end; below 40rem it is
-two, the nav on a row of its own, its links on one line, and the group on the next row, at its
-inline start, aligned with the nav. Each button, and each shortcut dialog's Close, is a glyph
+and Settings, which shrinks to its row and wraps its buttons onto more lines only where they don't
+fit on one, as with the text at 200% at 390px. From 40rem it is one row, the nav taking the rest
+of the row and wrapping its own links, the group on the nav's first line at its inline end; below
+40rem it is two, the nav on a row of its own, its links on one line, and the group on the next
+row, at its inline start, aligned with the nav. A header with no site nav holds the group at its
+inline end at every width. Each button, and each shortcut dialog's Close, is a glyph
 button, laid out by the components' `glyph-button.css`, which the shell links between the
 foundation's entry and `site.css`.
 
@@ -811,6 +823,10 @@ test("the Noctis pair merges", async () => {
   assert.deepEqual(await checkSyntax(noctis), []);
 });
 ```
+
+A highlighted block's `code` names its language as marked's plain fence does,
+`class="language-<label>"`, the label as the fence writes it, so `` ```Go `` gives
+`<code class="language-Go">` either way.
 
 Code falls back to plain, in the page's text color, where there is nothing to highlight it with:
 a fence with no language label, or one Shiki bundles no grammar for, and an indented block, render

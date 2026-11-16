@@ -28,8 +28,11 @@
 // title and Close, which Tab reaches first, or focus moved elsewhere as Help closes. With a
 // shortcut dialog's heading name, its Close's Esc, its opener's kbd, or its opener's hint wrong,
 // or its Close moved to a trailing footer or its heading out of its header row, the shortcut
-// dialog check fails, naming the dialog and what it lacks; with Help
-// holding a [data-keys-list], which loads the foundation's keys-help.js, the request check fails.
+// dialog check fails, naming the dialog and what it lacks, and with an outline on Help's title as
+// it takes focus, naming the dialog and the outline; with Settings' title given tabindex="-1", as
+// a shell whose script focuses it has it, the check passes, site.css drawing it no outline; with
+// Help holding a [data-keys-list], which loads the foundation's keys-help.js, the request check
+// fails.
 // With the Help button's glyph removed, the Settings button's word shown beside its glyph, or
 // Help's Close showing the Help button's glyph, the glyph check fails, naming the page and the
 // button. With the glyph buttons' padding and border dropped and their text small, the target size
@@ -37,15 +40,18 @@
 // and type as it found them; with the header's group wrapping its buttons, laid over the nav's row
 // below 40rem, wrapped under the nav from 40rem, at the header's inline end below 40rem or before
 // the nav from 40rem, or the nav wrapping its links below 40rem, the header row check fails,
-// naming the width; and with the header too wide for a phone, it fails naming the sideways
-// scroll. With the bottom pager removed, a pager's links swapped, a pager link
-// that follows nowhere, every L binding removed, or, below 40rem, a pager's title shown or out of
-// its name or its key hint shown, the crawl fails, naming the page; with the top pager's L dropped,
-// so keys lists the bottom one's, or a handler that follows the previous link on H whatever the
-// switch in Settings says, the keys help check fails on a paged page, naming it. With a meta
-// its source's front matter doesn't have after the title, where the build writes the front
-// matter's, on the index, which has none, or on a.html, past its own, the crawl fails, naming the
-// page.
+// naming the width; with the header too wide for a phone, or the group neither shrinking nor
+// wrapping its buttons, which scrolls a 390px viewport sideways with the text at 200%, it fails
+// naming the sideways scroll. With the site nav removed, the header row check passes, the group
+// at the header's inline end at every width and nothing scrolling sideways at 390px with the text
+// at 200%, which the shell's fitsNarrowWidth check holds the index to with its nav. With the
+// bottom pager removed, a pager's links swapped, a pager link that follows nowhere, every L binding
+// removed, or, below 40rem, a pager's title shown or out of its name or its key hint shown, the
+// crawl fails, naming the page; with the top pager's L dropped, so keys lists the bottom one's, or
+// a handler that follows the previous link on H whatever the switch in Settings says, the keys help
+// check fails on a paged page, naming it. With a meta its source's front matter doesn't have after
+// the title, where the build writes the front matter's, on the index, which has none, or on a.html,
+// past its own, the crawl fails, naming the page.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -671,6 +677,14 @@ describe("the fixture site with its shortcut dialogs wrong", () => {
       message: /\/fixture-site\/: the shortcut dialog #help, opened on \?, lacks its header row/,
     },
     {
+      change: "an outline on Help's title as it takes focus",
+      script: `const style = document.createElement("style");
+      style.textContent = "#help-title:focus { outline: 2px solid red; }";
+      document.head.append(style);`,
+      message:
+        /\/fixture-site\/: the shortcut dialog #help's heading, focused by script as \? opens it, draws no focus outline, not 2px solid/,
+    },
+    {
       change: "the Help button showing no key",
       script: `document.querySelector("header [commandfor=help] kbd").remove();`,
       message:
@@ -710,6 +724,20 @@ describe("the fixture site with its shortcut dialogs wrong", () => {
         );
         return true;
       });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with Settings' heading focusable by script", () => {
+  test("the shortcut dialog check passes, the heading drawing no focus outline", async () => {
+    // Settings' title given Help's tabindex="-1", as a shell whose script focuses it has it.
+    const page = await withChange(
+      `document.getElementById("settings-title").setAttribute("tabindex", "-1");`,
+    );
+    try {
+      await followsShortcutDialogs(page, server.origin);
     } finally {
       await page.close();
     }
@@ -782,6 +810,12 @@ describe("the fixture site with its header's row broken", () => {
       message: /\/fixture-site\/: at 640px the header's buttons end at its inline end/,
     },
     {
+      change: "the group neither shrinking nor wrapping its buttons",
+      css: ".header-actions { flex: none; flex-wrap: nowrap; }",
+      message:
+        /\/fixture-site\/: with text at 200%, \d+px wide in a \d+px viewport, past it: div\.header-actions/,
+    },
+    {
       change: "the header too wide for a phone",
       css: "body > header { min-inline-size: 30rem; }",
       message: /\/fixture-site\/: \d+px wide in a \d+px viewport, past it/,
@@ -799,6 +833,20 @@ describe("the fixture site with its header's row broken", () => {
       }
     });
   }
+});
+
+describe("the fixture site with no site nav", () => {
+  test("the header row check passes, the group at the inline end, fitting 390px at 200% text", async () => {
+    // The shell's sl-site-nav removed, as a site whose header holds the group alone has it.
+    const page = await withChange(
+      `document.querySelector("body > header > sl-site-nav")?.remove();`,
+    );
+    try {
+      await keepsHeaderRow(page, server.origin);
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("the fixture site with a front matter meta its source doesn't have", () => {

@@ -39,23 +39,25 @@
 // on again; every dialog a keyed show-modal opener opens follows the components' shortcut
 // dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
 // heading and the Close in its header row, a header.dialog-header, its opener showing its key and
-// named, with an interest hint showing the name; in a 390px viewport each header button, Pages and
-// Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
-// one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
-// and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
-// its aria-label; every rendered glyph button, the page's and its components' in their shadow
-// roots, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
-// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at the capture widths, 390px,
-// 1120px, and 1376px, in every space and every type profile the foundation's registry lists, each
-// space with each type; the header's buttons, its header-actions group, share one line at the
-// capture widths and at 40rem: at 390px, below 40rem, the site nav keeps its links on one line and
-// the group is on its own row below it, at the nav's inline start, and from 40rem the group is on
-// the site nav's first line, at the header's inline end; nothing scrolls sideways at 390px; and at
-// a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and at
-// 1400px, no navigation link's word breaks across lines and every docked side column is at least
-// 16rem wide. A check that changes the reader's stored theme or keys settings removes them after;
-// one that sets a facet's attribute on the root puts it back. shell lists them by name, for a site
-// to make a test of each.
+// named, with an interest hint showing the name, and its heading, where script may focus it by its
+// tabindex="-1", drawing no focus outline as it takes focus once its key opens it; in a 390px
+// viewport each header button, Pages and Contents where the shell has them, Help, and Settings, and
+// each shortcut dialog's Close each show one glyph, the icons layer's svg for list-unordered-16,
+// list-ordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, Esc for a Close, both
+// rendered, and no word, each named by its aria-label; every rendered glyph button, the page's and
+// its components' in their shadow roots, the Contents button at 390px on a page with a Contents
+// drawer, and with each shortcut dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at
+// the capture widths, 390px, 1120px, and 1376px, in every space and every type profile the
+// foundation's registry lists, each space with each type; the header's buttons, its header-actions
+// group, share one line at the capture widths and at 40rem: at 390px, below 40rem, the site nav
+// keeps its links on one line and the group is on its own row below it, at the nav's inline start,
+// and from 40rem the group is on the site nav's first line, at the header's inline end; nothing
+// scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.4 and 1.4.10);
+// and at a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's
+// docks), and at 1400px, no navigation link's word breaks across lines and every docked side
+// column is at least 16rem wide. A check that changes the reader's stored theme or keys settings
+// removes them after; one that sets a facet's attribute on the root puts it back. shell lists them
+// by name, for a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
@@ -68,7 +70,8 @@
 // is followed, breadth first, and each copied file's page reached loads with a 2xx, its one module
 // script render-blocking, every custom element on it defined, every request under the base and none
 // failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
-// sideways in a 390px one, its navigation laid out as the shell check has it at the same widths,
+// sideways in a 390px one, with its text at its own size and at 200%, its navigation laid out
+// as the shell check has it at the same widths,
 // its layout between the docks, its section tree in its Contents drawer, its main under the header,
 // its Help and the switch in Settings, its shortcut dialogs, its glyph buttons and their size, and
 // its header's row as the shell checks have them, and its title its source's front matter name, or,
@@ -90,11 +93,12 @@
 // Every in-site link reaches a built page, and an element with its fragment's id when it has one.
 // The crawl checks a page for every Markdown file content.json records, every tree's: a page no
 // link from the index reaches is crawled from once the links run out, and returned, for the test's
-// diagnostics. A page reached that no record names is a hand page the site also builds, a hand
-// index at the base or a hand page elsewhere: it loads with a 2xx, every request under the base and
-// none failed, it has no pager and binds neither H nor L, its ids are the targets of the fragments
-// linking it, and its links are followed, but the copied pages' checks are left to the shell
-// checks, which a site runs on each hand page by its URL; it is returned too.
+// diagnostics; a site with no content.json records none (content.ts). A page reached that no
+// record names is a hand page the site also builds, a hand index at the base or a hand page
+// elsewhere: it loads with a 2xx, every request under the base and none failed, it has no pager and
+// binds neither H nor L, its ids are the targets of the fragments linking it, and its links are
+// followed, but the copied pages' checks are left to the shell checks, which a site runs on each
+// hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -339,22 +343,40 @@ const narrow = (page: Page): Promise<unknown> =>
     mobile: false,
   });
 
-/** Asserts the loaded page, in a 390px viewport, is no wider than it: nothing scrolls sideways,
- * naming the widest elements that overflow it. */
+/** The loaded page's width against its viewport's with its text at scale times its size: the
+ * root's font size, which every rem length follows, set to scale times its computed size for the
+ * reading and put back after, in the same task, so nothing else sees it; the document's scroll
+ * width, the viewport's, and the first five elements whose box ends past it. */
+const SIDEWAYS = (scale: number): string => `(() => {
+  const root = document.documentElement;
+  const kept = root.style.fontSize;
+  root.style.fontSize = parseFloat(getComputedStyle(root).fontSize) * ${scale} + "px";
+  try {
+    const viewport = root.clientWidth;
+    const wide = [...document.body.querySelectorAll("*")]
+      .filter((element) => element.getBoundingClientRect().right > viewport + 0.5)
+      .map((element) => [element.localName, ...element.classList].join("."));
+    return { scroll: root.scrollWidth, viewport, wide: wide.slice(0, 5) };
+  } finally {
+    root.style.fontSize = kept;
+  }
+})()`;
+
+/** Asserts the loaded page, in a 390px viewport, is no wider than it, with its text at its own size
+ * and at 200%, as a reader who enlarges the text has it (WCAG 1.4.4, resize text, and 1.4.10,
+ * reflow): nothing scrolls sideways, naming the text's size past 100% and the widest elements
+ * that overflow it. */
 async function assertNoSidewaysScroll(page: Page, url: string): Promise<void> {
   await narrow(page);
-  const { scroll, viewport, wide }: { scroll: number; viewport: number; wide: string[] } =
-    await page.evaluate(`(() => {
-      const viewport = document.documentElement.clientWidth;
-      const wide = [...document.body.querySelectorAll("*")]
-        .filter((element) => element.getBoundingClientRect().right > viewport + 0.5)
-        .map((element) => [element.localName, ...element.classList].join("."));
-      return { scroll: document.documentElement.scrollWidth, viewport, wide: wide.slice(0, 5) };
-    })()`);
-  assert.ok(
-    scroll <= viewport,
-    `${url}: ${scroll}px wide in a ${viewport}px viewport, past it: ${wide.join(", ")}`,
-  );
+  for (const scale of [1, 2]) {
+    const { scroll, viewport, wide }: { scroll: number; viewport: number; wide: string[] } =
+      await page.evaluate(SIDEWAYS(scale));
+    const text = scale === 1 ? "" : `with text at ${scale * 100}%, `;
+    assert.ok(
+      scroll <= viewport,
+      `${url}: ${text}${scroll}px wide in a ${viewport}px viewport, past it: ${wide.join(", ")}`,
+    );
+  }
 }
 
 /** A dock's width in px, its rem the initial font size's, 16px, as a media query reads it. */
@@ -1080,6 +1102,56 @@ async function assertShortcutDialogs(page: Page, url: string): Promise<void> {
     .filter(({ lacks }) => lacks.length > 0)
     .map(({ id, keys, lacks }) => `#${id}, opened on ${keys}, lacks ${lacks.join("; ")}`);
   assert.deepEqual(failing, [], `${url}: the shortcut dialog ${failing.join(", and ")}`);
+  for (const { id, keys } of dialogs) await assertHeadingUnoutlined(page, url, id, keys);
+}
+
+/** The heading in the dialog's header row that script may focus, one with tabindex="-1", as Help's
+ * title takes focus as Help opens; null where the dialog has none. */
+const focusableHeading = (id: string): string =>
+  `document.getElementById(${JSON.stringify(id)})?.querySelector(
+    ':scope > header.dialog-header > :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]')`;
+
+/** Asserts the shortcut dialog's heading that script may focus, where it has one, draws no focus
+ * outline as it takes focus: the dialog opened by its key, so the reader's last input is the
+ * keyboard's and the heading, focused by script, matches :focus-visible, as Help's title does
+ * when ? opens it; then closed by Escape. The heading isn't a control and Tab never reaches it, so
+ * an outline would mark nothing the reader can act on. Fails naming the dialog and the outline. */
+async function assertHeadingUnoutlined(
+  page: Page,
+  url: string,
+  id: string,
+  keys: string,
+): Promise<void> {
+  const heading = focusableHeading(id);
+  if (!(await page.evaluate(`!!${heading}`))) return;
+  const open = `!!document.getElementById(${JSON.stringify(id)})?.matches(":modal")`;
+  await page.evaluate(`scrollTo({ top: 0, behavior: "instant" })`);
+  await press(page, keys);
+  try {
+    await until(page, open).catch(() =>
+      assert.fail(`${url}: ${keys.toUpperCase()} opens the shortcut dialog #${id}`),
+    );
+    // The dialog's toggle event, at which its content may move focus, has run once settled.
+    await page.evaluate(SETTLED);
+    const outline: { visible: boolean; style: string; width: string } =
+      await page.evaluate(`(() => {
+      const heading = ${heading};
+      heading.focus();
+      const { outlineStyle, outlineWidth } = getComputedStyle(heading);
+      return { visible: heading.matches(":focus-visible"), style: outlineStyle, width: outlineWidth };
+    })()`);
+    assert.ok(
+      outline.style === "none" || parseFloat(outline.width) === 0,
+      `${url}: the shortcut dialog #${id}'s heading, focused by script as ${keys.toUpperCase()} ` +
+        `opens it, draws no focus outline, not ${outline.width} ${outline.style}` +
+        (outline.visible ? ", matching :focus-visible" : ""),
+    );
+  } finally {
+    await press(page, "Escape");
+    await until(page, `!${open}`).catch(() =>
+      assert.fail(`${url}: Escape closes the shortcut dialog #${id}`),
+    );
+  }
 }
 
 /** The ids of the dialogs the page's keyed show-modal openers open, each once. */
@@ -1248,7 +1320,8 @@ const HEADER_ROW = `(() => {
  * keeps its links on one line, and the group is on its own row below the nav, at its inline start,
  * within a pixel of the nav's. From HEADER_ROWS it is one row: the group is on the site nav's first
  * line, however many lines the nav wraps to, at the header's inline end. With no site nav, the
- * group is at the header's inline end at every width. And, at 390px, nothing scrolls sideways. */
+ * group is at the header's inline end at every width. And, at 390px, nothing scrolls sideways,
+ * with the text at its own size and at 200%. */
 async function assertHeaderRow(page: Page, url: string): Promise<void> {
   type Row = {
     buttons: { name: string; top: number; bottom: number }[];
@@ -1651,7 +1724,9 @@ export const opensKeysHelp: Check = async (page, site, url = site) => {
 /** Each dialog a keyed show-modal opener opens follows the components' shortcut dialog pattern: a
  * name from a heading inside it, a Close showing Esc, the two in its header row, a
  * header.dialog-header, and an opener that shows its key and has a name its interest hint shows;
- * it fails naming each dialog and what it lacks. */
+ * it fails naming each dialog and what it lacks. A heading in its header row with tabindex="-1",
+ * which script may focus, draws no focus outline as it takes focus once its key opens the dialog;
+ * it fails naming the dialog and the outline. */
 export const followsShortcutDialogs: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertShortcutDialogs(page, url);
@@ -1676,13 +1751,14 @@ export const hasTargetSize: Check = async (page, site, url = site) => {
 /** At 390px, 40rem, 1120px, and 1376px, the header's buttons share one line: below 40rem on their
  * own row under the site nav, which keeps its links on one line, at its inline start, and from
  * 40rem on the site nav's first line, at the header's inline end; and at 390px nothing scrolls
- * sideways. */
+ * sideways, with the text at its own size and at 200%. */
 export const keepsHeaderRow: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertHeaderRow(page, url);
 };
 
-/** In a 390px viewport, nothing on the page scrolls sideways. */
+/** In a 390px viewport, nothing on the page scrolls sideways, with the text at its own size and
+ * at 200%. */
 export const fitsNarrowWidth: Check = async (page, site, url = site) => {
   await page.goto(url);
   await assertNoSidewaysScroll(page, url);
@@ -1878,7 +1954,7 @@ export const shell: Record<string, Check> = {
     hasTargetSize,
   "the header's buttons share one line, under the nav at its start below 40rem, at the end after":
     keepsHeaderRow,
-  "nothing scrolls sideways at 390px": fitsNarrowWidth,
+  "nothing scrolls sideways at 390px, with text at its size and at 200%": fitsNarrowWidth,
   "no navigation link breaks inside a word, and each docked column is 16rem or wider":
     keepsNavigationWords,
   "a change in the settings is stored at once and applies after a reload": storesAtOnce,

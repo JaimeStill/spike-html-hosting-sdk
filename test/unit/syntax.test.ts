@@ -1,5 +1,6 @@
 // The highlighting, on the renderer and the syntax themes: a fence with a label Shiki bundles no
-// grammar for, and one with no label, render plain, as marked renders them with no highlighter;
+// grammar for, and one with no label, render plain, as marked renders them with no highlighter; a
+// highlighted fence's code names its language as marked's plain one does, language-<label>;
 // the check passes each built-in and fails a pair with a rule dropped from one side, and one with
 // a color dropped, and the highlighter refuses an entry that fails it, naming the palette; the
 // Flexoki copy is held to its record, and the flexoki built-in carries the foundation's green, not
@@ -165,6 +166,20 @@ describe("the highlighting", () => {
     assert.match(highlighted.html, /^<h1 id="t">T<\/h1>\n<pre class="shiki [^"]*" tabindex="0">/);
   });
 
+  test("name the fence's language on its code, as marked's plain fence does", () => {
+    // Each label as the fence writes it, lowercase and not, as marked's own renderer keeps it.
+    for (const lang of ["go", "Go"]) {
+      const text = `# T\n\n\`\`\`${lang}\nfunc f() {}\n\`\`\`\n`;
+      const code = (html: string) =>
+        /<pre[^>]*><code[^>]*>/.exec(html)?.[0].replace(/^<pre[^>]*>/, "");
+      const plain = render("README.md", text, source).html;
+      const highlighted = render("README.md", text, source, syntax.highlight).html;
+      assert.match(highlighted, /<pre class="shiki /);
+      assert.equal(code(highlighted), `<code class="language-${lang}">`);
+      assert.equal(code(highlighted), code(plain));
+    }
+  });
+
   test("drop Shiki's inline background and color, so the foundation's pre styles the block", () => {
     const { html } = render(
       "README.md",
@@ -235,7 +250,7 @@ describe("the highlighting", () => {
     const { html } = render("README.md", sample, source, syntax.highlight);
     const styles = classes(syntax.stylesheet());
     const blocks = [
-      ...html.matchAll(/<pre class="shiki[^"]*"[^>]*><code>([\s\S]*?)<\/code><\/pre>/g),
+      ...html.matchAll(/<pre class="shiki[^"]*"[^>]*><code[^>]*>([\s\S]*?)<\/code><\/pre>/g),
     ];
     assert.equal(blocks.length, highlighted.length);
 

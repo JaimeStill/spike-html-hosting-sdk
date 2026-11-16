@@ -4,7 +4,10 @@
 // plain/dist/ (mise run build:fixture-noctis builds both). Each is served under its base by Vite's
 // preview, as served() serves a site, in the pinned chrome-headless-shell. The check passes the
 // first, with noctis in the settings, and fails the second, naming noctis, whose code renders
-// plain there. The Noctis copy the first build reads is held to its record.
+// plain there. The Noctis copy the first build reads is held to its record. The fixture has no
+// content.json, its content/ its own, and the crawl and the content check read it as a site with
+// no tree: the crawl reaches its one page as a hand page, and the check finds its file in no
+// record.
 
 import assert from "node:assert/strict";
 import { join } from "node:path";
@@ -15,7 +18,7 @@ import type { Browser } from "@jaimestill/spike-html-apps-tooling/browser.js";
 import { freePort, start } from "@jaimestill/spike-html-apps-tooling/process.js";
 import type { Server } from "@jaimestill/spike-html-apps-tooling/server.js";
 
-import { highlightsEachPalette } from "../../src/browser.ts";
+import { crawl, highlightsEachPalette } from "../../src/browser.ts";
 import type { Check } from "../../src/browser.ts";
 import { checkContent } from "../../src/content.ts";
 import { base, command, served } from "../../src/served.ts";
@@ -107,5 +110,22 @@ describe("the palette check on the Noctis fixture", () => {
       assert.match(error.message, /^noctis in light: .*renders plain/);
       return true;
     });
+  });
+});
+
+describe("the Noctis fixture, with no content.json", () => {
+  test("the crawl reads it as a site with no tree, its index a hand page", async () => {
+    const page = await browser.open("about:blank");
+    try {
+      const crawled = await crawl(page, noctis.origin, root);
+      assert.deepEqual(crawled.unreachable, []);
+      assert.deepEqual(crawled.hand, [""]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  test("the content check reads it as a site with no tree, its file in no record", () => {
+    assert.deepEqual(checkContent(root), ["content/README.md is in no record"]);
   });
 });

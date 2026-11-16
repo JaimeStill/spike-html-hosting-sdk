@@ -6,6 +6,66 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-11-16
+
+Nothing scrolls sideways at 390px with the text at 200%, a header with no site nav holds its
+buttons at its inline end, no shortcut dialog's script-focused heading draws a focus outline, a
+site with no `content.json` passes the crawl and the content check, and a highlighted fence's
+`code` names its language. It pins spike-html-apps-foundation `v0.3.1`, and still pins
+spike-html-hosting-components `v0.5.0` and spike-html-hosting-icons `v0.1.0`.
+
+Upgrading: the crawl, `fitsNarrowWidth`, and `keepsHeaderRow` now read every page at 390px with
+its text at 200% as well, so a page that fits 390px only at its own text size, with a long
+unbreakable string or wide inline content, fails its check on `0.6.3` until it reflows.
+
+### Changed
+
+- spike-html-apps-foundation `v0.3.1`, from `v0.3.0`, the peer, the dev dependency, and the
+  template's pin: only a modal dialog's `::backdrop` is veiled, a popover's is transparent, and a
+  fullscreen element's is the browser's black.
+- eslint `10.15.0`, from `10.14.0`, and vite `8.3.8`, from `8.3.7`, each the dev dependency, the
+  peer range's floor, and the template's pin; prettier `3.10.1`, from `3.9.10`, the dev dependency
+  and the template's pin. The SDK's and the template's node is `26.13.1`, pnpm `12.21.0`, and
+  chrome-headless-shell `157.0.8103.78`. The SDK's workflows, the reusable `site-ci.yml` and
+  `site-pages.yml` among them, run `jdx/mise-action` at `v5.2.9`, from `v5.2.7`. rolldown stays
+  at `1.2.18`, the version Vite `8.3.8` pins with `~1.2.18`, though `1.3.2` is out.
+
+### Fixed
+
+- A header with no `sl-site-nav` holds its `.header-actions` group at its inline end at every
+  width, as the header row check, which treats the nav as optional, has it; `site.css` placed the
+  group there only beside a site nav, which took the row's room, so with none it sat at the
+  header's inline start. The group's auto start margin takes the room the nav leaves, or the whole
+  row's, and below 40rem only a header with a nav sets it back to the nav's inline start.
+- The header's `.header-actions` group, `flex: none`, couldn't shrink: in a 390px viewport with the
+  text at 200%, its buttons ran past the header and the page scrolled sideways (WCAG 1.4.4, resize
+  text, and 1.4.10, reflow), with or without a site nav. The group now shrinks to its row and wraps
+  its buttons onto more lines where they don't fit on one, each line at the group's inline end, or
+  at the nav's inline start below 40rem. `fitsNarrowWidth`, `keepsHeaderRow`, and the crawl hold a
+  page in a 390px viewport to no sideways scroll with its text at its own size and at 200%, the
+  root's font size doubled for the reading and put back, and fail naming the text's size; the shell
+  check's name is now "nothing scrolls sideways at 390px, with text at its size and at 200%", so a
+  site that names the check by its old key, rather than running `shell`'s entries as the template
+  does, takes the new one.
+- `site.css`'s rule that keeps the focus outline off a heading script focuses named Help's title
+  alone, `dialog#help h2#help-title[tabindex="-1"]`, so a heading a site's script focuses in
+  Settings, or in any shortcut dialog it adds, drew the foundation's `:focus-visible` outline as its
+  dialog opened from its key. The rule now covers every heading with `tabindex="-1"` in a dialog's
+  header row, `.dialog-header > :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus`: none is a
+  control, and Tab never reaches one. The shortcut dialog check holds it: each dialog whose header
+  row has such a heading is opened by its key, its heading focused by script, and fails, naming the
+  dialog and the outline, where the heading draws one.
+- The crawl and the content check read a site's `content.json` without checking it exists, so on
+  a site with none, as a site of hand pages alone has, each threw `ENOENT`. Both read such a site
+  as one with no tree: `copiedFiles` lists none, so the crawl checks every page it reaches as a
+  hand page, and `checkContent` finds nothing with no `content/`, and each file under one in no
+  record.
+- A fence Shiki highlights dropped its language: its `code` element had no class, where marked's
+  plain fence writes `class="language-<label>"`. The highlighted block's `code` now names its
+  language the same way, the label as the fence writes it, so `` ```Go `` gives
+  `<code class="language-Go">` either way. A fence with no label, or one Shiki bundles no grammar
+  for, still renders plain, as marked renders it.
+
 ## [0.6.2] - 2026-11-11
 
 Help opens on its title, not its Close. A site pinning it takes the template's two attributes on
@@ -480,7 +540,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...v0.6.0

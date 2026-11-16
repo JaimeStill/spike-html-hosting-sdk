@@ -20,8 +20,10 @@
 // holds each class's variables and, per syntax theme, one rule that selects the theme's variables
 // under [data-palette="<palette>"], flexoki's also under a root with no data-palette, as the
 // foundation's default. A palette with no syntax theme matches no rule, so its code is plain, in
-// the page's text color. A fence whose label Shiki bundles no grammar for, or with no label,
-// isn't highlighted: createSyntax's highlight gives false, and marked renders it plain.
+// the page's text color. A highlighted block's code element names its language as marked's plain
+// fence does, class="language-<label>", the label as the fence writes it. A fence whose label Shiki
+// bundles no grammar for, or with no label, isn't highlighted: createSyntax's highlight gives
+// false, and marked renders it plain.
 //
 // The engine is Shiki's Oniguruma, the TextMate grammars' own regex engine, which runs every
 // bundled grammar as its source editor does; it runs once a build, at its start.
@@ -277,6 +279,11 @@ export async function createSyntax(
           {
             pre(node) {
               delete node.properties.style;
+            },
+            // The code names its language as marked's own fence does, a language-<label> class,
+            // the label as the fence writes it, so a highlighted block keeps what a plain one says.
+            code(node) {
+              this.addClassToHast(node, `language-${lang}`);
             },
           },
           classes,

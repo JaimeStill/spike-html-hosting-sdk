@@ -10,7 +10,8 @@
 // "blob <length>\0" and its bytes, and holds it to its record: an edited copy, a recorded file
 // missing, or a file no record names is a mismatch, and so is a record that names its source by
 // anything but a GitHub repository URL and a full commit, or two trees that share a directory. A
-// site's unit tier asserts it finds none.
+// site with no content.json records no tree: it has no copied file, and every file under its
+// content/, if it has one, is in no record. A site's unit tier asserts it finds none.
 // Adapted from spike-html-hosting-architecture (c4deeff): test/unit/content.test.ts, its
 // assertions a function that returns the mismatches, and the source's owner any GitHub owner.
 
@@ -54,9 +55,12 @@ function placed(content: Content): Placed[] {
   return [{ ...content, dir: "" }];
 }
 
-/** The site at root's content.json, its trees placed. */
+/** The site at root's content.json, its trees placed; none for a site with no content.json, which
+ * copies no tree, as a site of hand pages alone, or one whose content/ is its own, has it. */
 function readContent(root: string): Placed[] {
-  return placed(JSON.parse(readFileSync(join(root, "content.json"), "utf8")) as Content);
+  const file = join(root, "content.json");
+  if (!existsSync(file)) return [];
+  return placed(JSON.parse(readFileSync(file, "utf8")) as Content);
 }
 
 /** Every copied file the site at root records, by its path under content/, which is its page's
