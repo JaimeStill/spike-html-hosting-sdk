@@ -52,12 +52,12 @@
 // group, share one line at the capture widths and at 40rem: at 390px, below 40rem, the site nav
 // keeps its links on one line and the group is on its own row below it, at the nav's inline start,
 // and from 40rem the group is on the site nav's first line, at the header's inline end; nothing
-// scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.10); and at a
-// phone's width, a px below and at each of the layout's docks (markdown-pages.ts's docks), and at
-// 1400px, no navigation link's word breaks across lines and every docked side column is at least
-// 16rem wide. A check that changes the reader's stored theme or keys settings removes them after;
-// one that sets a facet's attribute on the root puts it back. shell lists them by name, for a site
-// to make a test of each.
+// scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.4 and 1.4.10);
+// and at a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's
+// docks), and at 1400px, no navigation link's word breaks across lines and every docked side
+// column is at least 16rem wide. A check that changes the reader's stored theme or keys settings
+// removes them after; one that sets a facet's attribute on the root puts it back. shell lists them
+// by name, for a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
@@ -363,8 +363,9 @@ const SIDEWAYS = (scale: number): string => `(() => {
 })()`;
 
 /** Asserts the loaded page, in a 390px viewport, is no wider than it, with its text at its own size
- * and at 200%, as a reader who enlarges the text has it (WCAG 1.4.10, reflow): nothing scrolls
- * sideways, naming the text's size past 100% and the widest elements that overflow it. */
+ * and at 200%, as a reader who enlarges the text has it (WCAG 1.4.4, resize text, and 1.4.10,
+ * reflow): nothing scrolls sideways, naming the text's size past 100% and the widest elements
+ * that overflow it. */
 async function assertNoSidewaysScroll(page: Page, url: string): Promise<void> {
   await narrow(page);
   for (const scale of [1, 2]) {

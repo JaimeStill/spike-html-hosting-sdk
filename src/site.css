@@ -77,8 +77,8 @@
      inline end by its auto start margin, which takes the room the site nav leaves, or the whole
      row's with no nav. The group shrinks to the room its row has, wrapping its buttons onto more
      lines only where they don't fit on one, as with the text at 200% in a 390px viewport, so the
-     header never scrolls the page sideways (WCAG 1.4.10); its lines keep the group's inline end.
-     Each is a glyph button, which the components' glyph-button.css lays out. */
+     header never scrolls the page sideways (WCAG 1.4.4 and 1.4.10); its lines keep the group's
+     inline end. Each is a glyph button, which the components' glyph-button.css lays out. */
   .header-actions {
     display: flex;
     flex-wrap: wrap;

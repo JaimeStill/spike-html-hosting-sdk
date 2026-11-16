@@ -33,22 +33,24 @@ spike-html-hosting-components `v0.5.0` and spike-html-hosting-icons `v0.1.0`.
   group there only beside a site nav, which took the row's room, so with none it sat at the
   header's inline start. The group's auto start margin takes the room the nav leaves, or the whole
   row's, and below 40rem only a header with a nav sets it back to the nav's inline start.
-- The header's `.header-actions` group, `flex: none`, couldn't shrink: in a 390px viewport with
-  the text at 200%, its buttons ran past the header and the page scrolled sideways (WCAG 1.4.10,
-  reflow), with or without a site nav. The group now shrinks to its row and wraps its buttons
-  onto more lines where they don't fit on one, each line at the group's inline end, or at the
-  nav's inline start below 40rem. `fitsNarrowWidth`, `keepsHeaderRow`, and the crawl hold a page
-  in a 390px viewport to no sideways scroll with its text at its own size and at 200%, the root's
-  font size doubled for the reading and put back, and fail naming the text's size; the shell
-  check's name is now "nothing scrolls sideways at 390px, with text at its size and at 200%".
+- The header's `.header-actions` group, `flex: none`, couldn't shrink: in a 390px viewport with the
+  text at 200%, its buttons ran past the header and the page scrolled sideways (WCAG 1.4.4, resize
+  text, and 1.4.10, reflow), with or without a site nav. The group now shrinks to its row and wraps
+  its buttons onto more lines where they don't fit on one, each line at the group's inline end, or
+  at the nav's inline start below 40rem. `fitsNarrowWidth`, `keepsHeaderRow`, and the crawl hold a
+  page in a 390px viewport to no sideways scroll with its text at its own size and at 200%, the
+  root's font size doubled for the reading and put back, and fail naming the text's size; the shell
+  check's name is now "nothing scrolls sideways at 390px, with text at its size and at 200%", so a
+  site that names the check by its old key, rather than running `shell`'s entries as the template
+  does, takes the new one.
 - `site.css`'s rule that keeps the focus outline off a heading script focuses named Help's title
-  alone, `dialog#help h2#help-title[tabindex="-1"]`, so Settings' heading, or any shortcut
-  dialog's a site's script focuses, drew the foundation's `:focus-visible` outline as its dialog
-  opened from its key. The rule now covers every heading with `tabindex="-1"` in a dialog's
+  alone, `dialog#help h2#help-title[tabindex="-1"]`, so a heading a site's script focuses in
+  Settings, or in any shortcut dialog it adds, drew the foundation's `:focus-visible` outline as its
+  dialog opened from its key. The rule now covers every heading with `tabindex="-1"` in a dialog's
   header row, `.dialog-header > :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus`: none is a
   control, and Tab never reaches one. The shortcut dialog check holds it: each dialog whose header
-  row has such a heading is opened by its key, its heading focused by script, and fails, naming
-  the dialog and the outline, where the heading draws one.
+  row has such a heading is opened by its key, its heading focused by script, and fails, naming the
+  dialog and the outline, where the heading draws one.
 - The crawl and the content check read a site's `content.json` without checking it exists, so on
   a site with none, as a site of hand pages alone has, each threw `ENOENT`. Both read such a site
   as one with no tree: `copiedFiles` lists none, so the crawl checks every page it reaches as a
