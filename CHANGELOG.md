@@ -6,8 +6,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-11-16
+
+Nothing scrolls sideways at 390px with the text at 200%, a header with no site nav holds its
+buttons at its inline end, no shortcut dialog's script-focused heading draws a focus outline, a
+site with no `content.json` passes the crawl and the content check, and a highlighted fence's
+`code` names its language. It pins spike-html-apps-foundation `v0.3.1`, and still pins
+spike-html-hosting-components `v0.5.0` and spike-html-hosting-icons `v0.1.0`.
+
 ### Changed
 
+- spike-html-apps-foundation `v0.3.1`, from `v0.3.0`, the peer, the dev dependency, and the
+  template's pin: only a modal dialog's `::backdrop` is veiled, a popover's is transparent, and a
+  fullscreen element's is the browser's black.
 - eslint `10.15.0`, from `10.14.0`, and vite `8.3.8`, from `8.3.7`, each the dev dependency, the
   peer range's floor, and the template's pin; prettier `3.10.1`, from `3.9.10`, the dev dependency
   and the template's pin. The SDK's and the template's node is `26.13.1`, pnpm `12.21.0`, and
@@ -523,7 +534,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.5.0...v0.6.0
