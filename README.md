@@ -238,10 +238,10 @@ The shell checks, each named in `shell`, assert these:
   to the first section and K back to the page's top, and the header's Contents button is hidden.
   At 390px and a pixel under 70rem the drawer is closed and the tree hidden; the Contents button,
   shown, opens it as a modal by its click and by C, its `aria-expanded` true while it is open and
-  false once Escape closes it, and its heading, not its Close, takes focus as it opens, drawing no
-  outline, Close's hint still closed a second after C opens it; opened by its `show()`, it closes
-  as a link in it is followed, and the link's section is marked. A page with no tree shows no
-  Contents button.
+  false once Escape closes it, and its heading takes focus as it opens, nothing else in it, its
+  Close above all, taking focus even in passing, the heading drawing no outline, and Close's hint
+  still closed a second after C opens it; opened by its `show()`, it closes as a link in it is
+  followed, and the link's section is marked. A page with no tree shows no Contents button.
 - At 390px, at 1200px, and at 1600px, main starts directly under the header, however short the
   page: never into it, and no further below it than on a page taller than the viewport.
 - A pixel under 70rem, below both docks, ? opens Help, its title heading focused, by its
@@ -304,9 +304,9 @@ carries none; with no
 page header, front matter table, or visible list of its keys left, and no `key: value` line in its
 text; its site index, in its Pages drawer, links every copied page the build writes, each once, and
 no hand page; its Pages button is hidden at 1600px and at 390px opens the drawer by its click and by
-P, its `aria-expanded` following the drawer open and closed and its heading, not its Close, taking
-focus as it opens, Close's hint still closed a second after P; its two pagers, at main's top and
-foot, each named, link the pages before and after it in its site index's order, none past either
+P, its `aria-expanded` following the drawer open and closed and its heading taking focus as it
+opens, nothing else in it, its Close above all, taking focus even in passing, and Close's hint still
+closed a second after P; its two pagers, at main's top and foot, each named, link the pages before and after it in its site index's order, none past either
 end, each link its arrow, its word, the page's title, its key hint, and its binding, H or L; at
 390px each link only its arrow and word, its title and key hint not visible, its name still
 `<word> <title>`; and each link followed, and H and L pressed at 390px, lands on its page; and

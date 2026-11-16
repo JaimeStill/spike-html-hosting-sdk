@@ -27,10 +27,12 @@ the Close that took focus. The shell's markup is unchanged.
   on it.
 - The shell check's section tree check and the crawl's Pages button check hold the drawers to it:
   each drawer, opened by its button's click and by its key, C or P, has its heading focused, inside
-  its shadow root, not its Close, and the heading draws no focus outline; opened by its key, at
-  390px for Contents, its Close's interest hint is still closed a second later, past the interest
-  delay. Each fails naming the drawer, how it opened, and what took focus; on components `v0.5.0`,
-  both fail on every page with the drawer.
+  its shadow root, and nothing else in it, its Close above all, took focus as it opened, not even
+  in passing, by the focus events heard inside it from before it opened; the heading draws no
+  focus outline; and opened by its key, at 390px for Contents, its Close's interest hint is still
+  closed a second later, past the interest delay, the one read a wait must make, since a hint that
+  never opens sends no event. Each fails naming the drawer, how it opened, and what took focus; on
+  components `v0.5.0`, both fail on every page with the drawer.
 
 ## [0.6.3] - 2026-11-16
 

@@ -24,10 +24,11 @@
 // its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
 // and K move through its sections, marking each, and the header's Contents button is hidden, and
 // below the dock, at 390px and a px under it, a closed drawer, which the Contents button, shown
-// there, opens by its click and by C, its aria-expanded in step and its heading, not its Close,
-// taking focus as it opens, no outline drawn and, opened by C, Close's interest hint not shown past
-// the interest delay, and whose show() opens it and in which following a link closes it and marks
-// the link's section, and a page with no tree has no Contents drawer and shows no Contents button;
+// there, opens by its click and by C, its aria-expanded in step and its heading taking focus as it
+// opens, nothing else in it, its Close above all, taking focus even in passing, no outline drawn
+// and, opened by C, Close's interest hint not shown past the interest delay, and whose show()
+// opens it and in which following a link closes it and marks the link's section, and a page with
+// no tree has no Contents drawer and shows no Contents button;
 // at 390px, between the docks, and at 1600px, main starts directly under the header, the gap from
 // the header's bottom never below zero and no more than on a page taller than the viewport, however
 // short the page; below both docks, ? opens Help, its title heading focused, by its tabindex="-1"
@@ -71,36 +72,35 @@
 // is followed, breadth first, and each copied file's page reached loads with a 2xx, its one module
 // script render-blocking, every custom element on it defined, every request under the base and none
 // failed, its main held to a reading width, centered, in a 1600px viewport, nothing scrolling
-// sideways in a 390px one, with its text at its own size and at 200%, its navigation laid out
-// as the shell check has it at the same widths,
-// its layout between the docks, its section tree in its Contents drawer, its main under the header,
-// its Help and the switch in Settings, its shortcut dialogs, its glyph buttons and their size, and
-// its header's row as the shell checks have them, and its title its source's front matter name, or,
-// for a source with no name, its first h1's text. Its Pages button is hidden at 1600px, where the
-// site index is docked, and at 390px is shown and opens the Pages drawer as a modal by its click
-// and by P, its aria-expanded true while the drawer is open and false once Escape closes it, its
-// heading taking focus as it opens, not its Close, whose hint, opened by P, isn't shown. Each
-// page has a pager at main's top and at its foot, each a nav named apart, linking the pages before
-// and after it in its site index's order, none past either end, each link showing its arrow glyph,
-// filled, its word, the page's title, and its key hint, binding H or L, and named by its visible
-// text, "Previous <title>" or "Next <title>", as the browser computes it; at 390px each link shows
-// only its arrow and word, its title and key hint not visible but the title still in its name, the
-// two links on one row at the pager's inline start and end; each link, followed, lands on its page,
-// and H and L, pressed at 390px, on the previous and the next. Each page's head holds right after
-// its title a meta per front matter key and no other, named by the key, in source order, its
-// content the value as frontMatterText gives it, so none for a source with no front matter, and
-// no meta elsewhere in the head takes a key's name; no page header, no front matter table, and
-// no visible list of its keys remains, and no key's "key: value" line is the page's text. Each
-// page's site index, in its Pages drawer, links every copied file's page, each once, and no other.
-// Every in-site link reaches a built page, and an element with its fragment's id when it has one.
-// The crawl checks a page for every Markdown file content.json records, every tree's: a page no
-// link from the index reaches is crawled from once the links run out, and returned, for the test's
-// diagnostics; a site with no content.json records none (content.ts). A page reached that no
-// record names is a hand page the site also builds, a hand index at the base or a hand page
-// elsewhere: it loads with a 2xx, every request under the base and none failed, it has no pager and
-// binds neither H nor L, its ids are the targets of the fragments linking it, and its links are
-// followed, but the copied pages' checks are left to the shell checks, which a site runs on each
-// hand page by its URL; it is returned too.
+// sideways in a 390px one, with its text at its own size and at 200%, its navigation laid out as
+// the shell check has it at the same widths, its layout between the docks, its section tree in its
+// Contents drawer, its main under the header, its Help and the switch in Settings, its shortcut
+// dialogs, its glyph buttons and their size, and its header's row as the shell checks have them,
+// and its title its source's front matter name, or, for a source with no name, its first h1's text.
+// Its Pages button is hidden at 1600px, where the site index is docked, and at 390px is shown and
+// opens the Pages drawer as a modal by its click and by P, its aria-expanded true while the drawer
+// is open and false once Escape closes it, its heading taking focus as it opens, nothing else in
+// it, not even its Close in passing, whose hint, opened by P, isn't shown. Each page has a pager at
+// main's top and at its foot, each a nav named apart, linking the pages before and after it in its
+// site index's order, none past either end, each link showing its arrow glyph, filled, its word,
+// the page's title, and its key hint, binding H or L, and named by its visible text, "Previous
+// <title>" or "Next <title>", as the browser computes it; at 390px each link shows only its arrow
+// and word, its title and key hint not visible but the title still in its name, the two links on
+// one row at the pager's inline start and end; each link, followed, lands on its page, and H and L,
+// pressed at 390px, on the previous and the next. Each page's head holds right after its title a
+// meta per front matter key and no other, named by the key, in source order, its content the value
+// as frontMatterText gives it, so none for a source with no front matter, and no meta elsewhere in
+// the head takes a key's name; no page header, no front matter table, and no visible list of its
+// keys remains, and no key's "key: value" line is the page's text. Each page's site index, in its
+// Pages drawer, links every copied file's page, each once, and no other. Every in-site link reaches
+// a built page, and an element with its fragment's id when it has one. The crawl checks a page for
+// every Markdown file content.json records, every tree's: a page no link from the index reaches is
+// crawled from once the links run out, and returned, for the test's diagnostics; a site with no
+// content.json records none (content.ts). A page reached that no record names is a hand page the
+// site also builds, a hand index at the base or a hand page elsewhere: it loads with a 2xx, every
+// request under the base and none failed, it has no pager and binds neither H nor L, its ids are
+// the targets of the fragments linking it, and its links are followed, but the copied pages' checks
+// are left to the shell checks, which a site runs on each hand page by its URL; it is returned too.
 // Adapted from spike-html-hosting (0a98c8e): test/browser/site.test.ts, its one page a crawl of
 // the site's pages.
 // Adapted from spike-html-hosting (16c97c6): test/browser/site.test.ts, its checks functions over
@@ -477,31 +477,53 @@ const PAGES = `(() => {
   };
 })()`;
 
-/** Where focus sits in the open modal drawer with the id, sl-drawer#<id>: whether its heading,
- * the h2 labeling its dialog, holds it, the drawer the document's focused element and the heading
- * its shadow root's; what does hold it there, by its tag; whether the heading draws no focus
- * outline; and whether its Close's interest hint, the shadow root's #close-hint, is showing. */
+/** Starts a record of every focus inside sl-drawer#<id>, in its shadow root and its slotted
+ * content, each by what took it: "heading", the h2 labeling its dialog, "Close", or its tag. Run
+ * before the drawer opens, so a focus that passes through the Close on its way to the heading is
+ * heard, not only where focus ends. */
+const recordDrawerFocus = (id: string): string => `(() => {
+  const root = document.getElementById(${JSON.stringify(id)})?.shadowRoot;
+  globalThis.drawerFocused = [];
+  if (!root || root.drawerFocusRecorded) return;
+  root.drawerFocusRecorded = true;
+  root.addEventListener("focusin", ({ target }) =>
+    globalThis.drawerFocused.push(
+      target.matches("dialog h2#title")
+        ? "heading"
+        : target.matches('[interestfor="close-hint"]')
+          ? "Close"
+          : target.localName,
+    ));
+})()`;
+
+/** Where focus sits in the open modal drawer with the id, sl-drawer#<id>: every focus heard inside
+ * it since recordDrawerFocus; whether its heading holds it, the drawer the document's focused
+ * element and the heading its shadow root's; whether the heading draws no focus outline; and
+ * whether its Close's interest hint, the shadow root's #close-hint, is showing. */
 const drawerFocus = (id: string): string => `(() => {
   const drawer = document.getElementById(${JSON.stringify(id)});
   const root = drawer?.shadowRoot;
   const heading = root?.querySelector("dialog h2#title");
   const { outlineStyle, outlineWidth } = heading ? getComputedStyle(heading) : {};
   return {
+    focused: globalThis.drawerFocused ?? [],
     heading: !!heading && document.activeElement === drawer && root.activeElement === heading,
-    focused: (document.activeElement === drawer ? root.activeElement : document.activeElement)
-      ?.localName ?? null,
     outline: outlineStyle === "none" || parseFloat(outlineWidth) === 0,
     hint: !!root?.getElementById("close-hint")?.matches(":popover-open"),
   };
 })()`;
 
 /**
- * Asserts the modal drawer sl-drawer#<id>, just opened, gives its heading first focus, by the
- * components' tabindex="-1" and autofocus, not its Close, the dialog's first control, and the
- * heading, which isn't a control and which Tab never reaches, draws no focus outline. With
- * `hint`, the drawer opened by its key, it waits past the interest delay (PAST_INTEREST) and
- * asserts Close's interest hint stays closed, as it shows at once on a Close that showModal()
- * focuses. Fails naming the drawer, how it opened, and what took focus.
+ * Asserts the modal drawer sl-drawer#<id>, just opened with its focus recorded from before
+ * (recordDrawerFocus), gave its heading first focus, by the components' tabindex="-1" and
+ * autofocus, and that nothing else in it, above all its Close, the dialog's first control, took
+ * focus as it opened, not even in passing; the heading still holds focus and, as it isn't a
+ * control and Tab never reaches it, draws no focus outline. With `hint`, it then waits past the
+ * interest delay (PAST_INTEREST) and asserts Close's interest hint is closed: a hint that never
+ * opens sends no event to wait on, so it is read after the wait, which a slow browser can make
+ * pass early, never fail. A caller asks for it on a key's open alone, since the hint shows on
+ * keyboard focus, and focus moved after a click isn't keyboard focus. Fails naming the drawer,
+ * how it opened, and what took focus.
  */
 async function assertDrawerFocus(
   page: Page,
@@ -510,12 +532,15 @@ async function assertDrawerFocus(
   by: string,
   hint: boolean,
 ): Promise<void> {
-  type Focus = { heading: boolean; focused: string | null; outline: boolean; hint: boolean };
+  type Focus = { focused: string[]; heading: boolean; outline: boolean; hint: boolean };
   let focus: Focus = await page.evaluate(drawerFocus(id));
-  assert.ok(
-    focus.heading,
-    `${url}: the ${id} drawer, opened by ${by}, focuses its heading, not ${focus.focused}`,
+  assert.deepEqual(
+    focus.focused,
+    ["heading"],
+    `${url}: the ${id} drawer, opened by ${by}, focuses its heading alone, not ` +
+      (focus.focused.join(", then ") || "nothing"),
   );
+  assert.ok(focus.heading, `${url}: the ${id} drawer, opened by ${by}, keeps focus on its heading`);
   assert.ok(focus.outline, `${url}: the ${id} drawer's focused heading draws no focus outline`);
   if (!hint) return;
   await page.evaluate(PAST_INTEREST);
@@ -529,9 +554,9 @@ async function assertDrawerFocus(
 
 /** Asserts the loaded page's Pages button: hidden in a 1600px viewport, where the site index's
  * drawer is docked; in a 390px one shown, opening the drawer as a modal by its click and by P,
- * with aria-expanded true while it is open, the drawer's heading focused and, opened by P, its
- * Close's hint closed past the interest delay (assertDrawerFocus), and aria-expanded false again
- * once Escape closes it. */
+ * with aria-expanded true while it is open, the drawer's heading focused and nothing else in it,
+ * even in passing, and, opened by P, its Close's hint closed past the interest delay
+ * (assertDrawerFocus), and aria-expanded false again once Escape closes it. */
 async function assertPagesButton(page: Page, url: string): Promise<void> {
   type Pages = { shown: boolean; expanded: string | null; modal: boolean };
   await wide(page);
@@ -550,6 +575,7 @@ async function assertPagesButton(page: Page, url: string): Promise<void> {
     ["its click", () => click(page, ".pages-opener")],
     ["P", () => press(page, "p")],
   ] as const) {
+    await page.evaluate(recordDrawerFocus("pages"));
     await open();
     await until(page, `${PAGES}.modal`);
     pages = await page.evaluate(PAGES);
@@ -686,10 +712,10 @@ async function atWidth(page: Page, width: number): Promise<void> {
  * is hidden there. At a phone's width and a px below the dock the drawer is closed, the tree not
  * rendered, and the Contents button shown, opening it as a modal by its click and by C, its
  * aria-expanded true while the drawer is open and false once Escape closes it, and the drawer's
- * heading focused as it opens, not its Close, and, opened by C at a phone's width, Close's hint
- * closed past the interest delay (assertDrawerFocus); the drawer's show()
- * opens it with the tree rendered, and following the tree's last link closes it, its fragment the
- * URL's and its section marked. A page with no tree has no Contents drawer, and no Contents button
+ * heading focused as it opens and nothing else in it, even in passing, and, opened by C at a
+ * phone's width, Close's hint closed past the interest delay (assertDrawerFocus); the drawer's
+ * show() opens it with the tree rendered, and following the tree's last link closes it, its
+ * fragment the URL's and its section marked. A page with no tree has no Contents drawer, and no Contents button
  * shown at a phone's width. The fragment and the emulated motion are put back after.
  */
 async function assertContents(page: Page, url: string): Promise<void> {
@@ -775,6 +801,7 @@ async function assertContents(page: Page, url: string): Promise<void> {
         ["its click", () => click(page, "body > header .contents-opener")],
         ["C", () => press(page, "c")],
       ] as const) {
+        await page.evaluate(recordDrawerFocus("contents"));
         await open();
         await until(page, CONTENTS_MODAL).catch(() =>
           assert.fail(`${url}: at ${width}px the Contents button opens the drawer by ${by}`),
@@ -784,7 +811,8 @@ async function assertContents(page: Page, url: string): Promise<void> {
           "true",
           `${url}: at ${width}px the Contents button's aria-expanded is true while it is open`,
         );
-        // Close's hint is waited for at a phone's width alone, once a page, by C.
+        // Close's hint is waited for once a page, by C at a phone's width: a px under the dock
+        // the same drawer opens by the same key, and the focus record covers both widths.
         await assertDrawerFocus(page, url, "contents", by, by === "C" && width === 390);
         await press(page, "Escape");
         await until(page, `!${CONTENTS_MODAL}`);
@@ -878,8 +906,9 @@ const HELP_TITLE = `document.querySelector("dialog#help h2#help-title")`;
 /** Help's Close's interest hint is showing. */
 const HELP_CLOSE_HINT = `!!document.getElementById("help-close-hint")?.matches(":popover-open")`;
 
-/** Waits well past a focused control's interest delay, Chrome's half a second, by which Close's
- * hint, focused as Help opened, had shown on the markup before the title took focus. */
+/** Waits well past a focused control's interest delay, Chromium's 0.25 s at "normal", by which a
+ * Close's hint, keyboard focused as its dialog opened, had shown on the markup before the
+ * dialog's heading took focus. */
 const PAST_INTEREST = `new Promise((resolve) => setTimeout(resolve, 1000))`;
 
 /** Help's shortcuts list, sl-shortcuts, as it renders in its shadow root: each row's keys, as its

@@ -14,7 +14,10 @@
 // column to 16rem on a page with no section tree, the between-docks check fails on the index,
 // naming main's off-center margins, and with the guide's Contents drawer moved to the start column
 // it fails naming the tree. With the Contents drawer's close() closing nothing, the section tree
-// check fails on the guide, naming the width and the drawer a followed link left open. The index
+// check fails on the guide, naming the width and the drawer a followed link left open; with its
+// Close focused in passing as it opens, its Close's hint shown after C opens it, or an outline on
+// its heading, the section tree check fails on the guide, naming the drawer and what went wrong,
+// and with the Pages drawer's Close focused as it opens, the crawl fails on the index. The index
 // and the orphan page are shorter than the viewport at 390px, 1200px, and 1600px, so the body's
 // min-height leaves room under them, and with v0.3.0's grid, whose rows stretch into it, the
 // under-header check and the crawl fail on the index, naming the width and main's gap; at 390px,
@@ -345,6 +348,68 @@ describe("the fixture site with its Contents drawer left open", () => {
         assert.match(
           error.message,
           /\/fixture-site\/guide\/: at 390px following a link in the Contents drawer closes it/,
+        );
+        return true;
+      });
+    } finally {
+      await page.close();
+    }
+  });
+});
+
+describe("the fixture site with its drawers' focus wrong", () => {
+  // Each change runs at the drawer's open event, which sl-drawer sends as showModal() returns, the
+  // heading already focused by its autofocus.
+  const opened = (id: string, body: string): string =>
+    `document.addEventListener("open", ({ target }) => {
+      if (target.id !== ${JSON.stringify(id)}) return;
+      const root = target.shadowRoot;
+      const heading = root.querySelector("dialog h2#title");
+      const close = root.querySelector('[interestfor="close-hint"]');
+      ${body}
+    });`;
+  for (const [change, script, message] of [
+    [
+      "Close focused in passing as it opens, the heading focused again after",
+      opened("contents", "close.focus(); heading.focus();"),
+      /\/fixture-site\/guide\/: the contents drawer, opened by its click, focuses its heading alone, not heading, then Close, then heading/,
+    ],
+    [
+      "Close's hint shown after it opens by C",
+      opened(
+        "contents",
+        `setTimeout(() => {
+          if (target.open) root.getElementById("close-hint").showPopover();
+        }, 300);`,
+      ),
+      /\/fixture-site\/guide\/: the contents drawer opens by C with its Close's hint closed/,
+    ],
+    [
+      "an outline on its heading",
+      opened("contents", `heading.style.outline = "2px solid";`),
+      /\/fixture-site\/guide\/: the contents drawer's focused heading draws no focus outline/,
+    ],
+  ] as const) {
+    test(`the Contents drawer with ${change} fails the section tree check`, async () => {
+      const page = await withChange(script);
+      try {
+        await assert.rejects(placesSectionTree(page, `${server.origin}guide/`), (error: Error) => {
+          assert.match(error.message, message);
+          return true;
+        });
+      } finally {
+        await page.close();
+      }
+    });
+  }
+
+  test("the Pages drawer focusing its Close as it opens fails the crawl, naming the page", async () => {
+    const page = await withChange(opened("pages", "close.focus();"));
+    try {
+      await assert.rejects(crawl(page, server.origin, root), (error: Error) => {
+        assert.match(
+          error.message,
+          /\/fixture-site\/: the pages drawer, opened by its click, focuses its heading alone, not heading, then Close/,
         );
         return true;
       });
