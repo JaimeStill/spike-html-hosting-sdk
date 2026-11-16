@@ -275,7 +275,8 @@ The shell checks, each named in `shell`, assert these:
   row below it, its inline start within a pixel of the nav's; from 40rem the group is on the site
   nav's first line, at the header's inline end. With no site nav, the group is at the header's
   inline end at every width.
-- Nothing scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.10).
+- Nothing scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.4 and
+  1.4.10).
 - At 390px, a pixel below and at each of the layout's docks, and at 1400px, no navigation link's
   word breaks across lines (a hyphenated compound may wrap after its hyphen), and every docked side
   column is at least 16rem wide.
