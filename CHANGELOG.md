@@ -6,6 +6,32 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-16
+
+The Pages and Contents drawers open on their heading, not their Close, as Help does. It pins
+spike-html-hosting-components `v0.5.1`, and still pins spike-html-apps-foundation `v0.3.1` and
+spike-html-hosting-icons `v0.1.0`.
+
+Upgrading: a site takes the components at `v0.5.1`, the template's pin, or the section tree check
+and the crawl fail on its Contents drawer, and the crawl on its Pages drawer, naming the drawer and
+the Close that took focus. The shell's markup is unchanged.
+
+### Changed
+
+- spike-html-hosting-components `v0.5.1`, from `v0.5.0`, the dev dependency and the template's pin:
+  `sl-drawer`, open as a modal below its dock, gives its dialog's heading first focus,
+  `<h2 id="title" tabindex="-1" autofocus>`, where `showModal()` focused its Close, whose interest
+  hint then showed at once. The Pages and Contents drawers on every Markdown page are
+  `sl-drawer`s, so each now opens on its heading, which draws no focus outline, the component's own
+  sheet keeping it off, and its Close shows its hint only when Tab reaches it or the pointer rests
+  on it.
+- The shell check's section tree check and the crawl's Pages button check hold the drawers to it:
+  each drawer, opened by its button's click and by its key, C or P, has its heading focused, inside
+  its shadow root, not its Close, and the heading draws no focus outline; opened by its key, at
+  390px for Contents, its Close's interest hint is still closed a second later, past the interest
+  delay. Each fails naming the drawer, how it opened, and what took focus; on components `v0.5.0`,
+  both fail on every page with the drawer.
+
 ## [0.6.3] - 2026-11-16
 
 Nothing scrolls sideways at 390px with the text at 200%, a header with no site nav holds its
@@ -540,7 +566,8 @@ The first release: the site SDK and template the spike's GitHub Pages sites cons
 - The reusable workflows `site-pages.yml`, the check then the Pages deploy, and `site-ci.yml`,
   the check on pull requests, on `workflow_call`.
 
-[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.3...HEAD
+[Unreleased]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.4...HEAD
+[0.6.4]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/JaimeStill/spike-html-hosting-sdk/compare/v0.6.0...v0.6.1

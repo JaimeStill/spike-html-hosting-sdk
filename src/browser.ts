@@ -24,40 +24,41 @@
 // its Contents drawer, docked as a column beside main from the tree's dock and at 1600px, where J
 // and K move through its sections, marking each, and the header's Contents button is hidden, and
 // below the dock, at 390px and a px under it, a closed drawer, which the Contents button, shown
-// there, opens by its click and by C, its aria-expanded in step, and whose show() opens it and in
-// which following a link closes it and marks the link's section, and a page with no tree has no
-// Contents drawer and shows no Contents button; at 390px, between the docks, and at 1600px, main
-// starts directly under the header, the gap from the header's bottom never below zero and no more
-// than on a page taller than the viewport, however short the page; below both docks, ? opens Help,
-// its title heading focused, by its tabindex="-1" and autofocus, and its Close's interest hint not
-// shown past the interest delay, Tab moving focus to its Close, whose sl-shortcuts lists exactly
-// the page's bindings as the foundation's keys module holds them, the shell's P, C where the page
-// has a Contents drawer, ?, S, and the tree's J and K among them, and, where the page has a pager,
-// its H and L, each once, named as its previous and next page, and neither on a page with none,
-// Escape closes it, returning focus to where it was, and the character-key switch in Settings turns
-// them off, so J moves to no section, P and C open no drawer, and H and L move to no page, and
-// on again; every dialog a keyed show-modal opener opens follows the components' shortcut
-// dialog pattern, named by a heading inside it, closed by a Close glyph button showing Esc, the
-// heading and the Close in its header row, a header.dialog-header, its opener showing its key and
-// named, with an interest hint showing the name, and its heading, where script may focus it by its
-// tabindex="-1", drawing no focus outline as it takes focus once its key opens it; in a 390px
-// viewport each header button, Pages and Contents where the shell has them, Help, and Settings, and
-// each shortcut dialog's Close each show one glyph, the icons layer's svg for list-unordered-16,
-// list-ordered-16, question-16, gear-16, and x-16, and the key hint in a kbd, Esc for a Close, both
-// rendered, and no word, each named by its aria-label; every rendered glyph button, the page's and
-// its components' in their shadow roots, the Contents button at 390px on a page with a Contents
-// drawer, and with each shortcut dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at
-// the capture widths, 390px, 1120px, and 1376px, in every space and every type profile the
-// foundation's registry lists, each space with each type; the header's buttons, its header-actions
-// group, share one line at the capture widths and at 40rem: at 390px, below 40rem, the site nav
-// keeps its links on one line and the group is on its own row below it, at the nav's inline start,
-// and from 40rem the group is on the site nav's first line, at the header's inline end; nothing
-// scrolls sideways at 390px, with the text at its own size and at 200% (WCAG 1.4.4 and 1.4.10);
-// and at a phone's width, a px below and at each of the layout's docks (markdown-pages.ts's
-// docks), and at 1400px, no navigation link's word breaks across lines and every docked side
-// column is at least 16rem wide. A check that changes the reader's stored theme or keys settings
-// removes them after; one that sets a facet's attribute on the root puts it back. shell lists them
-// by name, for a site to make a test of each.
+// there, opens by its click and by C, its aria-expanded in step and its heading, not its Close,
+// taking focus as it opens, no outline drawn and, opened by C, Close's interest hint not shown past
+// the interest delay, and whose show() opens it and in which following a link closes it and marks
+// the link's section, and a page with no tree has no Contents drawer and shows no Contents button;
+// at 390px, between the docks, and at 1600px, main starts directly under the header, the gap from
+// the header's bottom never below zero and no more than on a page taller than the viewport, however
+// short the page; below both docks, ? opens Help, its title heading focused, by its tabindex="-1"
+// and autofocus, and its Close's interest hint not shown past the interest delay, Tab moving focus
+// to its Close, whose sl-shortcuts lists exactly the page's bindings as the foundation's keys
+// module holds them, the shell's P, C where the page has a Contents drawer, ?, S, and the tree's J
+// and K among them, and, where the page has a pager, its H and L, each once, named as its previous
+// and next page, and neither on a page with none, Escape closes it, returning focus to where it
+// was, and the character-key switch in Settings turns them off, so J moves to no section, P and C
+// open no drawer, and H and L move to no page, and on again; every dialog a keyed show-modal opener
+// opens follows the components' shortcut dialog pattern, named by a heading inside it, closed by a
+// Close glyph button showing Esc, the heading and the Close in its header row, a
+// header.dialog-header, its opener showing its key and named, with an interest hint showing the
+// name, and its heading, where script may focus it by its tabindex="-1", drawing no focus outline
+// as it takes focus once its key opens it; in a 390px viewport each header button, Pages and
+// Contents where the shell has them, Help, and Settings, and each shortcut dialog's Close each show
+// one glyph, the icons layer's svg for list-unordered-16, list-ordered-16, question-16, gear-16,
+// and x-16, and the key hint in a kbd, Esc for a Close, both rendered, and no word, each named by
+// its aria-label; every rendered glyph button, the page's and its components' in their shadow
+// roots, the Contents button at 390px on a page with a Contents drawer, and with each shortcut
+// dialog open its own, is at least 24 CSS px a side (WCAG 2.5.8), at the capture widths, 390px,
+// 1120px, and 1376px, in every space and every type profile the foundation's registry lists, each
+// space with each type; the header's buttons, its header-actions group, share one line at the
+// capture widths and at 40rem: at 390px, below 40rem, the site nav keeps its links on one line and
+// the group is on its own row below it, at the nav's inline start, and from 40rem the group is on
+// the site nav's first line, at the header's inline end; nothing scrolls sideways at 390px, with
+// the text at its own size and at 200% (WCAG 1.4.4 and 1.4.10); and at a phone's width, a px below
+// and at each of the layout's docks (markdown-pages.ts's docks), and at 1400px, no navigation
+// link's word breaks across lines and every docked side column is at least 16rem wide. A check that
+// changes the reader's stored theme or keys settings removes them after; one that sets a facet's
+// attribute on the root puts it back. shell lists them by name, for a site to make a test of each.
 //
 // The palette check, highlightsEachPalette, runs on a page with highlighted code, which the site's
 // test names, since not every site's index holds code: stepping the settings, in the Settings
@@ -77,7 +78,8 @@
 // its header's row as the shell checks have them, and its title its source's front matter name, or,
 // for a source with no name, its first h1's text. Its Pages button is hidden at 1600px, where the
 // site index is docked, and at 390px is shown and opens the Pages drawer as a modal by its click
-// and by P, its aria-expanded true while the drawer is open and false once Escape closes it. Each
+// and by P, its aria-expanded true while the drawer is open and false once Escape closes it, its
+// heading taking focus as it opens, not its Close, whose hint, opened by P, isn't shown. Each
 // page has a pager at main's top and at its foot, each a nav named apart, linking the pages before
 // and after it in its site index's order, none past either end, each link showing its arrow glyph,
 // filled, its word, the page's title, and its key hint, binding H or L, and named by its visible
@@ -475,9 +477,61 @@ const PAGES = `(() => {
   };
 })()`;
 
+/** Where focus sits in the open modal drawer with the id, sl-drawer#<id>: whether its heading,
+ * the h2 labeling its dialog, holds it, the drawer the document's focused element and the heading
+ * its shadow root's; what does hold it there, by its tag; whether the heading draws no focus
+ * outline; and whether its Close's interest hint, the shadow root's #close-hint, is showing. */
+const drawerFocus = (id: string): string => `(() => {
+  const drawer = document.getElementById(${JSON.stringify(id)});
+  const root = drawer?.shadowRoot;
+  const heading = root?.querySelector("dialog h2#title");
+  const { outlineStyle, outlineWidth } = heading ? getComputedStyle(heading) : {};
+  return {
+    heading: !!heading && document.activeElement === drawer && root.activeElement === heading,
+    focused: (document.activeElement === drawer ? root.activeElement : document.activeElement)
+      ?.localName ?? null,
+    outline: outlineStyle === "none" || parseFloat(outlineWidth) === 0,
+    hint: !!root?.getElementById("close-hint")?.matches(":popover-open"),
+  };
+})()`;
+
+/**
+ * Asserts the modal drawer sl-drawer#<id>, just opened, gives its heading first focus, by the
+ * components' tabindex="-1" and autofocus, not its Close, the dialog's first control, and the
+ * heading, which isn't a control and which Tab never reaches, draws no focus outline. With
+ * `hint`, the drawer opened by its key, it waits past the interest delay (PAST_INTEREST) and
+ * asserts Close's interest hint stays closed, as it shows at once on a Close that showModal()
+ * focuses. Fails naming the drawer, how it opened, and what took focus.
+ */
+async function assertDrawerFocus(
+  page: Page,
+  url: string,
+  id: string,
+  by: string,
+  hint: boolean,
+): Promise<void> {
+  type Focus = { heading: boolean; focused: string | null; outline: boolean; hint: boolean };
+  let focus: Focus = await page.evaluate(drawerFocus(id));
+  assert.ok(
+    focus.heading,
+    `${url}: the ${id} drawer, opened by ${by}, focuses its heading, not ${focus.focused}`,
+  );
+  assert.ok(focus.outline, `${url}: the ${id} drawer's focused heading draws no focus outline`);
+  if (!hint) return;
+  await page.evaluate(PAST_INTEREST);
+  focus = await page.evaluate(drawerFocus(id));
+  assert.equal(
+    focus.hint,
+    false,
+    `${url}: the ${id} drawer opens by ${by} with its Close's hint closed`,
+  );
+}
+
 /** Asserts the loaded page's Pages button: hidden in a 1600px viewport, where the site index's
  * drawer is docked; in a 390px one shown, opening the drawer as a modal by its click and by P,
- * with aria-expanded true while it is open, and false again once Escape closes it. */
+ * with aria-expanded true while it is open, the drawer's heading focused and, opened by P, its
+ * Close's hint closed past the interest delay (assertDrawerFocus), and aria-expanded false again
+ * once Escape closes it. */
 async function assertPagesButton(page: Page, url: string): Promise<void> {
   type Pages = { shown: boolean; expanded: string | null; modal: boolean };
   await wide(page);
@@ -492,11 +546,15 @@ async function assertPagesButton(page: Page, url: string): Promise<void> {
     { shown: true, expanded: "false", modal: false },
     `${url}: the Pages button is shown at 390px, the drawer closed`,
   );
-  for (const open of [() => click(page, ".pages-opener"), () => press(page, "p")]) {
+  for (const [by, open] of [
+    ["its click", () => click(page, ".pages-opener")],
+    ["P", () => press(page, "p")],
+  ] as const) {
     await open();
     await until(page, `${PAGES}.modal`);
     pages = await page.evaluate(PAGES);
     assert.equal(pages.expanded, "true", `${url}: aria-expanded is true while the drawer is open`);
+    await assertDrawerFocus(page, url, "pages", by, by === "P");
     await press(page, "Escape");
     await until(page, `!${PAGES}.modal`);
     // The dialog's close event, which the drawer's own follows, is a task after Escape's.
@@ -627,7 +685,9 @@ async function atWidth(page: Page, width: number): Promise<void> {
  * pager's, which move to another page, so the check presses neither; the header's Contents button
  * is hidden there. At a phone's width and a px below the dock the drawer is closed, the tree not
  * rendered, and the Contents button shown, opening it as a modal by its click and by C, its
- * aria-expanded true while the drawer is open and false once Escape closes it; the drawer's show()
+ * aria-expanded true while the drawer is open and false once Escape closes it, and the drawer's
+ * heading focused as it opens, not its Close, and, opened by C at a phone's width, Close's hint
+ * closed past the interest delay (assertDrawerFocus); the drawer's show()
  * opens it with the tree rendered, and following the tree's last link closes it, its fragment the
  * URL's and its section marked. A page with no tree has no Contents drawer, and no Contents button
  * shown at a phone's width. The fragment and the emulated motion are put back after.
@@ -724,6 +784,8 @@ async function assertContents(page: Page, url: string): Promise<void> {
           "true",
           `${url}: at ${width}px the Contents button's aria-expanded is true while it is open`,
         );
+        // Close's hint is waited for at a phone's width alone, once a page, by C.
+        await assertDrawerFocus(page, url, "contents", by, by === "C" && width === 390);
         await press(page, "Escape");
         await until(page, `!${CONTENTS_MODAL}`);
         // The dialog's close event, which the drawer's own follows, is a task after Escape's.
