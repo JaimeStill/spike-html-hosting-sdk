@@ -396,7 +396,10 @@ describe("the pack", () => {
     const sheet = readFileSync(join(dir, "dist", "assets", sheets[0]), "utf8");
     assert.match(sheet, /@layer site\s*\{/);
     assert.ok(index.includes(`<link rel="stylesheet" href="/assets/${syntax[0]}">`), index);
-    assert.match(index, /<pre class="shiki [^"]*" tabindex="0"><code><span class="line">/);
+    assert.match(
+      index,
+      /<pre class="shiki [^"]*" tabindex="0"><code class="language-sh"><span class="line">/,
+    );
     const generated = readFileSync(join(dir, "dist", "assets", syntax[0]), "utf8");
     assert.match(generated, /\[data-palette="flexoki"\] \.shiki span/);
     // The theme menu's CSS module script, rewritten to a constructed sheet; the lint below finds

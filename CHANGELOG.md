@@ -43,6 +43,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   as one with no tree: `copiedFiles` lists none, so the crawl checks every page it reaches as a
   hand page, and `checkContent` finds nothing with no `content/`, and each file under one in no
   record.
+- A fence Shiki highlights dropped its language: its `code` element had no class, where marked's
+  plain fence writes `class="language-<label>"`. The highlighted block's `code` now names its
+  language the same way, the label as the fence writes it, so `` ```Go `` gives
+  `<code class="language-Go">` either way. A fence with no label, or one Shiki bundles no grammar
+  for, still renders plain, as marked renders it.
 
 ## [0.6.2] - 2026-11-11
 

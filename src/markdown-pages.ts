@@ -63,9 +63,10 @@
 // Each fenced block is highlighted at build, so no script reaches the page: marked's own code
 // renderer, on the page's Marked instance, renders it through the build's Shiki highlighter
 // (syntax.ts), once per build at its start, over the syntax themes the plugin is given, the
-// built-ins by default, and the languages the pages' fences label. A fence whose label Shiki
-// bundles no grammar for, or with none, renders plain, as marked renders it. The build emits one
-// stylesheet of the highlighted tokens' classes, which every page links, after the shell's own.
+// built-ins by default, and the languages the pages' fences label, its code naming its language as
+// marked's does, language-<label>. A fence whose label Shiki bundles no grammar for, or with none,
+// renders plain, as marked renders it. The build emits one stylesheet of the highlighted tokens'
+// classes, which every page links, after the shell's own.
 //
 // Nothing here names a site or a source: a site imports the plugin and configures it with its
 // content directory and, for its one tree, or for each of several, the source repository's URL,
