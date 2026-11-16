@@ -31,10 +31,11 @@
  * screen, which the site index marks on its light-DOM link, below a shadow sheet's reach, is
  * painted here in a heavier weight; the section tree paints its own mark, by the sheet it adopts.
  * The shell's header holds the site nav and one group of glyph buttons, Pages, Contents, Help,
- * and Settings: from 40rem one row, the nav wrapping its links and the group on its
- * first line at the inline end, and below 40rem two, the nav on a row of its own and the group on
- * the next, at its inline start, aligned with the nav; the components' glyph-button.css lays out
- * each button. The Pages and Contents buttons show only below their drawers' docks. The shell's two
+ * and Settings: from 40rem one row, the nav wrapping its links and the group on its first line at
+ * the inline end, and below 40rem two, the nav on a row of its own and the group on the next, at
+ * its inline start, aligned with the nav; a header with no site nav, which the shell checks allow,
+ * holds the group at its inline end at every width; the components' glyph-button.css lays out each
+ * button. The Pages and Contents buttons show only below their drawers' docks. The shell's two
  * shortcut dialogs, Help and Settings, each open with a header row, the heading and the Close;
  * Settings takes the foundation's theme menu width, the viewport less --space-s on each side, up to
  * 56rem, and Help its list's width, up to the same cap. Each rendered page's two pagers, at main's
@@ -60,7 +61,8 @@
   /* The shell's header: from 40rem one row, the site nav at the start, taking the rest of the row
      and wrapping its own links, and the header-actions group at the end, never wrapping, so the
      group stays on the header's first line; the first baseline holds the group to the nav's first
-     line however many lines the nav wraps to. */
+     line however many lines the nav wraps to. A header with no site nav holds the group alone, at
+     its inline end at every width. */
   body > header {
     display: flex;
     align-items: baseline;
@@ -71,18 +73,20 @@
     flex: 1;
   }
 
-  /* The header's buttons, Pages, Contents, Help, and Settings, one group in a row. Each is a glyph
-     button, which the components' glyph-button.css lays out. */
+  /* The header's buttons, Pages, Contents, Help, and Settings, one group in a row, at the header's
+     inline end by its auto start margin, which takes the room the site nav leaves, or the whole
+     row's with no nav. Each is a glyph button, which the components' glyph-button.css lays out. */
   .header-actions {
     display: flex;
     flex: none;
     align-items: center;
     gap: var(--space-2xs);
+    margin-inline-start: auto;
   }
 
   /* Below 40rem, two rows: the site nav takes the first whole, so its links keep one line, and the
      group the next, at its inline start, aligned with the nav above it, a step closer under the
-     nav than the row's own gap. */
+     nav than the row's own gap. With no site nav the group keeps its row's inline end. */
   @media (width < 40rem) {
     body > header {
       flex-wrap: wrap;
@@ -91,6 +95,10 @@
 
     body > header > sl-site-nav {
       flex-basis: 100%;
+    }
+
+    body > header:has(> sl-site-nav) > .header-actions {
+      margin-inline-start: 0;
     }
   }
 

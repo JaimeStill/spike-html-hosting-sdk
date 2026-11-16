@@ -15,6 +15,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the packag
   `site-pages.yml` among them, run `jdx/mise-action` at `v5.2.9`, from `v5.2.7`. rolldown stays
   at `1.2.18`, the version Vite `8.3.8` pins with `~1.2.18`, though `1.3.2` is out.
 
+### Fixed
+
+- A header with no `sl-site-nav` holds its `.header-actions` group at its inline end at every
+  width, as the header row check, which treats the nav as optional, has it; `site.css` placed the
+  group there only beside a site nav, which took the row's room, so with none it sat at the
+  header's inline start. The group's auto start margin takes the room the nav leaves, or the whole
+  row's, and below 40rem only a header with a nav sets it back to the nav's inline start.
+
 ## [0.6.2] - 2026-11-11
 
 Help opens on its title, not its Close. A site pinning it takes the template's two attributes on

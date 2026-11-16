@@ -38,7 +38,8 @@
 // below 40rem, wrapped under the nav from 40rem, at the header's inline end below 40rem or before
 // the nav from 40rem, or the nav wrapping its links below 40rem, the header row check fails,
 // naming the width; and with the header too wide for a phone, it fails naming the sideways
-// scroll. With the bottom pager removed, a pager's links swapped, a pager link
+// scroll. With the site nav removed, the header row check passes, the group at the header's inline
+// end at every width. With the bottom pager removed, a pager's links swapped, a pager link
 // that follows nowhere, every L binding removed, or, below 40rem, a pager's title shown or out of
 // its name or its key hint shown, the crawl fails, naming the page; with the top pager's L dropped,
 // so keys lists the bottom one's, or a handler that follows the previous link on H whatever the
@@ -799,6 +800,20 @@ describe("the fixture site with its header's row broken", () => {
       }
     });
   }
+});
+
+describe("the fixture site with no site nav", () => {
+  test("the header row check passes, the group at the header's inline end at every width", async () => {
+    // The shell's sl-site-nav removed, as a site whose header holds the group alone has it.
+    const page = await withChange(
+      `document.querySelector("body > header > sl-site-nav")?.remove();`,
+    );
+    try {
+      await keepsHeaderRow(page, server.origin);
+    } finally {
+      await page.close();
+    }
+  });
 });
 
 describe("the fixture site with a front matter meta its source doesn't have", () => {
